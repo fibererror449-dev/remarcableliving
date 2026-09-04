@@ -11,7 +11,6 @@ const previewListings: PublicListing[] = [
   { id:1, slug:"centric-ari-station-1br", name:"Centric Ari Station · 1 Bedroom", district:"Ari", rent:17000, image:"/bangkok/green-condo.jpg", bedrooms:1, bathrooms:1, sizeSqm:28, status:"available", stationType:"BTS", stationName:"Ari", walkMinutes:3 },
   { id:2, slug:"noble-around-ari-1br", name:"Noble Around Ari · 1 Bedroom", district:"Ari", rent:20000, image:"/bangkok/skyline.jpg", bedrooms:1, bathrooms:1, sizeSqm:26.58, status:"verify", stationType:"BTS", stationName:"Ari", walkMinutes:2 },
   { id:3, slug:"thru-thonglor-1br", name:"Thru Thonglor · 1 Bedroom", district:"Thonglor", rent:23000, image:"/bangkok/night-city.jpg", bedrooms:1, bathrooms:1, sizeSqm:37, status:"verify", stationType:"BTS", stationName:"Thong Lo", walkMinutes:18 },
-  { id:4, slug:"supalai-icon-sathorn-1br", name:"Supalai ICON Sathorn · 1 Bedroom", district:"Sathorn", rent:45000, image:"/bangkok/hero-night.jpg", bedrooms:1, bathrooms:1, sizeSqm:46, status:"verify", stationType:"BTS", stationName:"Chong Nonsi", walkMinutes:10 },
   { id:5, slug:"supalai-veranda-rama9-1br", name:"Supalai Veranda Rama 9 · 1 Bedroom", district:"Rama 9", rent:17000, image:"/bangkok/bang-wa.jpg", bedrooms:1, bathrooms:1, sizeSqm:42, status:"available", stationType:"MRT", stationName:"Phra Ram 9", walkMinutes:14 },
   { id:6, slug:"belle-grand-rama9-1br", name:"Belle Grand Rama 9 · 1 Bedroom", district:"Rama 9", rent:20000, image:"/bangkok/night-city.jpg", bedrooms:1, bathrooms:1, sizeSqm:42, status:"verify", stationType:"MRT", stationName:"Phra Ram 9", walkMinutes:8 },
 ];
@@ -54,7 +53,7 @@ export default function Home() {
     return properties.filter((property) => {
       const areaMatch = location === "All Bangkok areas" || property.district === location;
       const value = property.rent;
-      const budgetMatch = budget === "Any budget" || (budget === "Under ฿25,000" && value < 25000) || (budget === "฿25,000–฿45,000" && value >= 25000 && value <= 45000) || (budget === "฿45,000+" && value > 45000);
+      const budgetMatch = budget === "Any budget" || (budget === "Under ฿20,000" && value < 20000) || (budget === "฿20,000–฿25,000" && value >= 20000 && value <= 25000) || (budget === "฿25,000+" && value > 25000);
       return areaMatch && budgetMatch;
     });
   }, [location, budget, properties]);
@@ -172,7 +171,7 @@ export default function Home() {
 
       <section className="search-strip reveal delay-3" id="search" aria-label="Bangkok condominium search" data-reveal>
         <label><span>Bangkok area</span><select value={location} onChange={(event) => setLocation(event.target.value)}><option>All Bangkok areas</option><option>Ratchathewi</option><option>Thonglor</option><option>Phrom Phong</option><option>Sathorn</option><option>Ari</option><option>Rama 9</option><option>On Nut</option></select></label>
-        <label><span>Monthly budget</span><select value={budget} onChange={(event) => setBudget(event.target.value)}><option>Any budget</option><option>Under ฿25,000</option><option>฿25,000–฿45,000</option><option>฿45,000+</option></select></label>
+        <label><span>Monthly budget</span><select value={budget} onChange={(event) => setBudget(event.target.value)}><option>Any budget</option><option>Under ฿20,000</option><option>฿20,000–฿25,000</option><option>฿25,000+</option></select></label>
         <div><span>What we check</span><strong>Price · commute · condition</strong></div>
         <a href="#residences">Show {visibleProperties.length} matches <span>→</span></a>
       </section>
