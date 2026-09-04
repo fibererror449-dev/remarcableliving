@@ -1,0 +1,225 @@
+/* ===== verified core, extracted verbatim from arrival.html lines 631-856 ===== */
+var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+var ease = function(t){ return 1 - Math.pow(1-t, 4); };
+var clamp = function(v,a,b){ return Math.min(b, Math.max(a,v)); };
+var seg = function(t,a,b){ return clamp((t-a)/(b-a),0,1); };
+
+var LAND = [
+"............................................................",
+"................###########.....####........................",
+".........##################.....####..############..........",
+"...########################......###########################",
+"..##########################...#############################",
+"........#############........#.##########################...",
+".........############........#########################......",
+".........###########.........##########################.....",
+".........#########..........########################.#......",
+"..........#######...........##########################......",
+"...........######...........#######################.........",
+"............##.###.........#############.#########..........",
+"..............#########....##########.....##..###.##........",
+".................####.......##########........##..##........",
+".................#####..........######........####..........",
+".................########.......######.........#######......",
+".................########.......#####..........#######......",
+".................#######........#####.#...........####......",
+"..................######........#####.#..........#######....",
+"..................#####..........###.............#######....",
+"..................####...........###.............#######....",
+"..................##..................................#...##",
+"..................##......................................##",
+"..................##........................................",
+"..................#........................................."];
+function isLand(lat,lon){
+  var r=Math.floor((90-lat)/6), c=Math.floor((lon+180)/6);
+  if(r<0||r>=LAND.length||c<0||c>59) return false;
+  return LAND[r].charAt(c)==='#';
+}
+
+var BKK={lat:13.7563,lon:100.5018};
+var ORIGINS=[
+ {n:'London',lat:51.51,lon:-0.13},{n:'Paris',lat:48.86,lon:2.35},
+ {n:'Berlin',lat:52.52,lon:13.40},{n:'Madrid',lat:40.42,lon:-3.70},
+ {n:'Rome',lat:41.90,lon:12.50},{n:'Amsterdam',lat:52.37,lon:4.90},
+ {n:'Stockholm',lat:59.33,lon:18.07},{n:'Warsaw',lat:52.23,lon:21.01},
+ {n:'Istanbul',lat:41.01,lon:28.98},{n:'Moscow',lat:55.75,lon:37.62},
+ {n:'New York',lat:40.71,lon:-74.01},{n:'Toronto',lat:43.65,lon:-79.38},
+ {n:'Los Angeles',lat:34.05,lon:-118.24},{n:'Mexico City',lat:19.43,lon:-99.13},
+ {n:'Bogot\u00E1',lat:4.71,lon:-74.07},{n:'Lima',lat:-12.05,lon:-77.04},
+ {n:'S\u00E3o Paulo',lat:-23.55,lon:-46.63},{n:'Santiago',lat:-33.45,lon:-70.67},
+ {n:'Casablanca',lat:33.57,lon:-7.59},{n:'Lagos',lat:6.52,lon:3.38},
+ {n:'Cairo',lat:30.04,lon:31.24},{n:'Addis Ababa',lat:9.03,lon:38.74},
+ {n:'Nairobi',lat:-1.29,lon:36.82},{n:'Johannesburg',lat:-26.20,lon:28.05},
+ {n:'Dubai',lat:25.20,lon:55.27},{n:'Karachi',lat:24.86,lon:67.01},
+ {n:'Mumbai',lat:19.08,lon:72.88},{n:'Delhi',lat:28.61,lon:77.21},
+ {n:'Dhaka',lat:23.81,lon:90.41},{n:'Beijing',lat:39.90,lon:116.41},
+ {n:'Shanghai',lat:31.23,lon:121.47},{n:'Seoul',lat:37.57,lon:126.98},
+ {n:'Tokyo',lat:35.68,lon:139.65},{n:'Hong Kong',lat:22.32,lon:114.17},
+ {n:'Manila',lat:14.60,lon:120.98},{n:'Jakarta',lat:-6.21,lon:106.85},
+ {n:'Sydney',lat:-33.87,lon:151.21},{n:'Auckland',lat:-36.85,lon:174.76}];
+
+/* ---------- world canvas ---------- */
+var wc=document.querySelector('[data-world]'), wx=wc?wc.getContext('2d'):null;
+var W=0,H=0,P=null;
+var landCache=null, DPR=1;
+function wsetup(){
+  var r=wc.getBoundingClientRect();
+  W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+  var dpr=Math.min(devicePixelRatio||1,2);
+  wc.width=W*dpr; wc.height=H*dpr; wx.setTransform(dpr,0,0,dpr,0,0); DPR=dpr;
+  var narrow=W<820;
+  P={k:narrow?W/420:W/320, lon0:10, lat0:8,
+     cx:narrow?W*0.50:W*0.43, cy:narrow?H*0.32:H*0.52, narrow:narrow};
+  /* The copy block claims a no-label zone. Dots behind text read as texture;
+     a city name behind a headline reads as a mistake. */
+  var cr=wc.getBoundingClientRect();
+  var parts=document.querySelectorAll('.hero__eyebrow,.hero h1,.hero__sub,.acts,.eyebrow');
+  if(parts.length && !narrow){
+    var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    parts.forEach(function(el){
+      if(!el.closest('.hero')) return;
+      var b=el.getBoundingClientRect();
+      if(b.width<2||b.height<2) return;
+      x0=Math.min(x0,b.left-cr.left); y0=Math.min(y0,b.top-cr.top);
+      x1=Math.max(x1,b.right-cr.left); y1=Math.max(y1,b.bottom-cr.top);
+    });
+    P.guard=(x1>x0)?{x:x0-10,y:y0-10,w:(x1-x0)+20,h:(y1-y0)+20}:null;
+  } else P.guard=null;
+  buildLand();
+}
+
+/* The landmass never changes between resizes, so it is rasterised once into an
+   offscreen canvas and blitted each frame. That buys 1\u00B0 sampling \u2014 roughly four
+   times the dots of a 2\u00B0 field \u2014 at no per-frame cost, which is the whole
+   difference between a loose stipple and something that reads as land. */
+function buildLand(){
+  landCache=document.createElement('canvas');
+  landCache.width=W*DPR; landCache.height=H*DPR;
+  var g=landCache.getContext('2d');
+  g.setTransform(DPR,0,0,DPR,0,0);
+
+  // faint curved meridians sit behind the land and give the field a substrate
+  g.strokeStyle='rgba(84,127,150,.085)'; g.lineWidth=1;
+  for(var lon=-180;lon<=180;lon+=15){
+    g.beginPath();
+    for(var la=-58;la<=84;la+=3){var q=pj(la,lon+P.lon0); la===-58?g.moveTo(q.x,q.y):g.lineTo(q.x,q.y);}
+    g.stroke();
+  }
+  for(var lat=-45;lat<=75;lat+=15){
+    g.beginPath();
+    for(var lo=-180;lo<=180;lo+=5){var r=pj(lat,lo+P.lon0); lo===-180?g.moveTo(r.x,r.y):g.lineTo(r.x,r.y);}
+    g.stroke();
+  }
+
+  for(var y=-56;y<=84;y+=1){
+    for(var x=-180;x<=180;x+=1){
+      if(!isLand(y,x)) continue;
+      var p=pj(y,x);
+      if(p.x<-8||p.x>W+8||p.y<-8||p.y>H+8) continue;
+      // deterministic per-cell jitter so the field has grain, not a flat screen
+      var h=(((y+90)*911) ^ ((x+180)*2837)) >>> 0;
+      var a=0.34+(h%100)/100*0.46;
+      g.fillStyle='rgba(139,180,206,'+a.toFixed(3)+')';
+      var s=1.25+((h>>7)%3)*0.12;
+      g.fillRect(p.x-s/2,p.y-s/2,s,s);
+    }
+  }
+}
+/* Sinusoidal: x scales by cos(lat), so meridians curve and it reads as a globe
+   laid flat \u2014 pure trigonometry, so the geometry cannot be wrong. */
+function pj(lat,lon){
+  var dl=lon-P.lon0; while(dl>180)dl-=360; while(dl<-180)dl+=360;
+  return {x:P.cx+dl*P.k*Math.cos(lat*Math.PI/180), y:P.cy-(lat-P.lat0)*P.k};
+}
+function ctrl(a,b,i){
+  var mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;
+  var px=-dy/d,py=dx/d; if(py>0){px=-px;py=-py;}
+  var bow=0.15+((i||0)%5)*0.028;      // fan the routes instead of bundling them
+  return {x:mx+px*d*bow, y:my+py*d*bow};
+}
+function qp(a,c,b,t){var u=1-t;return{x:u*u*a.x+2*u*t*c.x+t*t*b.x,y:u*u*a.y+2*u*t*c.y+t*t*b.y};}
+
+var placed=[];
+function hits(r){for(var i=0;i<placed.length;i++){var q=placed[i];
+  if(r.x<q.x+q.w+4&&r.x+r.w+4>q.x&&r.y<q.y+q.h+3&&r.y+r.h+3>q.y)return true;}return false;}
+function label(txt,x,y,al){
+  var w=wx.measureText(txt).width;
+  var R={x:x+7,y:y-6,w:w,h:12}, L={x:x-7-w,y:y-6,w:w,h:12};
+  var g=P.guard;
+  var blocked=function(r){ return g && r.x<g.x+g.w && r.x+r.w>g.x &&
+                                      r.y<g.y+g.h && r.y+r.h>g.y; };
+  var b=(!hits(R)&&!blocked(R))?R:((!hits(L)&&!blocked(L))?L:null);
+  if(!b||b.x<2||b.x+b.w>W-2) return;
+  placed.push(b); wx.fillStyle='rgba(255,253,248,'+al+')'; wx.fillText(txt,b.x,y+3.5);
+}
+
+function wdraw(t,now){
+  wx.clearRect(0,0,W,H); placed=[];
+  var dest=pj(BKK.lat,BKK.lon);
+
+  var la=ease(seg(t,0,0.30));
+  if(la>0&&landCache){ wx.globalAlpha=la; wx.drawImage(landCache,0,0,W,H); wx.globalAlpha=1; }
+
+  // glow beneath the convergence point so the destination carries weight
+  if(t>0.5){
+    var gl=ease(seg(t,0.5,0.9));
+    var rg=wx.createRadialGradient(dest.x,dest.y,0,dest.x,dest.y,Math.max(W,H)*0.16);
+    rg.addColorStop(0,'rgba(201,169,97,'+(0.16*gl)+')');
+    rg.addColorStop(1,'rgba(201,169,97,0)');
+    wx.fillStyle=rg; wx.fillRect(0,0,W,H);
+  }
+  if(!P.narrow){
+    wx.font='400 italic 20px "Geist",system-ui,sans-serif';
+    placed.push({x:dest.x+17,y:dest.y-12,w:wx.measureText('Bangkok').width,h:24});
+  }
+
+  var n=ORIGINS.length;
+  for(var i=0;i<n;i++){
+    var o=ORIGINS[i], a=pj(o.lat,o.lon), c=ctrl(a,dest,i);
+    var nT=seg(t,0.18+(i/n)*0.20,0.36+(i/n)*0.20);
+    var aT=seg(t,0.32+(i/n)*0.44,0.66+(i/n)*0.34);
+
+    if(nT>0){
+      var na=ease(nT);
+      wx.fillStyle='rgba(143,182,206,'+(0.95*na)+')';
+      wx.beginPath(); wx.arc(a.x,a.y,2.5,0,6.2832); wx.fill();
+      if(!P.narrow){ wx.font='600 9.5px "Geist",system-ui,sans-serif'; label(o.n.toUpperCase(),a.x,a.y,0.5*na); }
+    }
+    if(aT>0){
+      var e2=ease(aT);
+      wx.strokeStyle='rgba(212,178,104,'+(0.34+0.36*e2)+')'; wx.lineWidth=1.15;
+      wx.beginPath();
+      var S=70;
+      for(var s=0;s<=S*e2;s++){var q=qp(a,c,dest,s/S); s===0?wx.moveTo(q.x,q.y):wx.lineTo(q.x,q.y);}
+      wx.stroke();
+      if(e2<1){var hd=qp(a,c,dest,e2);
+        wx.fillStyle='rgba(255,253,248,.95)'; wx.beginPath(); wx.arc(hd.x,hd.y,1.9,0,6.2832); wx.fill();}
+      else if(now!==undefined){
+        // once drawn, a light keeps travelling the route \u2014 the page stays alive
+        var ph=((now/3400)+i*0.11)%1, tp=qp(a,c,dest,ph);
+        var g=wx.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,7);
+        g.addColorStop(0,'rgba(255,247,224,.95)'); g.addColorStop(1,'rgba(255,247,224,0)');
+        wx.fillStyle=g; wx.beginPath(); wx.arc(tp.x,tp.y,7,0,6.2832); wx.fill();
+      }
+    }
+  }
+
+  var dT=seg(t,0.58,0.88);
+  if(dT>0){
+    var de=ease(dT);
+    if(now!==undefined&&dT>=1){
+      var pu=((now/2600)%1);
+      wx.strokeStyle='rgba(201,169,97,'+(0.32*(1-pu))+')'; wx.lineWidth=1;
+      wx.beginPath(); wx.arc(dest.x,dest.y,6+pu*30,0,6.2832); wx.stroke();
+    }
+    wx.fillStyle='rgba(201,169,97,'+de+')';
+    wx.beginPath(); wx.arc(dest.x,dest.y,4.8*de,0,6.2832); wx.fill();
+    wx.strokeStyle='rgba(201,169,97,'+(0.5*de)+')'; wx.lineWidth=1;
+    wx.beginPath(); wx.arc(dest.x,dest.y,12,0,6.2832); wx.stroke();
+    if(!P.narrow){
+      wx.fillStyle='rgba(201,169,97,'+de+')';
+      wx.font='400 italic 20px "Geist",system-ui,sans-serif';
+      wx.fillText('Bangkok',dest.x+17,dest.y+6);
+    }
+  }
+}
