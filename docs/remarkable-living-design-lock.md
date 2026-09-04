@@ -12,7 +12,11 @@ Help a Bangkok renter understand the available home, asking rent, location conte
 - Ink, warm paper, muted gold, restrained green, and evidence-led photography.
 - Large editorial headings balanced by compact uppercase utility labels.
 - Square or restrained geometry. Do not introduce generic glass cards, purple gradients, pill-heavy interfaces, emoji icons, or invented luxury signals.
-- Motion is limited to orientation, feedback, and continuity. Prefer 180–300 ms interaction feedback; retain the existing slow hero image movement only because reduced-motion users receive a static version.
+- Motion is limited to orientation, feedback, and continuity. **SUPERSEDED
+  2026-09-03 for the landing page only, by the owner's explicit decision: the
+  landing page takes the full cinematic treatment and should read as expensive.
+  See `docs/ANIMATION-HANDOFF.md`. This clause still governs every other
+  surface — admin, inventory, residence pages, forms.** Prefer 180–300 ms interaction feedback; retain the existing slow hero image movement only because reduced-motion users receive a static version.
 
 ## Information and evidence rules
 

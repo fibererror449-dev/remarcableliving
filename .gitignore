@@ -44,6 +44,10 @@ yarn-error.log*
 # number, listing-provenance findings and local filesystem paths.
 /AGENTS.md
 /CODEX-AUDIT-BRIEF.md
+# founder-story.md is the source copy for /about, but the draft carries
+# internal annotations of the same kind: the work-status gate, the theft
+# and police report, and a person who must not be filmed.
+/docs/founder-story.md
 
 # platform config: carries the Sites project id. Required by vite.config.ts,
 # so a fresh clone cannot build without it being supplied separately.

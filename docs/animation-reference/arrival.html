@@ -1,0 +1,1371 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"></head><body>
+<title>Remarcable Living &#8212; Arrival</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,300..900;1,300..900&display=swap">
+<style>
+:root{
+  --ground:#0B161E; --ground-2:#0E1C25; --surface:#13232E; --paper:#FFFDF8; --bone:#F3F0E8;
+  --steel:#547F96; --steel-lit:#8FB6CE; --gold:#C9A961; --gold-deep:#9A7A2E;
+  --line:rgba(255,255,255,.11); --line-ink:rgba(16,17,14,.14);
+  --ink:#10110E; --ink-soft:#4A4C45; --ink-mute:#8A8C82;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --display:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--paper);font-family:var(--sans);
+     font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.eyebrow{display:flex;align-items:center;gap:.8rem;font-size:.63rem;letter-spacing:.2em;
+         text-transform:uppercase;font-weight:600;margin:0 0 1.1rem;color:rgba(255,255,255,.66)}
+.eyebrow::before{content:"";width:2.2rem;height:1px;background:var(--gold);flex:none}
+.eyebrow--ink{color:var(--ink-mute)}
+.dsp{font-family:var(--display);font-weight:500;letter-spacing:-.035em;line-height:1;margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* grain &#8212; one data-URI turbulence, no external asset */
+.grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E")}
+
+/* ---------- ghost layer ----------
+   Huge outlined type behind each section, drifting slowly on scroll. This is
+   the depth layer the flat version lacked; content rides above it at z1. */
+.ghost{position:absolute;z-index:0;pointer-events:none;user-select:none;
+  font-weight:700;letter-spacing:-.04em;line-height:.8;white-space:nowrap;
+  font-size:clamp(9rem,26vw,24rem);
+  color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.06);
+  transform:translateY(var(--gy,0px));will-change:transform}
+.ghost--ink{-webkit-text-stroke:1.2px rgba(16,17,14,.08)}
+.progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--gold);z-index:70}
+.proc__ghost{position:absolute;right:-1%;bottom:-5%;z-index:0;pointer-events:none;
+  font-size:clamp(11rem,34vh,22rem);font-weight:700;line-height:.8;
+  color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.07)}
+@media (prefers-reduced-motion:reduce){ .ghost{transform:none!important} }
+
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+     justify-content:space-between;gap:2rem;
+     padding:clamp(.9rem,2vw,1.5rem) clamp(1.1rem,4vw,3rem);
+     background:linear-gradient(180deg,rgba(11,22,30,.92),rgba(11,22,30,0));
+     transition:transform .4s var(--ease),background-color .4s ease}
+.nav[data-hidden="true"]{transform:translateY(-105%)}
+.nav[data-solid="true"]{background:rgba(11,22,30,.94);border-bottom:1px solid var(--line);
+                        backdrop-filter:blur(8px)}
+.nav__brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;font-size:.72rem;
+            letter-spacing:.22em;text-transform:uppercase;font-weight:600}
+.nav__mark{width:24px;height:24px;border:1px solid rgba(255,255,255,.45);display:grid;
+           place-items:center;transform:rotate(45deg);flex:none}
+.nav__mark span{transform:rotate(-45deg);font-family:var(--display);font-size:.75rem}
+.nav__links{display:flex;gap:1.5rem;list-style:none;margin:0;padding:0}
+.nav__links a{color:rgba(255,255,255,.78);text-decoration:none;font-size:.74rem}
+.nav__links a:hover{color:var(--paper)}
+.nav__cta{text-decoration:none;font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;
+          font-weight:600;padding:.6rem 1.05rem;border:1px solid rgba(255,255,255,.4);
+          transition:background-color .25s var(--ease),color .25s var(--ease)}
+.nav__cta:hover{background:var(--paper);color:var(--ground)}
+@media (max-width:940px){.nav__links{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+      overflow:hidden;isolation:isolate;background:var(--ground)}
+.hero__map{position:absolute;inset:0;z-index:0;
+           transform:scale(var(--mscale,1)) translateY(var(--my,0px));
+           transform-origin:70% 50%;will-change:transform}
+.hero__map canvas{display:block;width:100%;height:100%}
+.hero__scrim{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(97deg,rgba(11,22,30,.97) 0%,rgba(11,22,30,.88) 26%,
+                                   rgba(11,22,30,.34) 48%,rgba(11,22,30,.08) 70%,
+                                   rgba(11,22,30,.26) 100%)}
+.hero__vig{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(125% 95% at 66% 48%,transparent 46%,rgba(6,12,17,.62) 100%)}
+/* Cap the copy against the viewport as well as in rem: at ~830px a fixed 46rem
+   column covers almost the whole frame and buries the Americas under the scrim. */
+.hero__in{position:relative;z-index:2;width:100%;max-width:min(58rem,66%);
+          padding:7rem clamp(1.1rem,4vw,3rem) 6rem;opacity:var(--cfade,1)}
+@media (max-width:820px){ .hero__in{max-width:100%} }
+/* Sized so each masked line stays ONE line at every width. A masked line that
+   wraps breaks the reveal's rhythm and the two-line structure the copy is
+   built on, so the ceiling is set by the longest line, not by taste. */
+.hero h1{font-size:clamp(2.05rem,5.5vw,4.9rem);margin-bottom:clamp(1.2rem,3vh,1.9rem)}
+.ln{display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
+.ln i{display:block;font-style:normal;transform:translateY(105%);
+      transition:transform 1.05s var(--ease);transition-delay:calc(var(--d,0)*1ms)}
+.ln i.acc{font-style:italic;color:var(--gold)}
+.hero__sub{margin:0 0 2rem;max-width:41ch;color:rgba(255,255,255,.84);
+           font-size:clamp(.97rem,1.4vw,1.1rem)}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:1rem 1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.6rem;background:var(--paper);color:var(--ground);
+     text-decoration:none;font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;
+     font-weight:600;padding:.95rem 1.5rem;
+     transition:transform .25s var(--ease),background-color .25s var(--ease)}
+.btn:hover{transform:translateY(-2px);background:var(--gold)}
+.btn--ghost{background:transparent;color:var(--paper);border:1px solid rgba(255,255,255,.38)}
+.btn--ghost:hover{background:var(--paper);color:var(--ground)}
+.lnk{text-decoration:none;font-size:.9rem;color:rgba(255,255,255,.84);
+     border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:.15rem}
+.lnk:hover{border-color:var(--gold);color:var(--paper)}
+.fade{opacity:0;transform:translateY(14px);
+      transition:opacity .9s ease,transform .9s var(--ease);transition-delay:calc(var(--d,0)*1ms)}
+.is-ready .ln i{transform:none}
+.is-ready .fade{opacity:1;transform:none}
+
+.dest{position:absolute;right:clamp(1rem,3vw,2.6rem);bottom:clamp(4.5rem,9vh,6rem);z-index:2;text-align:right}
+.dest__i{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+         color:rgba(255,255,255,.5);font-weight:600}
+.dest b{display:block;font-family:var(--display);font-style:italic;font-weight:400;font-size:1.6rem;
+        letter-spacing:0;color:var(--gold);text-transform:none;margin-top:.15rem}
+.dest code{display:block;font-size:.56rem;letter-spacing:.1em;color:rgba(255,255,255,.42);
+           margin-top:.25rem;font-family:ui-monospace,Menlo,monospace}
+@media (max-width:820px){.dest{display:none}}
+
+/* ---------- marquee ---------- */
+.mq{position:relative;z-index:3;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    background:var(--ground-2);overflow:hidden;padding:1.15rem 0}
+.mq__t{display:flex;gap:3.2rem;width:max-content;animation:mq 60s linear infinite}
+.mq span{font-size:clamp(1.7rem,3.6vw,3rem);letter-spacing:.01em;text-transform:uppercase;
+         font-weight:700;white-space:nowrap;
+         color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.35)}
+.mq span::after{content:"&#8594;";margin-left:3.2rem;color:var(--gold);-webkit-text-stroke:0}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- generic section ---------- */
+.sec{position:relative;overflow:hidden;padding:clamp(4.5rem,11vh,9rem) clamp(1.1rem,4vw,3rem)}
+.sec__in{position:relative;z-index:1;max-width:76rem;margin:0 auto}
+.sec--ink{background:var(--bone);color:var(--ink)}
+.sec--ink .lead{color:var(--ink-soft)}
+.sec h2{font-size:clamp(2.4rem,5.4vw,4.5rem);margin-bottom:1rem;max-width:16ch}
+.lead{max-width:48ch;color:rgba(255,255,255,.72);margin:0 0 3rem}
+.rv{opacity:0;transform:translateY(22px);
+    transition:opacity .7s ease,transform .7s var(--ease);transition-delay:calc(var(--i,0)*70ms)}
+.rv.in,.rv:focus-within{opacity:1;transform:none}
+
+/* ---------- campus ---------- */
+.campus{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+        gap:clamp(1.5rem,4vw,3.5rem);align-items:center}
+@media (max-width:900px){.campus{grid-template-columns:1fr}}
+.campus__map{position:relative;aspect-ratio:1/1;border:1px solid var(--line);background:var(--ground-2)}
+.campus__map canvas{display:block;width:100%;height:100%}
+.uni{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.uni li{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+        padding:.85rem 0;border-bottom:1px solid var(--line);cursor:default;
+        transition:color .25s var(--ease),padding-left .25s var(--ease)}
+.uni li:hover,.uni li[data-on="true"]{color:var(--gold);padding-left:.5rem}
+.uni b{font-weight:500;font-size:.98rem}
+.uni em{font-style:normal;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;
+        color:rgba(255,255,255,.45);white-space:nowrap}
+.uni li{flex-wrap:wrap}
+.uni__l{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.uni__r{display:flex;align-items:center;gap:.9rem;flex:none}
+.uni__meta{display:flex;align-items:center;gap:.45rem;font-size:.66rem;
+           color:rgba(255,255,255,.45);letter-spacing:.02em;text-transform:none}
+.uni__pip{width:6px;height:6px;border-radius:50%;flex:none}
+.uni__km{font-variant-numeric:tabular-nums;font-size:.7rem;color:rgba(255,255,255,.55);
+         letter-spacing:.06em}
+.uni__n{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+        padding:.2rem .42rem;border:1px solid var(--line);color:rgba(255,255,255,.6);
+        white-space:nowrap;transition:border-color .25s var(--ease),color .25s var(--ease)}
+.uni li:hover .uni__n,.uni li[data-on="true"] .uni__n{border-color:var(--gold);color:var(--gold)}
+.uni li[role="button"]{cursor:pointer}
+.uni li:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.2rem;margin:1.1rem 0 0}
+.legend span{display:inline-flex;align-items:center;gap:.45rem;font-size:.6rem;
+             letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.legend i{width:14px;height:2px;display:block;flex:none}
+.campus__sum{margin:.9rem 0 1.6rem;font-size:.72rem;color:rgba(255,255,255,.5);
+             font-variant-numeric:tabular-nums}
+.campus__sum b{color:var(--paper);font-weight:500}
+
+/* ---------- rooms ---------- */
+.grid{list-style:none;margin:0;padding:0;display:grid;gap:clamp(1.4rem,3vw,2.4rem);
+      grid-template-columns:repeat(auto-fill,minmax(16.5rem,1fr))}
+.card a{display:block;text-decoration:none;color:inherit}
+.card__m{position:relative;aspect-ratio:4/3;overflow:hidden;margin-bottom:1rem;
+         background:linear-gradient(150deg,#8FA9B8,#5A7E92 45%,#31485A)}
+.card__m::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(115% 85% at 24% 16%,rgba(255,255,255,.28),transparent 62%)}
+.card__h{display:flex;justify-content:space-between;align-items:center;gap:.7rem;margin-bottom:.5rem}
+.card__n{font-family:var(--display);font-size:1rem;color:var(--ink-mute)}
+.tag{font-size:.57rem;letter-spacing:.13em;text-transform:uppercase;font-weight:600;
+     padding:.2rem .45rem;border:1px solid currentColor;color:var(--steel)}
+.tag[data-t="fast"]{color:var(--gold-deep)}
+.card__a{font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-mute);
+         font-weight:600;margin:0 0 .35rem}
+.card__t{font-size:1.24rem;font-weight:500;letter-spacing:-.012em;line-height:1.25;margin:0 0 .45rem}
+.card__p{margin:0 0 .3rem;overflow:hidden;line-height:1.15}
+.card__p i{display:inline-block;font-style:normal;font-family:var(--display);font-weight:600;font-size:1.95rem;
+           font-variant-numeric:tabular-nums;transform:translateY(105%);
+           transition:transform .7s var(--ease);transition-delay:calc(var(--i,0)*70ms + 190ms)}
+.rv.in .card__p i,.rv:focus-within .card__p i{transform:none}
+.card__s{font-size:.83rem;color:var(--ink-soft);margin:0}
+
+/* ---------- rooms: filters + card detail ---------- */
+.tools{display:flex;flex-wrap:wrap;gap:1.6rem 2.4rem;align-items:flex-end;
+       padding-bottom:1.4rem;border-bottom:1px solid var(--line-ink);margin-bottom:2.4rem}
+.fgrp{display:flex;flex-direction:column;gap:.55rem}
+.fgrp>span{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
+           color:var(--ink-mute)}
+.fgrp div{display:flex;flex-wrap:wrap;gap:.4rem}
+.fbtn{font:inherit;font-size:.7rem;letter-spacing:.02em;cursor:pointer;
+      background:transparent;color:var(--ink-soft);border:1px solid var(--line-ink);
+      padding:.4rem .7rem;border-radius:2px;
+      transition:background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}
+.fbtn:hover{border-color:var(--ink)}
+.fbtn[aria-pressed="true"]{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+.count{margin-left:auto;font-size:.72rem;color:var(--ink-mute);font-variant-numeric:tabular-nums;
+       white-space:nowrap}
+.count b{color:var(--ink);font-weight:500}
+.empty{padding:3rem 0;color:var(--ink-mute)}
+
+.card a{transition:transform .35s var(--ease)}
+.card a:hover{transform:translateY(-4px)}
+.card__m{background:var(--ground);border:1px solid rgba(16,17,14,.10)}
+.card__m{overflow:hidden}
+.card__m svg{display:block;width:100%;height:100%;transform:scale(1.02);transition:transform .6s var(--ease)}
+.card a:hover .card__m svg{transform:scale(1.08)}
+.card__m::after{content:none}
+.card__d{display:flex;flex-wrap:wrap;gap:.3rem .9rem;margin:.55rem 0 0;
+         font-size:.7rem;color:var(--ink-mute)}
+.card__d span{display:inline-flex;align-items:center;gap:.3rem}
+.card__d b{font-weight:500;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.card--hide{display:none}
+
+/* ---------- process ---------- */
+.proc{height:440vh;background:var(--ground-2)}
+.proc__stage{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;
+             justify-content:center;padding:clamp(2rem,6vw,5rem) clamp(1.1rem,4vw,3rem);overflow:hidden}
+.route{position:relative;margin:0 0 clamp(2rem,5vh,3.2rem)}
+.route__tr{position:relative;height:2px;background:var(--line);margin:0 clamp(.75rem,3vw,1.5rem)}
+.route__fl{position:absolute;inset:0 auto 0 0;width:0;background:var(--steel-lit);
+           transition:width .5s var(--ease)}
+.route__st{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;
+           margin:0 clamp(.75rem,3vw,1.5rem)}
+.stn{position:relative;width:13px;height:13px}
+.stn__d{position:absolute;inset:0;border-radius:50%;background:var(--ground-2);
+        border:2px solid var(--line);
+        transition:transform .5s var(--ease),border-color .5s ease,background-color .5s ease}
+.stn[data-s="done"] .stn__d{border-color:var(--steel-lit);background:var(--steel-lit)}
+.stn[data-s="active"] .stn__d{border-color:var(--gold);transform:scale(1.8)}
+.stn__l{position:absolute;top:1.4rem;left:50%;transform:translateX(-50%);font-size:.58rem;
+        letter-spacing:.14em;text-transform:uppercase;font-weight:600;white-space:nowrap;
+        color:rgba(255,255,255,.4);transition:color .4s ease}
+.stn[data-s="active"] .stn__l{color:var(--paper)}
+.steps{position:relative;min-height:clamp(9rem,21vh,12rem);margin:0;padding:0;list-style:none}
+.step{position:absolute;inset:0;display:grid;grid-template-columns:auto 1fr;
+      gap:0 clamp(1rem,3vw,2rem);opacity:0;transform:translateY(16px);pointer-events:none;
+      transition:opacity .55s ease,transform .55s var(--ease)}
+.step[data-on="true"]{opacity:1;transform:none;pointer-events:auto}
+.step b{font-family:var(--display);font-size:clamp(2.4rem,5.5vw,4rem);line-height:.85;
+        color:var(--gold);font-weight:400;font-variant-numeric:tabular-nums}
+.step h3{font-family:var(--display);font-size:clamp(1.8rem,3.8vw,2.7rem);font-weight:400;
+         line-height:1.05;letter-spacing:-.02em;margin:0 0 .45rem}
+.step p{margin:0;color:rgba(255,255,255,.74);max-width:44ch}
+@media (max-width:900px){
+  .proc{height:auto;padding:clamp(3rem,9vw,5rem) 0}
+  .proc__stage{position:static;height:auto}
+  .route{display:none}
+  .steps{min-height:0;display:grid;gap:2.2rem}
+  .step{position:static;opacity:1;transform:none;pointer-events:auto}
+}
+
+/* ---------- process panels ---------- */
+.proc__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);
+            gap:clamp(1.5rem,4vw,3.5rem);align-items:center;width:100%}
+.panes{position:relative;min-height:clamp(16rem,42vh,25rem)}
+.pane{position:absolute;inset:0;opacity:0;transform:translateY(14px) scale(.985);
+      pointer-events:none;transition:opacity .5s ease,transform .55s var(--ease);
+      border:1px solid var(--line);background:rgba(19,35,46,.72);
+      backdrop-filter:blur(3px);padding:1.15rem 1.25rem;display:flex;flex-direction:column;gap:.75rem}
+.pane[data-on="true"]{opacity:1;transform:none;pointer-events:auto}
+.pane__h{display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+         padding-bottom:.7rem;border-bottom:1px solid var(--line);
+         font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
+         color:rgba(255,255,255,.5)}
+.pane__h b{color:var(--paper);font-weight:600;display:flex;align-items:center;gap:.45rem}
+.dot{width:6px;height:6px;border-radius:50%;background:#5FBF8B;flex:none}
+
+/* 01 message thread */
+.msg{display:flex;flex-direction:column;gap:.5rem}
+.bub{max-width:82%;padding:.6rem .8rem;font-size:.82rem;line-height:1.45;border-radius:3px}
+.bub--in{align-self:flex-start;background:rgba(255,255,255,.07);color:rgba(255,255,255,.88)}
+.bub--out{align-self:flex-end;background:var(--gold);color:#1A1408}
+.bub time{display:block;font-size:.58rem;letter-spacing:.1em;opacity:.55;margin-top:.3rem}
+
+/* 02 shortlist */
+.sl{display:flex;flex-direction:column;gap:.55rem}
+.sl__r{display:grid;grid-template-columns:1fr auto;gap:.15rem .9rem;align-items:baseline;
+       padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.sl__r:last-child{border-bottom:0;padding-bottom:0}
+.sl__n{font-size:.86rem;color:var(--paper)}
+.sl__p{font-family:var(--display);font-size:1.1rem;color:var(--gold);
+       font-variant-numeric:tabular-nums}
+.sl__m{grid-column:1/-1;display:flex;align-items:center;gap:.5rem;
+       font-size:.62rem;letter-spacing:.08em;color:rgba(255,255,255,.45)}
+
+/* 03 terms */
+.tm{display:grid;grid-template-columns:1fr auto;gap:.5rem .9rem;font-size:.8rem}
+.tm dt{color:rgba(255,255,255,.5)}
+.tm dd{margin:0;text-align:right;color:var(--paper);font-variant-numeric:tabular-nums}
+.stamp{align-self:flex-start;margin-top:.2rem;font-size:.58rem;letter-spacing:.18em;
+       text-transform:uppercase;font-weight:600;color:var(--gold);
+       border:1px solid var(--gold);padding:.28rem .55rem}
+
+/* 04 arrival */
+.arr{display:flex;flex-direction:column;gap:.7rem}
+.arr__row{display:flex;align-items:center;gap:.7rem;font-size:.82rem;color:rgba(255,255,255,.86)}
+.arr__k{width:26px;height:26px;border:1px solid var(--gold);display:grid;place-items:center;
+        color:var(--gold);font-size:.7rem;flex:none}
+.arr__big{font-family:var(--display);font-size:1.5rem;color:var(--paper);line-height:1.1}
+
+.stn__t{position:absolute;top:2.55rem;left:50%;transform:translateX(-50%);font-size:.55rem;
+        letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+        color:rgba(255,255,255,.28);transition:color .4s ease}
+.stn[data-s="active"] .stn__t{color:var(--gold)}
+.route{margin-bottom:clamp(3.2rem,7vh,4.5rem)}
+
+@media (max-width:900px){
+  .proc__grid{grid-template-columns:1fr;gap:1.5rem}
+  .panes{min-height:0;display:grid;gap:1.25rem}
+  .pane{position:static;opacity:1;transform:none;pointer-events:auto}
+  .stn__t{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .pane{position:static;opacity:1;transform:none;transition:none}
+  .panes{min-height:0;display:grid;gap:1.25rem}
+}
+
+/* ---------- footer ---------- */
+.foot{position:relative;overflow:hidden;padding:clamp(4rem,10vh,8rem) clamp(1.1rem,4vw,3rem) 2rem;
+      border-top:1px solid var(--line);background:var(--ground-2)}
+.foot__lead{color:rgba(255,255,255,.7);max-width:40ch;margin:0 0 2rem}
+.foot__top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+           gap:clamp(2rem,5vw,4.5rem);align-items:start}
+@media (max-width:900px){.foot__top{grid-template-columns:1fr}}
+.foot__arc{margin-top:2.5rem;max-width:22rem}
+.foot__arc svg{display:block;width:100%;height:auto}
+.foot__coord{margin:.6rem 0 0;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+             color:rgba(255,255,255,.38)}
+.frm{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.frm label{display:flex;flex-direction:column;gap:.4rem;font-size:.58rem;letter-spacing:.16em;
+           text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.5)}
+.frm label.wide{grid-column:1/-1}
+@media (max-width:560px){ .frm{grid-template-columns:1fr} }
+.frm input,.frm select,.frm textarea{font:inherit;font-size:.9rem;color:var(--paper);
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:2px;
+  padding:.7rem .75rem;width:100%;
+  transition:border-color .2s var(--ease),background-color .2s var(--ease)}
+.frm textarea{resize:vertical;min-height:4.5rem}
+.frm input:focus,.frm select:focus,.frm textarea:focus{outline:none;border-color:var(--gold);
+  background:rgba(255,255,255,.07)}
+.frm select{appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,rgba(255,255,255,.5) 50%),
+                   linear-gradient(135deg,rgba(255,255,255,.5) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.frm select option{background:#12222C;color:var(--paper)}
+.frm .err{color:#E08A6E;font-size:.62rem;letter-spacing:.04em;text-transform:none;font-weight:400}
+.frm__foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-top:.3rem}
+.frm__note{font-size:.7rem;color:rgba(255,255,255,.42);margin:0}
+.frm button{cursor:pointer;border:0}
+.sent{grid-column:1/-1;border:1px solid var(--gold);padding:1rem 1.1rem;background:rgba(201,169,97,.07)}
+.sent p{margin:0 0 .6rem;font-size:.85rem;color:rgba(255,255,255,.86)}
+.sent pre{margin:0;white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;
+          font-size:.74rem;color:var(--paper);line-height:1.55}
+.foot__cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:2rem;
+            margin-top:clamp(3rem,7vh,5rem);padding-top:2.2rem;border-top:1px solid var(--line)}
+.foot__col h3{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+              color:rgba(255,255,255,.42);margin:0 0 .9rem}
+.foot__col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
+.foot__col a{font-size:.85rem;color:rgba(255,255,255,.8);text-decoration:none;
+             transition:color .2s var(--ease)}
+.foot__col a:hover{color:var(--gold)}
+.foot__col p{margin:0 0 .4rem;font-size:.85rem;color:rgba(255,255,255,.7)}
+.foot__r a{color:inherit;text-decoration:none}
+.foot__r a:hover{color:var(--gold)}
+.foot__in{position:relative;z-index:1;max-width:76rem;margin:0 auto}
+.foot h2{font-size:clamp(2.4rem,5.6vw,4.6rem);margin-bottom:1.2rem;max-width:14ch}
+.foot__r{display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:space-between;align-items:flex-end;
+         margin-top:3rem;padding-top:1.4rem;border-top:1px solid var(--line);
+         font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.38)}
+
+@media (prefers-reduced-motion:reduce){
+  .ln i,.fade,.rv,.card__p i,.step{opacity:1!important;transform:none!important;transition:none!important}
+  .hero__map{transform:none!important}
+  .mq__t{animation:none}
+  .proc{height:auto}
+  .proc__stage{position:static;height:auto}
+  .steps{min-height:0;display:grid;gap:2.2rem}
+  .step{position:static}
+}
+</style>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" data-prog aria-hidden="true"></div>
+
+<header class="nav" data-nav>
+  <a class="nav__brand" href="#"><span class="nav__mark"><span>R</span></span>Remarcable Living</a>
+  <ul class="nav__links">
+    <li><a href="#campus">Universities</a></li>
+    <li><a href="#rooms">Rooms</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#arrive">Arriving</a></li>
+  </ul>
+  <a class="nav__cta" href="#arrive">WhatsApp Mark</a>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top" data-hero>
+  <div class="hero__map" data-map><canvas data-world></canvas></div>
+  <div class="hero__scrim"></div><div class="hero__vig"></div>
+
+  <div class="hero__in" data-content>
+    <p class="eyebrow fade" style="--d:0">Student &amp; internship housing &#183; Bangkok</p>
+    <h1 class="dsp">
+      <span class="ln"><i style="--d:200">Fly in from anywhere.</i></span>
+      <span class="ln"><i class="acc" style="--d:390">Move into somewhere.</i></span>
+    </h1>
+    <p class="hero__sub fade" style="--d:700">Furnished rooms and short leases beside Bangkok's universities &#8212; matched before you land, with one person handling the viewing, the deposit and the keys.</p>
+    <div class="acts">
+      <a class="btn fade" style="--d:880" href="#campus">Find rooms near my campus <span aria-hidden="true">&#8594;</span></a>
+      <a class="lnk fade" style="--d:960" href="#how">How it works</a>
+    </div>
+  </div>
+
+  <div class="dest"><div class="dest__i fade" style="--d:1300">Final destination
+    <b>Bangkok</b><code>13.7563&#176; N &#183; 100.5018&#176; E</code></div></div>
+</section>
+
+<div class="mq" aria-hidden="true"><div class="mq__t" data-mq></div></div>
+
+<!-- ================= CAMPUS ================= -->
+<section class="sec" id="campus">
+  <div class="ghost" data-gh="-0.07" aria-hidden="true" style="right:-4%;top:1%">01</div>
+  <div class="sec__in campus">
+    <div class="campus__map rv" data-rv><canvas data-city></canvas></div>
+    <div>
+      <p class="eyebrow rv" data-rv style="--i:1">One scale down</p>
+      <h2 class="dsp rv" data-rv style="--i:1">Then the city, then the street.</h2>
+      <p class="lead rv" data-rv style="--i:2">Nine campuses, one transit map. Where you study decides your commute far more than the district name does &#8212; so we start from your faculty gate and work outwards.</p>
+      <p class="campus__sum rv" data-rv data-campus-sum></p>
+      <ul class="uni" data-uni-list></ul>
+      <div class="legend rv" data-rv data-legend></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ROOMS ================= -->
+<section class="sec sec--ink" id="rooms">
+  <div class="ghost ghost--ink" data-gh="-0.05" aria-hidden="true" style="left:-3%;bottom:-2%">02</div>
+  <div class="sec__in">
+    <p class="eyebrow eyebrow--ink rv" data-rv>Near campus, not near the office</p>
+    <h2 class="dsp rv" data-rv>Every room, plotted against its campus.</h2>
+    <p class="lead rv" data-rv>Current inventory, sorted by rent. Each card shows the walk to its station and the measured distance to the nearest campus. Availability and final rent are confirmed before any viewing.</p>
+
+    <div class="tools rv" data-rv>
+      <div class="fgrp"><span>Campus</span><div data-f="campus"></div></div>
+      <div class="fgrp"><span>Monthly budget</span><div data-f="budget">
+        <button class="fbtn" type="button" data-v="all" aria-pressed="true">Any</button>
+        <button class="fbtn" type="button" data-v="lo" aria-pressed="false">Under &#3647;20,000</button>
+        <button class="fbtn" type="button" data-v="mid" aria-pressed="false">&#3647;20&#8211;30,000</button>
+        <button class="fbtn" type="button" data-v="hi" aria-pressed="false">&#3647;30,000+</button>
+      </div></div>
+      <p class="count" data-count-out aria-live="polite"></p>
+    </div>
+
+    <ul class="grid" data-grid></ul>
+    <p class="empty" data-empty hidden>No rooms match that combination. Widen the budget or the lease and we will keep looking &#8212; new rooms land every week.</p>
+  </div>
+</section>
+
+<!-- ================= PROCESS ================= -->
+<section class="proc" id="how" data-proc>
+  <div class="proc__stage"><div class="sec__in" style="width:100%">
+    <p class="eyebrow">A clear route to the keys</p>
+    <h2 class="dsp" style="margin-bottom:clamp(1.6rem,4vh,2.4rem)">From your first message to your front door.</h2>
+
+    <div class="proc__ghost" data-proc-ghost aria-hidden="true">01</div>
+    <div class="route" aria-hidden="true">
+      <div class="route__tr"><span class="route__fl" data-fill></span></div>
+      <div class="route__st">
+        <span class="stn" data-stn><span class="stn__d"></span><span class="stn__l">Message</span><span class="stn__t">Day 1</span></span>
+        <span class="stn" data-stn><span class="stn__d"></span><span class="stn__l">Match</span><span class="stn__t">Day 2&#8211;3</span></span>
+        <span class="stn" data-stn><span class="stn__d"></span><span class="stn__l">Reserve</span><span class="stn__t">Day 4</span></span>
+        <span class="stn" data-stn><span class="stn__d"></span><span class="stn__l">Land</span><span class="stn__t">Arrival day</span></span>
+      </div>
+    </div>
+
+    <div class="proc__grid">
+      <ol class="steps">
+        <li class="step" data-step><b>01</b><div><h3>Message</h3>
+          <p>Tell us your university, your start date, your monthly budget and whether you need a desk. Two minutes on WhatsApp, in your own language.</p></div></li>
+        <li class="step" data-step><b>02</b><div><h3>Match</h3>
+          <p>We shortlist by walking time to your faculty gate &#8212; not by district name &#8212; and send video walkthroughs so you can judge them from home.</p></div></li>
+        <li class="step" data-step><b>03</b><div><h3>Reserve</h3>
+          <p>We reconfirm the room is still available, explain the deposit and the lease in plain English, and hold it against your arrival date.</p></div></li>
+        <li class="step" data-step><b>04</b><div><h3>Land</h3>
+          <p>Someone meets you with the keys. If the room is not what the video showed, you do not take it and you do not lose the deposit.</p></div></li>
+      </ol>
+
+      <div class="panes">
+        <div class="pane" data-pane>
+          <div class="pane__h"><b><span class="dot"></span>Mark</b><span>WhatsApp</span></div>
+          <div class="msg">
+            <div class="bub bub--in">Hi Mark &#8212; I start at Chulalongkorn on 12 August. Budget around &#3647;10,000, and I need somewhere I can actually study.<time>09:41</time></div>
+            <div class="bub bub--out">Got it. Sam Yan side or Siam side? I'll send three with desks by tomorrow evening.<time>09:44</time></div>
+            <div class="bub bub--in">Sam Yan if it fits the budget. I land on the 12th.<time>09:46</time></div>
+          </div>
+        </div>
+
+        <div class="pane" data-pane>
+          <div class="pane__h"><b>Your shortlist</b><span>4 rooms</span></div>
+          <div class="sl">
+            <div class="sl__r"><span class="sl__n">Studio near Sam Yan</span><span class="sl__p">&#3647;9,800</span>
+              <span class="sl__m">6 min walk</span></div>
+            <div class="sl__r"><span class="sl__n">Shared 2 bed, Rama I</span><span class="sl__p">&#3647;9,800</span>
+              <span class="sl__m">9 min walk</span></div>
+            <div class="sl__r"><span class="sl__n">Studio, Chamchuri side</span><span class="sl__p">&#3647;10,400</span>
+              <span class="sl__m">4 min walk</span></div>
+            <div class="sl__r"><span class="sl__n">1 bed, Banthat Thong</span><span class="sl__p">&#3647;11,200</span>
+              <span class="sl__m">11 min walk</span></div>
+          </div>
+        </div>
+
+        <div class="pane" data-pane>
+          <div class="pane__h"><b>Room held</b><span>Terms</span></div>
+          <dl class="tm">
+            <dt>Room</dt><dd>Studio near Sam Yan</dd>
+            <dt>Monthly rent</dt><dd>&#3647;9,800</dd>
+            <dt>Lease</dt><dd>6 months</dd>
+            <dt>Held until</dt><dd>12 Aug</dd>
+            <dt>Move-in</dt><dd>12 Aug, 15:00</dd>
+          </dl>
+          <span class="stamp">Reserved &#183; not charged yet</span>
+        </div>
+
+        <div class="pane" data-pane>
+          <div class="pane__h"><b>Arrival</b><span>12 August</span></div>
+          <div class="arr">
+            <p class="arr__big">Mark meets you at the building, 15:00.</p>
+            <div class="arr__row"><span class="arr__k">&#8962;</span>Keys, contract and the Wi-Fi password on the day.</div>
+            <div class="arr__row"><span class="arr__k">&#10003;</span>Room not as shown? You walk away, deposit intact.</div>
+            <div class="arr__row"><span class="arr__k">&#8594;</span>Campus 6 minutes on foot. Nearest BTS, 4 minutes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="foot" id="arrive">
+  <div class="ghost" data-gh="-0.06" aria-hidden="true" style="right:-5%;top:4%">04</div>
+  <div class="foot__in">
+    <div class="foot__top">
+      <div>
+        <p class="eyebrow rv" data-rv>Arriving this term</p>
+        <h2 class="dsp rv" data-rv>Tell us where you're flying from.</h2>
+        <p class="foot__lead rv" data-rv style="--i:1">Send this once and Mark comes back with a shortlist built around your campus, your budget and your arrival date. No account, no sign-up.</p>
+        <div class="foot__arc rv" data-rv style="--i:1" aria-hidden="true">
+          <svg viewBox="0 0 300 70">
+            <path d="M6 62 C 90 4, 190 6, 286 34" fill="none" stroke="#C9A961"
+                  stroke-width="1.1" stroke-dasharray="2.5 3.5" opacity=".75"/>
+            <circle cx="6" cy="62" r="2.6" fill="#8FB6CE"/>
+            <circle cx="286" cy="34" r="4" fill="#C9A961"/>
+            <circle cx="286" cy="34" r="9" fill="none" stroke="#C9A961" stroke-width=".8" opacity=".6"/>
+            <text x="278" y="20" text-anchor="end" fill="#C9A961"
+                  font-family="Geist,system-ui,sans-serif" font-style="italic" font-size="15">Bangkok</text>
+          </svg>
+          <p class="foot__coord">Final destination &#183; 13.7563&#176; N 100.5018&#176; E</p>
+        </div>
+      </div>
+
+      <form class="frm rv" data-rv data-form novalidate>
+        <label class="wide">Your name
+          <input type="text" name="name" autocomplete="name" placeholder="Ana Ribeiro" required></label>
+        <label class="wide">WhatsApp number or email
+          <input type="text" name="contact" placeholder="+55 11 90000 0000 or you@uni.edu" required></label>
+        <label>University
+          <select name="uni"><option>Not sure yet</option><option>Chulalongkorn</option>
+          <option>Thammasat</option><option>Mahidol Salaya</option><option>Kasetsart</option>
+          <option>KMUTT</option><option>KMITL</option><option>Assumption</option>
+          <option>NIDA</option><option>Srinakharinwirot</option></select></label>
+        <label>Move-in month
+          <select name="month"><option>As soon as possible</option><option>January</option>
+          <option>February</option><option>March</option><option>April</option><option>May</option>
+          <option>June</option><option>July</option><option>August</option><option>September</option>
+          <option>October</option><option>November</option><option>December</option></select></label>
+        <label>Monthly budget
+          <select name="budget"><option>Under &#3647;10,000</option><option>&#3647;10,000&#8211;15,000</option>
+          <option>&#3647;15,000+</option><option>Not sure yet</option></select></label>
+        <label>Lease length
+          <select name="lease"><option>3 months</option><option>6 months</option>
+          <option>12 months</option><option>Flexible</option></select></label>
+        <label class="wide">Anything essential
+          <textarea name="notes" placeholder="A desk, a quiet soi, ensuite bathroom, near the BTS&#8230;"></textarea></label>
+        <div class="frm__foot">
+          <button class="btn" type="submit">Send to Mark <span aria-hidden="true">&#8594;</span></button>
+          <p class="frm__note">Goes straight to WhatsApp. Nothing is stored on this page.</p>
+        </div>
+      </form>
+    </div>
+
+    <div class="foot__cols">
+      <div class="foot__col rv" data-rv><h3>Rooms</h3><ul>
+        <li><a href="#rooms">All rooms</a></li><li><a href="#rooms">Under &#3647;10,000</a></li>
+        <li><a href="#rooms">Three-month leases</a></li><li><a href="#campus">By campus</a></li></ul></div>
+      <div class="foot__col rv" data-rv><h3>Remarcable</h3><ul>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#arrive">Contact</a></li></ul></div>
+      <div class="foot__col rv" data-rv><h3>Talk to a person</h3>
+        <p>WhatsApp is fastest.</p></div>
+    </div>
+
+    <div class="foot__r">
+      <span>&#169; 2026 Remarcable Living</span>
+      <span>Listings indicative &#183; confirmed before viewing</span>
+      <span><a href="#top">Back to top &#8593;</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+var ease = function(t){ return 1 - Math.pow(1-t, 4); };
+var clamp = function(v,a,b){ return Math.min(b, Math.max(a,v)); };
+var seg = function(t,a,b){ return clamp((t-a)/(b-a),0,1); };
+
+/* ---------- landmass ----------
+   60x25 grid, 6\u00B0 cells. Verified against 21 known cities and 9 open-ocean points. */
+var LAND = [
+"............................................................",
+"................###########.....####........................",
+".........##################.....####..############..........",
+"...########################......###########################",
+"..##########################...#############################",
+"........#############........#.##########################...",
+".........############........#########################......",
+".........###########.........##########################.....",
+".........#########..........########################.#......",
+"..........#######...........##########################......",
+"...........######...........#######################.........",
+"............##.###.........#############.#########..........",
+"..............#########....##########.....##..###.##........",
+".................####.......##########........##..##........",
+".................#####..........######........####..........",
+".................########.......######.........#######......",
+".................########.......#####..........#######......",
+".................#######........#####.#...........####......",
+"..................######........#####.#..........#######....",
+"..................#####..........###.............#######....",
+"..................####...........###.............#######....",
+"..................##..................................#...##",
+"..................##......................................##",
+"..................##........................................",
+"..................#........................................."];
+function isLand(lat,lon){
+  var r=Math.floor((90-lat)/6), c=Math.floor((lon+180)/6);
+  if(r<0||r>=LAND.length||c<0||c>59) return false;
+  return LAND[r].charAt(c)==='#';
+}
+
+var BKK={lat:13.7563,lon:100.5018};
+var ORIGINS=[
+ {n:'London',lat:51.51,lon:-0.13},{n:'Paris',lat:48.86,lon:2.35},
+ {n:'Berlin',lat:52.52,lon:13.40},{n:'Madrid',lat:40.42,lon:-3.70},
+ {n:'Rome',lat:41.90,lon:12.50},{n:'Amsterdam',lat:52.37,lon:4.90},
+ {n:'Stockholm',lat:59.33,lon:18.07},{n:'Warsaw',lat:52.23,lon:21.01},
+ {n:'Istanbul',lat:41.01,lon:28.98},{n:'Moscow',lat:55.75,lon:37.62},
+ {n:'New York',lat:40.71,lon:-74.01},{n:'Toronto',lat:43.65,lon:-79.38},
+ {n:'Los Angeles',lat:34.05,lon:-118.24},{n:'Mexico City',lat:19.43,lon:-99.13},
+ {n:'Bogot\u00E1',lat:4.71,lon:-74.07},{n:'Lima',lat:-12.05,lon:-77.04},
+ {n:'S\u00E3o Paulo',lat:-23.55,lon:-46.63},{n:'Santiago',lat:-33.45,lon:-70.67},
+ {n:'Casablanca',lat:33.57,lon:-7.59},{n:'Lagos',lat:6.52,lon:3.38},
+ {n:'Cairo',lat:30.04,lon:31.24},{n:'Addis Ababa',lat:9.03,lon:38.74},
+ {n:'Nairobi',lat:-1.29,lon:36.82},{n:'Johannesburg',lat:-26.20,lon:28.05},
+ {n:'Dubai',lat:25.20,lon:55.27},{n:'Karachi',lat:24.86,lon:67.01},
+ {n:'Mumbai',lat:19.08,lon:72.88},{n:'Delhi',lat:28.61,lon:77.21},
+ {n:'Dhaka',lat:23.81,lon:90.41},{n:'Beijing',lat:39.90,lon:116.41},
+ {n:'Shanghai',lat:31.23,lon:121.47},{n:'Seoul',lat:37.57,lon:126.98},
+ {n:'Tokyo',lat:35.68,lon:139.65},{n:'Hong Kong',lat:22.32,lon:114.17},
+ {n:'Manila',lat:14.60,lon:120.98},{n:'Jakarta',lat:-6.21,lon:106.85},
+ {n:'Sydney',lat:-33.87,lon:151.21},{n:'Auckland',lat:-36.85,lon:174.76}];
+
+/* ---------- world canvas ---------- */
+var wc=document.querySelector('[data-world]'), wx=wc?wc.getContext('2d'):null;
+var W=0,H=0,P=null;
+var landCache=null, DPR=1;
+function wsetup(){
+  var r=wc.getBoundingClientRect();
+  W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+  var dpr=Math.min(devicePixelRatio||1,2);
+  wc.width=W*dpr; wc.height=H*dpr; wx.setTransform(dpr,0,0,dpr,0,0); DPR=dpr;
+  var narrow=W<820;
+  P={k:narrow?W/420:W/320, lon0:10, lat0:8,
+     cx:narrow?W*0.50:W*0.43, cy:narrow?H*0.32:H*0.52, narrow:narrow};
+  /* The copy block claims a no-label zone. Dots behind text read as texture;
+     a city name behind a headline reads as a mistake. */
+  var cr=wc.getBoundingClientRect();
+  var parts=document.querySelectorAll('.hero__eyebrow,.hero h1,.hero__sub,.acts,.eyebrow');
+  if(parts.length && !narrow){
+    var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    parts.forEach(function(el){
+      if(!el.closest('.hero')) return;
+      var b=el.getBoundingClientRect();
+      if(b.width<2||b.height<2) return;
+      x0=Math.min(x0,b.left-cr.left); y0=Math.min(y0,b.top-cr.top);
+      x1=Math.max(x1,b.right-cr.left); y1=Math.max(y1,b.bottom-cr.top);
+    });
+    P.guard=(x1>x0)?{x:x0-10,y:y0-10,w:(x1-x0)+20,h:(y1-y0)+20}:null;
+  } else P.guard=null;
+  buildLand();
+}
+
+/* The landmass never changes between resizes, so it is rasterised once into an
+   offscreen canvas and blitted each frame. That buys 1\u00B0 sampling \u2014 roughly four
+   times the dots of a 2\u00B0 field \u2014 at no per-frame cost, which is the whole
+   difference between a loose stipple and something that reads as land. */
+function buildLand(){
+  landCache=document.createElement('canvas');
+  landCache.width=W*DPR; landCache.height=H*DPR;
+  var g=landCache.getContext('2d');
+  g.setTransform(DPR,0,0,DPR,0,0);
+
+  // faint curved meridians sit behind the land and give the field a substrate
+  g.strokeStyle='rgba(84,127,150,.085)'; g.lineWidth=1;
+  for(var lon=-180;lon<=180;lon+=15){
+    g.beginPath();
+    for(var la=-58;la<=84;la+=3){var q=pj(la,lon+P.lon0); la===-58?g.moveTo(q.x,q.y):g.lineTo(q.x,q.y);}
+    g.stroke();
+  }
+  for(var lat=-45;lat<=75;lat+=15){
+    g.beginPath();
+    for(var lo=-180;lo<=180;lo+=5){var r=pj(lat,lo+P.lon0); lo===-180?g.moveTo(r.x,r.y):g.lineTo(r.x,r.y);}
+    g.stroke();
+  }
+
+  for(var y=-56;y<=84;y+=1){
+    for(var x=-180;x<=180;x+=1){
+      if(!isLand(y,x)) continue;
+      var p=pj(y,x);
+      if(p.x<-8||p.x>W+8||p.y<-8||p.y>H+8) continue;
+      // deterministic per-cell jitter so the field has grain, not a flat screen
+      var h=(((y+90)*911) ^ ((x+180)*2837)) >>> 0;
+      var a=0.34+(h%100)/100*0.46;
+      g.fillStyle='rgba(139,180,206,'+a.toFixed(3)+')';
+      var s=1.25+((h>>7)%3)*0.12;
+      g.fillRect(p.x-s/2,p.y-s/2,s,s);
+    }
+  }
+}
+/* Sinusoidal: x scales by cos(lat), so meridians curve and it reads as a globe
+   laid flat \u2014 pure trigonometry, so the geometry cannot be wrong. */
+function pj(lat,lon){
+  var dl=lon-P.lon0; while(dl>180)dl-=360; while(dl<-180)dl+=360;
+  return {x:P.cx+dl*P.k*Math.cos(lat*Math.PI/180), y:P.cy-(lat-P.lat0)*P.k};
+}
+function ctrl(a,b,i){
+  var mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;
+  var px=-dy/d,py=dx/d; if(py>0){px=-px;py=-py;}
+  var bow=0.15+((i||0)%5)*0.028;      // fan the routes instead of bundling them
+  return {x:mx+px*d*bow, y:my+py*d*bow};
+}
+function qp(a,c,b,t){var u=1-t;return{x:u*u*a.x+2*u*t*c.x+t*t*b.x,y:u*u*a.y+2*u*t*c.y+t*t*b.y};}
+
+var placed=[];
+function hits(r){for(var i=0;i<placed.length;i++){var q=placed[i];
+  if(r.x<q.x+q.w+4&&r.x+r.w+4>q.x&&r.y<q.y+q.h+3&&r.y+r.h+3>q.y)return true;}return false;}
+function label(txt,x,y,al){
+  var w=wx.measureText(txt).width;
+  var R={x:x+7,y:y-6,w:w,h:12}, L={x:x-7-w,y:y-6,w:w,h:12};
+  var g=P.guard;
+  var blocked=function(r){ return g && r.x<g.x+g.w && r.x+r.w>g.x &&
+                                      r.y<g.y+g.h && r.y+r.h>g.y; };
+  var b=(!hits(R)&&!blocked(R))?R:((!hits(L)&&!blocked(L))?L:null);
+  if(!b||b.x<2||b.x+b.w>W-2) return;
+  placed.push(b); wx.fillStyle='rgba(255,253,248,'+al+')'; wx.fillText(txt,b.x,y+3.5);
+}
+
+function wdraw(t,now){
+  wx.clearRect(0,0,W,H); placed=[];
+  var dest=pj(BKK.lat,BKK.lon);
+
+  var la=ease(seg(t,0,0.30));
+  if(la>0&&landCache){ wx.globalAlpha=la; wx.drawImage(landCache,0,0,W,H); wx.globalAlpha=1; }
+
+  // glow beneath the convergence point so the destination carries weight
+  if(t>0.5){
+    var gl=ease(seg(t,0.5,0.9));
+    var rg=wx.createRadialGradient(dest.x,dest.y,0,dest.x,dest.y,Math.max(W,H)*0.16);
+    rg.addColorStop(0,'rgba(201,169,97,'+(0.16*gl)+')');
+    rg.addColorStop(1,'rgba(201,169,97,0)');
+    wx.fillStyle=rg; wx.fillRect(0,0,W,H);
+  }
+  if(!P.narrow){
+    wx.font='400 italic 20px "Geist",system-ui,sans-serif';
+    placed.push({x:dest.x+17,y:dest.y-12,w:wx.measureText('Bangkok').width,h:24});
+  }
+
+  var n=ORIGINS.length;
+  for(var i=0;i<n;i++){
+    var o=ORIGINS[i], a=pj(o.lat,o.lon), c=ctrl(a,dest,i);
+    var nT=seg(t,0.18+(i/n)*0.20,0.36+(i/n)*0.20);
+    var aT=seg(t,0.32+(i/n)*0.44,0.66+(i/n)*0.34);
+
+    if(nT>0){
+      var na=ease(nT);
+      wx.fillStyle='rgba(143,182,206,'+(0.95*na)+')';
+      wx.beginPath(); wx.arc(a.x,a.y,2.5,0,6.2832); wx.fill();
+      if(!P.narrow){ wx.font='600 9.5px "Geist",system-ui,sans-serif'; label(o.n.toUpperCase(),a.x,a.y,0.5*na); }
+    }
+    if(aT>0){
+      var e2=ease(aT);
+      wx.strokeStyle='rgba(212,178,104,'+(0.34+0.36*e2)+')'; wx.lineWidth=1.15;
+      wx.beginPath();
+      var S=70;
+      for(var s=0;s<=S*e2;s++){var q=qp(a,c,dest,s/S); s===0?wx.moveTo(q.x,q.y):wx.lineTo(q.x,q.y);}
+      wx.stroke();
+      if(e2<1){var hd=qp(a,c,dest,e2);
+        wx.fillStyle='rgba(255,253,248,.95)'; wx.beginPath(); wx.arc(hd.x,hd.y,1.9,0,6.2832); wx.fill();}
+      else if(now!==undefined){
+        // once drawn, a light keeps travelling the route \u2014 the page stays alive
+        var ph=((now/3400)+i*0.11)%1, tp=qp(a,c,dest,ph);
+        var g=wx.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,7);
+        g.addColorStop(0,'rgba(255,247,224,.95)'); g.addColorStop(1,'rgba(255,247,224,0)');
+        wx.fillStyle=g; wx.beginPath(); wx.arc(tp.x,tp.y,7,0,6.2832); wx.fill();
+      }
+    }
+  }
+
+  var dT=seg(t,0.58,0.88);
+  if(dT>0){
+    var de=ease(dT);
+    if(now!==undefined&&dT>=1){
+      var pu=((now/2600)%1);
+      wx.strokeStyle='rgba(201,169,97,'+(0.32*(1-pu))+')'; wx.lineWidth=1;
+      wx.beginPath(); wx.arc(dest.x,dest.y,6+pu*30,0,6.2832); wx.stroke();
+    }
+    wx.fillStyle='rgba(201,169,97,'+de+')';
+    wx.beginPath(); wx.arc(dest.x,dest.y,4.8*de,0,6.2832); wx.fill();
+    wx.strokeStyle='rgba(201,169,97,'+(0.5*de)+')'; wx.lineWidth=1;
+    wx.beginPath(); wx.arc(dest.x,dest.y,12,0,6.2832); wx.stroke();
+    if(!P.narrow){
+      wx.fillStyle='rgba(201,169,97,'+de+')';
+      wx.font='400 italic 20px "Geist",system-ui,sans-serif';
+      wx.fillText('Bangkok',dest.x+17,dest.y+6);
+    }
+  }
+}
+
+/* ---------- city canvas ---------- */
+var UNIS=[
+ {n:'Chulalongkorn',d:'Pathum Wan',lat:13.7380,lon:100.5320},
+ {n:'Thammasat',d:'Phra Nakhon',lat:13.7570,lon:100.4920},
+ {n:'Mahidol Salaya',d:'Nakhon Pathom',lat:13.7940,lon:100.3230},
+ {n:'Kasetsart',d:'Chatuchak',lat:13.8480,lon:100.5700},
+ {n:'KMUTT',d:'Thung Khru',lat:13.6510,lon:100.4940},
+ {n:'KMITL',d:'Lat Krabang',lat:13.7280,lon:100.7790},
+ {n:'Assumption',d:'Bang Kapi',lat:13.7370,lon:100.6470},
+ {n:'NIDA',d:'Bang Kapi',lat:13.7720,lon:100.6480},
+ {n:'Srinakharinwirot',d:'Watthana',lat:13.7440,lon:100.5640}];
+
+/* Simplified transit geometry \u2014 real stations, schematic between them, which is
+   how transit maps are drawn anyway. Indicative, not for navigation. */
+var LINES=[
+ {n:'BTS Sukhumvit',c:'#5E9E7F',s:[
+  [13.8025,100.5537,'Mo Chit'],[13.7796,100.5446,'Ari'],[13.7650,100.5375,'Victory Monument'],
+  [13.7566,100.5330,'Phaya Thai'],[13.7519,100.5316,'Ratchathewi'],[13.7455,100.5341,'Siam'],
+  [13.7442,100.5432,'Chit Lom'],[13.7404,100.5551,'Nana'],[13.7367,100.5601,'Asok'],
+  [13.7305,100.5697,'Phrom Phong'],[13.7241,100.5786,'Thong Lo'],[13.7150,100.5918,'Phra Khanong'],
+  [13.7057,100.6014,'On Nut'],[13.6614,100.6017,'Bearing']]},
+ {n:'BTS Silom',c:'#3F7A66',s:[
+  [13.7462,100.5297,'National Stadium'],[13.7455,100.5341,'Siam'],[13.7396,100.5395,'Ratchadamri'],
+  [13.7286,100.5343,'Sala Daeng'],[13.7237,100.5292,'Chong Nonsi'],[13.7186,100.5142,'Saphan Taksin'],
+  [13.7212,100.4900,'Wongwian Yai']]},
+ {n:'MRT Blue',c:'#6B84BF',s:[
+  [13.7376,100.5170,'Hua Lamphong'],[13.7327,100.5290,'Sam Yan'],[13.7290,100.5360,'Si Lom'],
+  [13.7256,100.5460,'Lumphini'],[13.7232,100.5602,'Queen Sirikit'],[13.7378,100.5606,'Sukhumvit'],
+  [13.7486,100.5637,'Phetchaburi'],[13.7580,100.5655,'Phra Ram 9'],
+  [13.7663,100.5697,'Thailand Cultural Centre'],[13.8064,100.5744,'Lat Phrao'],
+  [13.8137,100.5615,'Phahon Yothin'],[13.8022,100.5537,'Chatuchak Park']]}];
+
+var KMDEG=110.6;
+function kmBetween(aLat,aLon,bLat,bLon){
+  var dx=(aLon-bLon)*Math.cos(13.75*Math.PI/180), dy=aLat-bLat;
+  return Math.sqrt(dx*dx+dy*dy)*KMDEG;
+}
+/* Nearest station is computed from the line data, not asserted. */
+function nearestStation(u){
+  var best=null;
+  LINES.forEach(function(L){ L.s.forEach(function(st){
+    var d=kmBetween(u.lat,u.lon,st[0],st[1]);
+    if(!best||d<best.km) best={km:d,name:st[2],line:L.n,c:L.c};
+  });});
+  return best;
+}
+var cc=document.querySelector('[data-city]'), cx2=cc?cc.getContext('2d'):null;
+var CW=0,CH=0,CK=0,active=-1;
+var cplaced=[];
+function chits(r){for(var i=0;i<cplaced.length;i++){var q=cplaced[i];
+  if(r.x<q.x+q.w+3&&r.x+r.w+3>q.x&&r.y<q.y+q.h+2&&r.y+r.h+2>q.y)return true;}return false;}
+function csetup(){
+  var r=cc.getBoundingClientRect();
+  CW=Math.max(1,Math.round(r.width)); CH=Math.max(1,Math.round(r.height));
+  var dpr=Math.min(devicePixelRatio||1,2);
+  cc.width=CW*dpr; cc.height=CH*dpr; cx2.setTransform(dpr,0,0,dpr,0,0);
+  CK=CW/0.60;                              // ~0.60\u00B0 of longitude across the frame
+}
+function cpj(lat,lon){
+  return {x:CW/2+(lon-100.5500)*CK*Math.cos(13.75*Math.PI/180), y:CH/2-(lat-13.7500)*CK};
+}
+function cdraw(t){
+  cx2.clearRect(0,0,CW,CH);
+  var a=ease(clamp(t,0,1)); if(a<=0) return;
+  var c=cpj(13.7500,100.5500);
+  var KMDEG=110.6;                       // km per degree of latitude
+
+  cx2.strokeStyle='rgba(84,127,150,'+(0.10*a)+')'; cx2.lineWidth=1;
+  for(var i=1;i<6;i++){
+    cx2.beginPath(); cx2.moveTo(CW*i/6,0); cx2.lineTo(CW*i/6,CH); cx2.stroke();
+    cx2.beginPath(); cx2.moveTo(0,CH*i/6); cx2.lineTo(CW,CH*i/6); cx2.stroke();
+  }
+
+  /* Rings are real distances, not decoration: radius = km * px-per-degree / 110.6.
+     The section's claim is that commute beats district name, so the graphic has
+     to actually measure something. */
+  [10,20,30].forEach(function(km){
+    var r=km*CK/KMDEG*a;
+    cx2.strokeStyle='rgba(84,127,150,'+(0.26*a)+')'; cx2.lineWidth=1;
+    cx2.setLineDash([2,4]);
+    cx2.beginPath(); cx2.arc(c.x,c.y,r,0,6.2832); cx2.stroke();
+    cx2.setLineDash([]);
+    cx2.fillStyle='rgba(84,127,150,'+(0.65*a)+')';
+    cx2.font='600 8.5px "Geist",system-ui,sans-serif';
+    cx2.fillText(km+' KM', c.x+r*0.707+3, c.y-r*0.707-3);
+  });
+
+  // transit lines, drawn under the campus nodes
+  LINES.forEach(function(L,li){
+    var la2=ease(clamp((t-0.05-li*0.05)/0.55,0,1)); if(la2<=0) return;
+    cx2.strokeStyle=L.c; cx2.globalAlpha=0.55*la2; cx2.lineWidth=1.8;
+    cx2.lineJoin='round'; cx2.lineCap='round';
+    cx2.beginPath();
+    L.s.forEach(function(st,k){ var q=cpj(st[0],st[1]); k===0?cx2.moveTo(q.x,q.y):cx2.lineTo(q.x,q.y); });
+    cx2.stroke();
+    cx2.globalAlpha=0.8*la2; cx2.fillStyle='#0E1C25';
+    L.s.forEach(function(st){ var q=cpj(st[0],st[1]);
+      cx2.beginPath(); cx2.arc(q.x,q.y,1.9,0,6.2832); cx2.fill();
+      cx2.strokeStyle=L.c; cx2.lineWidth=1;
+      cx2.beginPath(); cx2.arc(q.x,q.y,1.9,0,6.2832); cx2.stroke(); });
+    cx2.globalAlpha=1;
+  });
+
+  cplaced=[];
+  UNIS.forEach(function(u,i){
+    var q=cpj(u.lat,u.lon), on=(i===active);
+    var ua=ease(clamp((t-0.08-i*0.045)/0.5,0,1)); if(ua<=0) return;
+    var dx=(u.lon-100.5500)*Math.cos(13.75*Math.PI/180), dy=(u.lat-13.7500);
+    var km=Math.round(Math.sqrt(dx*dx+dy*dy)*KMDEG);
+
+    cx2.strokeStyle=on?'rgba(201,169,97,'+ua+')':'rgba(143,182,206,'+(0.5*ua)+')';
+    cx2.lineWidth=on?1.6:1;
+    cx2.beginPath(); cx2.arc(q.x,q.y,on?10:5,0,6.2832); cx2.stroke();
+    cx2.fillStyle=on?'rgba(201,169,97,'+ua+')':'rgba(143,182,206,'+(0.8*ua)+')';
+    cx2.beginPath(); cx2.arc(q.x,q.y,on?3.4:2,0,6.2832); cx2.fill();
+
+    cx2.font=(on?'600 10.5px':'600 9px')+' "Geist",system-ui,sans-serif';
+    var txt=u.n.toUpperCase()+'  '+km+'KM';
+    var w=cx2.measureText(txt).width;
+    var R={x:q.x+12,y:q.y-6,w:w,h:12}, L={x:q.x-12-w,y:q.y-6,w:w,h:12};
+    var box=!chits(R)?R:(!chits(L)?L:null);
+    if(box && box.x>2 && box.x+box.w<CW-2){
+      cplaced.push(box);
+      cx2.fillStyle=on?'rgba(255,253,248,'+ua+')':'rgba(255,253,248,'+(0.46*ua)+')';
+      cx2.fillText(txt,box.x,q.y+3.5);
+    }
+  });
+
+  cx2.fillStyle='rgba(201,169,97,'+(0.9*a)+')';
+  cx2.beginPath(); cx2.arc(c.x,c.y,2.5,0,6.2832); cx2.fill();
+}
+
+/* ---------- rooms ----------
+   dx/dy are the room's offset from its campus in kilometres, so the card's map
+   is drawn from the same geometry as the campus section rather than being art. */
+/* REAL inventory, imported from remarcable-site/lib/listings.ts.
+   campus + km + dx/dy are COMPUTED from each unit's true lat/lon against the
+   nine campus coordinates \u2014 not authored. Sorted by rent. */
+var ROOMS=[
+ {c:"Srinakharinwirot",d:"Ari",t:"Centric Ari Station \u00b7 1 Bedroom",p:17000,st:"BTS",sn:"Ari",w:3,sq:28.0,bd:1,ba:1,fl:"17",g:"available",km:4.5,dx:-2.07,dy:3.95,img:"/bangkok/green-condo.jpg"},
+ {c:"Srinakharinwirot",d:"Rama 9",t:"Supalai Veranda Rama 9 \u00b7 1 Bedroom",p:17000,st:"MRT",sn:"Phra Ram 9",w:14,sq:42.0,bd:1,ba:1,fl:"28",g:"available",km:2.0,dx:1.48,dy:1.39,img:"/bangkok/bang-wa.jpg"},
+ {c:"Srinakharinwirot",d:"Ari",t:"Noble Around Ari \u00b7 1 Bedroom",p:20000,st:"BTS",sn:"Ari",w:2,sq:26.58,bd:1,ba:1,fl:"High floor",g:"verify",km:4.5,dx:-2.11,dy:3.97,img:"/bangkok/skyline.jpg"},
+ {c:"Srinakharinwirot",d:"Rama 9",t:"Belle Grand Rama 9 \u00b7 1 Bedroom",p:20000,st:"MRT",sn:"Phra Ram 9",w:8,sq:42.0,bd:1,ba:1,fl:"22",g:"verify",km:1.4,dx:0.3,dy:1.34,img:"/bangkok/night-city.jpg"},
+ {c:"Srinakharinwirot",d:"Thonglor",t:"Thru Thonglor \u00b7 1 Bedroom",p:23000,st:"BTS",sn:"Thong Lo",w:18,sq:37.0,bd:1,ba:1,fl:"16",g:"verify",km:2.2,dx:2.13,dy:-0.64,img:"/bangkok/night-city.jpg"},
+ {c:"Srinakharinwirot",d:"Ari",t:"Centurion Park \u00b7 1 Bedroom",p:25000,st:"BTS",sn:"Ari",w:8,sq:62.0,bd:1,ba:1,fl:"\u2014",g:"available",km:4.9,dx:-2.4,dy:4.28,img:"/properties/centurion-park-ari.jpg"},
+ {c:"Chulalongkorn",d:"Ratchathewi",t:"Baan Klang Krung Siam \u00b7 2 Bedrooms",p:30000,st:"BTS",sn:"Ratchathewi",w:3,sq:74.0,bd:2,ba:2,fl:"21",g:"available",km:1.5,dx:0.05,dy:1.51,img:"/properties/baan-klang-krung-siam.jpg"},
+ {c:"Chulalongkorn",d:"Sathorn",t:"Supalai ICON Sathorn \u00b7 1 Bedroom",p:45000,st:"BTS",sn:"Chong Nonsi",w:10,sq:46.0,bd:1,ba:1,fl:"High floor",g:"verify",km:1.5,dx:-0.39,dy:-1.49,img:"/bangkok/hero-night.jpg"},
+ {c:"Srinakharinwirot",d:"Asoke",t:"Ashton Asoke \u00b7 Rare 3 Bedroom",p:100000,st:"MRT",sn:"Sukhumvit",w:1,sq:100.0,bd:3,ba:3,fl:"42",g:"available",km:0.7,dx:-0.38,dy:-0.6,img:"/properties/ashton-asoke/786342964_2664258444007827_8397648305202113964_n.jpg"}
+];
+
+var THB=function(n){ return '\u0E3F'+n.toLocaleString('en-US'); };
+
+/* A tiny true-to-scale area map: campus at centre, room at its real offset,
+   a walking line between them, and a 500 m ring for scale. */
+function miniMap(r){
+  var W=100,H=75,cx=W*0.5,cy=H*0.52;
+  var dist=Math.sqrt(r.dx*r.dx+r.dy*r.dy);
+  var k=(Math.min(W,H)*0.30)/Math.max(dist,0.7);
+  var rx=cx+r.dx*k, ry=cy-r.dy*k;
+  var ring=0.5*k;
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+r.t+
+   ', about '+dist.toFixed(1)+' km from '+r.c+'">'+
+   '<defs><radialGradient id="g'+r.id+'" cx="50%" cy="52%" r="60%">'+
+   '<stop offset="0" stop-color="#172A36"/><stop offset="1" stop-color="#0B161E"/>'+
+   '</radialGradient></defs>'+
+   '<rect width="'+W+'" height="'+H+'" fill="url(#g'+r.id+')"/>'+
+   '<g stroke="#3C6076" stroke-width="0.35" opacity=".55">'+
+     '<path d="M0 '+(H*0.28)+'H'+W+'M0 '+(H*0.76)+'H'+W+'M'+(W*0.25)+' 0V'+H+'M'+(W*0.75)+' 0V'+H+'"/>'+
+   '</g>'+
+   (function(){var s='';for(var b=0;b<18;b++){
+     var h=(((r.id+1)*2654435761)^(b*40503))>>>0;
+     var bx=3+(h%88), by=6+((h>>8)%58), bw=3+((h>>16)%8), bh=2+((h>>20)%5);
+     s+='<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="#22394A" opacity=".6"/>';
+   } return s;})()+
+   '<circle cx="'+cx+'" cy="'+cy+'" r="'+ring.toFixed(2)+'" fill="none" stroke="#C9A961" '+
+     'stroke-width="0.35" stroke-dasharray="1.6 1.6" opacity=".7"/>'+
+   '<line x1="'+cx+'" y1="'+cy+'" x2="'+rx.toFixed(2)+'" y2="'+ry.toFixed(2)+
+     '" stroke="#FFFDF8" stroke-width="0.45" stroke-dasharray="1.4 1.4" opacity=".72"/>'+
+   '<circle cx="'+cx+'" cy="'+cy+'" r="2.2" fill="none" stroke="#C9A961" stroke-width="0.7"/>'+
+   '<circle cx="'+cx+'" cy="'+cy+'" r="0.9" fill="#C9A961"/>'+
+   '<circle cx="'+rx.toFixed(2)+'" cy="'+ry.toFixed(2)+'" r="1.6" fill="#FFFDF8"/>'+
+   '<text x="4" y="7.5" fill="#8FB6CE" font-family="Geist,system-ui,sans-serif" '+
+     'font-size="3.4" letter-spacing="0.5" opacity=".85">'+r.c.toUpperCase()+'</text>'+
+   '<text x="4" y="'+(H-4)+'" fill="#C9A961" font-family="Geist,system-ui,sans-serif" '+
+     'font-size="3.4" letter-spacing="0.5">'+dist.toFixed(1)+' KM TO CAMPUS</text>'+
+   '<text x="'+(W-4)+'" y="'+(H-4)+'" text-anchor="end" fill="#3C6076" '+
+     'font-family="Geist,system-ui,sans-serif" font-size="3">500 M</text>'+
+   '</svg>';
+}
+
+var setCampusFilter=null;
+var grid=document.querySelector('[data-grid]');
+var countOut=document.querySelector('[data-count-out]');
+var emptyMsg=document.querySelector('[data-empty]');
+var cards=[];
+ROOMS.forEach(function(r,i){ r.id=i; });
+
+if(grid){
+  ROOMS.forEach(function(r,i){
+    var li=document.createElement('li');
+    li.className='card rv'; li.setAttribute('data-rv','');
+    li.setAttribute('data-campus',r.c); li.setAttribute('data-price',r.p); li.setAttribute('data-lease',r.l);
+    li.innerHTML='<a href="#"><div class="card__m">'+miniMap(r)+'</div>'+
+      '<div class="card__h"><span class="card__n num">'+(i<9?'0':'')+(i+1)+'</span>'+
+      '<span class="tag" data-t="'+(r.g==='available'?'now':'fast')+'">'+
+      (r.g==='available'?'Available now':'Confirm status')+'</span></div>'+
+      '<p class="card__a">'+r.d+' \u00B7 '+r.w+' min to '+r.st+' '+r.sn+'</p>'+
+      '<h3 class="card__t">'+r.t+'</h3>'+
+      '<p class="card__p"><i>'+THB(r.p)+'</i></p>'+
+      '<p class="card__s">'+r.bd+' bed \u00B7 '+r.ba+' bath \u00B7 '+r.sq+' sq m</p>'+
+      '<p class="card__d"><span>floor <b>'+r.fl+'</b></span>'+
+      '<span><b>'+r.km+'</b> km to '+r.c+'</span></p></a>';
+    li.setAttribute('data-img', r.img);
+    grid.appendChild(li); cards.push(li);
+  });
+
+  var state={campus:'all',budget:'all'};
+  var campuses=[]; ROOMS.forEach(function(r){ if(campuses.indexOf(r.c)<0) campuses.push(r.c); });
+  campuses.sort();
+  var cWrap=document.querySelector('[data-f="campus"]');
+  ['all'].concat(campuses).forEach(function(c){
+    var b=document.createElement('button');
+    b.type='button'; b.className='fbtn'; b.setAttribute('data-v',c);
+    b.setAttribute('aria-pressed', c==='all'?'true':'false');
+    b.textContent = c==='all' ? 'All campuses' : c;
+    cWrap.appendChild(b);
+  });
+
+  function inBudget(p){ return state.budget==='all' ||
+    (state.budget==='lo'&&p<20000) || (state.budget==='mid'&&p>=20000&&p<30000) ||
+    (state.budget==='hi'&&p>=30000); }
+
+  function apply(){
+    var shown=0, lo=Infinity, hi=0;
+    cards.forEach(function(li){
+      var r=ROOMS[+li.querySelector('.card__n').textContent-1];
+      var ok=(state.campus==='all'||r.c===state.campus) && inBudget(r.p);
+      li.classList.toggle('card--hide',!ok);
+      if(ok){ shown++; lo=Math.min(lo,r.p); hi=Math.max(hi,r.p); }
+    });
+    countOut.innerHTML = shown
+      ? '<b>'+shown+'</b> room'+(shown===1?'':'s')+' \u00B7 '+(lo===hi?THB(lo):THB(lo)+'\u2013'+THB(hi))
+      : '<b>0</b> rooms';
+    if(emptyMsg) emptyMsg.hidden = shown>0;
+    stagger();                      // re-index the visible rows so the stagger stays per-row
+  }
+
+  setCampusFilter=function(c){
+    state.campus=c;
+    document.querySelectorAll('[data-f="campus"] .fbtn').forEach(function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-v')===c ? 'true':'false'); });
+    apply();
+  };
+
+  document.querySelectorAll('.tools [data-f]').forEach(function(wrap){
+    var key=wrap.getAttribute('data-f');
+    wrap.addEventListener('click',function(e){
+      var b=e.target.closest('.fbtn'); if(!b) return;
+      state[key]=b.getAttribute('data-v');
+      wrap.querySelectorAll('.fbtn').forEach(function(x){
+        x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
+      apply();
+    });
+  });
+  apply();
+}
+
+/* ---------- marquee ---------- */
+var mq=document.querySelector('[data-mq]');
+if(mq){ var names=ORIGINS.map(function(o){return o.n;});
+  var html=names.concat(names).map(function(n){return '<span>'+n+'</span>';}).join('');
+  mq.innerHTML=html; }
+
+/* ---------- campus list ----------
+   Rows are built from data: distance and nearest station are computed, and the
+   room count is read from ROOMS, so the two sections can never disagree. */
+var uniList=document.querySelector('[data-uni-list]');
+if(uniList){
+  var roomsPer={};
+  ROOMS.forEach(function(r){ roomsPer[r.c]=(roomsPer[r.c]||0)+1; });
+
+  UNIS.forEach(function(u,i){
+    var km=kmBetween(u.lat,u.lon,13.7500,100.5500);
+    var st=nearestStation(u);
+    var n=roomsPer[u.n]||0;
+    var li=document.createElement('li');
+    li.className='rv'; li.setAttribute('data-rv',''); li.setAttribute('data-uni',i);
+    li.style.setProperty('--i', String(2+Math.floor(i/2)));
+    if(n){ li.setAttribute('role','button'); li.setAttribute('tabindex','0');
+           li.title='Show the '+n+' room'+(n===1?'':'s')+' near '+u.n; }
+    li.innerHTML='<span class="uni__l"><b>'+u.n+'</b>'+
+      '<span class="uni__meta"><i class="uni__pip" style="background:'+st.c+'"></i>'+
+      st.name+' \u00B7 '+st.km.toFixed(1)+' km \u00B7 '+u.d+'</span></span>'+
+      '<span class="uni__r"><span class="uni__km">'+Math.round(km)+' KM</span>'+
+      '<span class="uni__n">'+(n? n+' room'+(n===1?'':'s') : 'None yet')+'</span></span>';
+    uniList.appendChild(li);
+  });
+
+  var sum=document.querySelector('[data-campus-sum]');
+  if(sum){
+    var stations=LINES.reduce(function(a,L){ return a+L.s.length; },0);
+    sum.innerHTML='<b>'+UNIS.length+'</b> campuses \u00B7 <b>'+ROOMS.length+'</b> rooms \u00B7 '+
+                  '<b>'+LINES.length+'</b> transit lines \u00B7 '+stations+' stations plotted';
+  }
+  var leg=document.querySelector('[data-legend]');
+  if(leg){ leg.innerHTML=LINES.map(function(L){
+    return '<span><i style="background:'+L.c+'"></i>'+L.n+'</span>'; }).join('')+
+    '<span><i style="background:#C9A961"></i>Campus</span>'; }
+
+  function setActive(i){
+    active=i;
+    uniList.querySelectorAll('[data-uni]').forEach(function(x){
+      x.setAttribute('data-on', (+x.getAttribute('data-uni'))===i ? 'true':'false'); });
+    cdraw(cityT);
+  }
+  uniList.addEventListener('mouseover',function(e){
+    var li=e.target.closest('[data-uni]'); if(li) setActive(+li.getAttribute('data-uni'));
+  });
+  uniList.addEventListener('mouseleave',function(){ setActive(-1); });
+  uniList.addEventListener('focusin',function(e){
+    var li=e.target.closest('[data-uni]'); if(li) setActive(+li.getAttribute('data-uni'));
+  });
+  function jump(li){
+    var u=UNIS[+li.getAttribute('data-uni')];
+    if(!roomsPer[u.n] || !setCampusFilter) return;
+    setCampusFilter(u.n);
+    document.getElementById('rooms').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  uniList.addEventListener('click',function(e){
+    var li=e.target.closest('[data-uni]'); if(li) jump(li);
+  });
+  uniList.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ') return;
+    var li=e.target.closest('[data-uni]'); if(!li) return;
+    e.preventDefault(); jump(li);
+  });
+}
+
+/* ---------- reveals ---------- */
+var rvs=[].slice.call(document.querySelectorAll('[data-rv]'));
+function stagger(){
+  if(!rvs) return;               // rooms render before rvs is collected; the later call covers it
+  var rows=new Map();
+  rvs.forEach(function(e){
+    if(e.classList.contains('card--hide')) return;      // hidden cards must not hold a slot
+    var k=Math.round(e.offsetTop);
+    if(!rows.has(k)) rows.set(k,[]); rows.get(k).push(e); });
+  rows.forEach(function(row){ row.forEach(function(e,i){
+    if(!e.style.getPropertyValue('--i')) e.style.setProperty('--i',i); }); });
+}
+stagger();
+if(reduce.matches){ rvs.forEach(function(e){e.classList.add('in');}); }
+else{
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){
+    e.target.classList.toggle('in', e.isIntersecting); }); },
+    {threshold:.15, rootMargin:'0px 0px -8% 0px'});
+  rvs.forEach(function(e){ io.observe(e); });
+}
+
+/* ---------- process ---------- */
+var proc=document.querySelector('[data-proc]');
+var steps=[].slice.call(document.querySelectorAll('[data-step]'));
+var stns=[].slice.call(document.querySelectorAll('[data-stn]'));
+var panes=[].slice.call(document.querySelectorAll('[data-pane]'));
+var fill=document.querySelector('[data-fill]');
+var lastStep=-1, small=matchMedia('(max-width: 900px)');
+function procRender(){
+  if(!proc) return;
+  if(reduce.matches||small.matches){
+    if(lastStep!==-2){ steps.forEach(function(s){s.setAttribute('data-on','true');});
+      panes.forEach(function(s){s.setAttribute('data-on','true');});
+      stns.forEach(function(s){s.setAttribute('data-s','done');});
+      if(fill) fill.style.width='100%'; lastStep=-2; }
+    return;
+  }
+  var r=proc.getBoundingClientRect(), sc=proc.offsetHeight-innerHeight;
+  if(sc<=0) return;
+  var p=clamp(-r.top/sc,0,1), n=steps.length;
+  var i=Math.min(n-1,Math.floor(clamp((p-0.08)/0.82,0,1)*n));
+  if(i===lastStep) return; lastStep=i;
+  steps.forEach(function(s,k){ s.setAttribute('data-on', k===i?'true':'false'); });
+  panes.forEach(function(s,k){ s.setAttribute('data-on', k===i?'true':'false'); });
+  var pg=document.querySelector('[data-proc-ghost]');
+  if(pg) pg.textContent='0'+(i+1);
+  stns.forEach(function(s,k){ s.setAttribute('data-s', k<i?'done':(k===i?'active':'ahead')); });
+  if(fill) fill.style.width=(i/(n-1))*100+'%';
+}
+
+/* ---------- nav ---------- */
+var nav=document.querySelector('[data-nav]'), lastY=0;
+function navRender(){
+  var y=scrollY;
+  nav.setAttribute('data-solid', y>60?'true':'false');
+  nav.setAttribute('data-hidden', (y>320 && y>lastY)?'true':'false');
+  lastY=y;
+}
+
+/* ---------- hero scroll ---------- */
+var hero=document.querySelector('[data-hero]'), map=document.querySelector('[data-map]');
+var content=document.querySelector('[data-content]');
+function heroRender(){
+  if(reduce.matches) return;
+  var h=hero.offsetHeight||innerHeight, p=clamp(scrollY/h,0,1);
+  map.style.setProperty('--mscale',(1+p*0.10).toFixed(4));
+  map.style.setProperty('--my',(-p*40).toFixed(1)+'px');
+  content.style.setProperty('--cfade',clamp(1-p*1.35,0,1).toFixed(3));
+}
+
+/* ---------- city map reveal ----------
+   Driven by scroll position rather than an IntersectionObserver flag. An
+   observer that fires late \u2014 or not at all \u2014 leaves this canvas blank, and an
+   empty box is a worse failure than a map that is simply already drawn. */
+var cityT=0, cityDrawn=-1;
+function cityProgress(){
+  if(!cc) return 0;
+  var r=cc.getBoundingClientRect();
+  if(r.bottom<0 || r.top>innerHeight) return cityT;      // hold the last state off-screen
+  return clamp((innerHeight*0.92 - r.top)/(innerHeight*0.55), 0, 1);
+}
+
+/* ---------- run ---------- */
+var DUR=3800, t0=null;
+function frame(ts){
+  if(t0===null) t0=ts;
+  var el=ts-t0, t=Math.min(1,el/DUR);
+  wdraw(t, t>=1?el:undefined);
+  if(cc){ cityT=cityProgress();
+          if(Math.abs(cityT-cityDrawn)>0.004){ cdraw(cityT); cityDrawn=cityT; } }
+  requestAnimationFrame(frame);
+}
+function begin(){
+  document.body.classList.add('is-ready');
+  document.querySelector('.hero').classList.add('is-ready');
+  if(reduce.matches){ wdraw(1); cityT=1; cityDrawn=1; if(cc) cdraw(1); return; }
+  requestAnimationFrame(frame);
+}
+if(wc){ wsetup(); wdraw(0); }
+if(cc){ csetup(); cdraw(0); }
+Promise.race([
+  (document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve(),
+  new Promise(function(r){setTimeout(r,1200);})
+]).then(begin);
+
+var ghosts=[].slice.call(document.querySelectorAll('[data-gh]'));
+var prog=document.querySelector('[data-prog]');
+function ghostRender(){
+  ghosts.forEach(function(g){
+    var r=g.parentElement.getBoundingClientRect();
+    if(r.bottom<0||r.top>innerHeight) return;
+    var f=parseFloat(g.getAttribute('data-gh'))||-0.08;
+    g.style.setProperty('--gy',(r.top*f).toFixed(1)+'px');
+  });
+  if(prog){
+    var d=document.documentElement;
+    prog.style.width=(scrollY/Math.max(1,d.scrollHeight-innerHeight)*100).toFixed(2)+'%';
+  }
+}
+var tick=false;
+addEventListener('scroll',function(){
+  if(tick) return; tick=true;
+  requestAnimationFrame(function(){ heroRender(); procRender(); navRender(); ghostRender(); tick=false; });
+},{passive:true});
+addEventListener('resize',function(){
+  if(wc) wsetup(); if(cc) csetup(); stagger(); lastStep=-1; cityDrawn=-1;
+  heroRender(); procRender();
+},{passive:true});
+heroRender(); procRender(); navRender(); ghostRender();
+
+/* ---------- requirements form ----------
+   No backend here, so the form composes a WhatsApp message from the fields.
+   Until a real number is set below it shows the composed text instead of opening
+   a wa.me link, so it can never send anyone to a number that does not exist. */
+var WHATSAPP='66634962466';      // from remarcable-site (wa.me/66634962466)
+var form=document.querySelector('[data-form]');
+if(form){
+  form.addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var f=form.elements, bad=null;
+    form.querySelectorAll('.err').forEach(function(e){ e.remove(); });
+    ['name','contact'].forEach(function(k){
+      var el=f[k];
+      if(!el.value.trim()){
+        var s=document.createElement('span');
+        s.className='err'; s.textContent='Please add this so Mark can reply.';
+        el.parentNode.appendChild(s);
+        if(!bad) bad=el;
+      }
+    });
+    if(bad){ bad.focus(); return; }
+
+    var msg='Hi Mark - room enquiry from your site.\n\n'+
+      'Name: '+f.name.value.trim()+'\n'+
+      'Contact: '+f.contact.value.trim()+'\n'+
+      'University: '+f.uni.value+'\n'+
+      'Move-in: '+f.month.value+'\n'+
+      'Budget: '+f.budget.value+'\n'+
+      'Lease: '+f.lease.value+
+      (f.notes.value.trim() ? '\nEssential: '+f.notes.value.trim() : '');
+
+    if(WHATSAPP){
+      window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg),'_blank','noopener');
+      return;
+    }
+    var box=form.querySelector('.sent');
+    if(!box){ box=document.createElement('div'); box.className='sent'; form.appendChild(box); }
+    box.innerHTML='<p>WhatsApp number not set yet - here is your message, ready to paste:</p><pre></pre>';
+    box.querySelector('pre').textContent=msg;
+  });
+}
+
+
+})();
+</script>
+</body></html>
