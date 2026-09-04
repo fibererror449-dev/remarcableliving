@@ -14,6 +14,31 @@ Verified running: mounts cleanly, paints ~14% of the canvas, honours
 `prefers-reduced-motion` by showing the final composed frame instead of a blank
 box.
 
+## When it starts
+
+It runs 3.8s once started. If the section sits below the fold and it started on
+mount, it would finish before anyone scrolled to it — so it **starts on first
+view**, via `IntersectionObserver`.
+
+The fallback is a health check on the observer, not a timer on the visitor. An
+`IntersectionObserver` always delivers one callback on `observe()`; if none
+arrives within 1.5s the observer is broken and the animation starts blind rather
+than leaving a permanently empty canvas. A visitor who has simply not scrolled
+yet is left alone.
+
+Frame 0 is genuinely empty — the landmass fades in from t=0 — so the canvas is
+blank until it starts. That is fine off-screen, and the health check is what
+guarantees it cannot stay that way.
+
+```tsx
+mountArcs(el, {
+  durationMs: 3800,        // full convergence
+  startOnView: false,      // start on mount instead
+  viewThreshold: 0.25,     // fraction visible before starting
+  observerHealthMs: 1500,  // how long to wait for the observer's first callback
+});
+```
+
 ## Use it in the site
 
 ```tsx

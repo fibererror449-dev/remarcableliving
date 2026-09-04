@@ -264,17 +264,55 @@ export function mountArcs(canvasEl, options) {
   buildLand();
   addEventListener("resize", onResize);
 
-  if (reduce.matches) {
-    wdraw(1);                       // final state, never blank
-  } else {
-    wdraw(0);
+  // Frame 0 is genuinely empty — the landmass fades in from t=0 — so there is
+  // nothing useful to paint before the animation starts. That is fine while the
+  // section is off-screen, and the observer health-check below guarantees it
+  // cannot stay empty if the observer is broken.
+  wdraw(0);
+
+  var io = null, healthTimer = 0, started = false, observerAlive = false;
+  function start() {
+    if (started || dead) return;
+    started = true;
+    if (io) { io.disconnect(); io = null; }
+    clearTimeout(healthTimer);
+    t0 = null;                            // clock starts at first view, not at mount
     raf = requestAnimationFrame(frame);
+  }
+
+  if (reduce.matches) {
+    wdraw(1);                             // final composed state, no motion
+  } else if (opts.startOnView === false || typeof IntersectionObserver === "undefined") {
+    start();
+  } else {
+    // This runs for 3.8s from the moment it starts. If the section sits below
+    // the fold and it starts on mount, it finishes before anyone scrolls to it
+    // and they only ever see a static map. So: start on first view.
+    io = new IntersectionObserver(function (entries) {
+      observerAlive = true;               // it fires once on observe, even off-screen
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) { start(); return; }
+      }
+    }, { threshold: opts.viewThreshold || 0.25 });
+    io.observe(canvasEl);
+
+    // Health check, not a timeout on the visitor. An IntersectionObserver always
+    // delivers an initial callback; if none has arrived, the observer is broken
+    // (it can fire before layout settles and never fire again) and would leave
+    // this canvas permanently empty. Only that case starts it blind. A visitor
+    // who simply has not scrolled yet is left alone — an unwatched animation is
+    // a far smaller failure than a dead one, but so is a late one.
+    healthTimer = setTimeout(function () {
+      if (!observerAlive) start();
+    }, opts.observerHealthMs || 1500);
   }
 
   return {
     destroy: function () {
       dead = true;
       cancelAnimationFrame(raf);
+      clearTimeout(healthTimer);
+      if (io) { io.disconnect(); io = null; }
       removeEventListener("resize", onResize);
     },
   };
