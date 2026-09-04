@@ -52,3 +52,7 @@ yarn-error.log*
 # platform config: carries the Sites project id. Required by vite.config.ts,
 # so a fresh clone cannot build without it being supplied separately.
 /.openai/
+
+# build artefacts, committed by accident in 0ad5f9b
+/server.log
+/tsconfig.tsbuildinfo
