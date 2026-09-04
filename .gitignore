@@ -38,3 +38,13 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# internal working documents — must not reach this public repository.
+# CODEX-AUDIT-BRIEF.md contains work-status/legal analysis, a personal phone
+# number, listing-provenance findings and local filesystem paths.
+/AGENTS.md
+/CODEX-AUDIT-BRIEF.md
+
+# platform config: carries the Sites project id. Required by vite.config.ts,
+# so a fresh clone cannot build without it being supplied separately.
+/.openai/
