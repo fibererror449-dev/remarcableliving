@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import ListingCard from "../components/ListingCard";
 import { AREA_ALL, toResidencesHref, type PublicListing } from "../../lib/listings-data";
@@ -40,11 +39,11 @@ export default function NeighbourhoodsClient({ listings }: { listings: PublicLis
               <p className="eyebrow dark"><span /> {location === AREA_ALL ? "Every area" : location}</p>
               <h2 className="h3">{selected.length} {selected.length === 1 ? "residence" : "residences"} {location === AREA_ALL ? "in the collection" : `in ${location}`}</h2>
             </div>
-            <Link className="text-link" href={toResidencesHref({ area: location })}>Open with filters →</Link>
+            <a className="text-link" href={toResidencesHref({ area: location })}>Open with filters →</a>
           </div>
           {selected.length
             ? <div className="property-grid">{selected.map((listing, index) => <ListingCard key={listing.slug} listing={listing} index={index} />)}</div>
-            : <div className="empty-state"><h3 className="h3">No residence listed here yet.</h3><p>Ask Mark to search {location} beyond the sample collection.</p><Link className="btn" href="/contact">Send your brief</Link></div>}
+            : <div className="empty-state"><h3 className="h3">No residence listed here yet.</h3><p>Ask Mark to search {location} beyond the sample collection.</p><a className="btn" href="/contact">Send your brief</a></div>}
         </div>
       </div>
     </section>

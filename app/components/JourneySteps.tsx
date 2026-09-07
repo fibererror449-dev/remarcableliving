@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { journeySteps } from "../../lib/site-data";
 
 export default function JourneySteps() {
@@ -14,7 +13,7 @@ export default function JourneySteps() {
             <article key={step.title}><b>{String(index + 1).padStart(2, "0")}</b><h3 className="h3">{step.title}</h3><p>{step.note}</p></article>
           ))}
         </div>
-        <Link className="journey-cta" href="/contact">Tell Mark what you need <span>→</span></Link>
+        <a className="journey-cta" href="/contact">Tell Mark what you need <span>→</span></a>
       </div>
     </section>
   );

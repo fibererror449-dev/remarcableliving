@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import IntakeForm from "../components/IntakeForm";
 import SiteFooter from "../components/SiteFooter";
@@ -40,8 +39,8 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
               <div><b>3</b><span>Availability and asking rent are confirmed before a viewing.</span></div>
             </div>
             <div className="concierge-links">
-              <Link className="text-link" href="/residences">See the current collection →</Link>
-              <Link className="text-link" href="/approach">How the search works →</Link>
+              <a className="text-link" href="/residences">See the current collection →</a>
+              <a className="text-link" href="/approach">How the search works →</a>
             </div>
           </div>
           <IntakeForm initialPersona={persona} listingName={listing} />

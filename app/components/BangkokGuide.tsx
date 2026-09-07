@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { guideNotes } from "../../lib/site-data";
 
 export default function BangkokGuide() {
@@ -11,10 +10,10 @@ export default function BangkokGuide() {
         </div>
         <div className="before-sign-list">
           {guideNotes.map((item) => (
-            <Link key={item.href} href={item.href}>
+            <a key={item.href} href={item.href}>
               <span><strong>{item.title}</strong><span className="meta">{item.note}</span></span>
               <span className="text-link">{item.cta} →</span>
-            </Link>
+            </a>
           ))}
         </div>
       </div>
