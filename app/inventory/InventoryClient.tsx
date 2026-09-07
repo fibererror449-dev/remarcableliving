@@ -112,7 +112,7 @@ export default function InventoryClient({ units }: { units: ImportedInventoryUni
         </div>
       </section>
 
-      <SiteFooter homeHref="/" />
+      <SiteFooter />
     </main>
   );
 }

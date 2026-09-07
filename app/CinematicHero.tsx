@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import "./cinematic-hero.css";
+import Link from "next/link";
 import ListingImage from "./ListingImage";
+import { studentHousingHref } from "../lib/site-data";
 
 type Listing = { id: number; slug: string; name: string; district: string; rent: number; image: string; bedrooms: number; sizeSqm: number };
 const areas = [
@@ -20,7 +22,6 @@ const scenes = [
 const clamp = (n: number) => Math.min(1, Math.max(0, n));
 const smooth = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
 const ramp = (p: number, a: number, b: number) => smooth((p - a) / (b - a));
-const universityUrl = "https://www.remarcableliving.co/student-housing";
 
 export default function CinematicHero({ listings, onExploreArea, children }: { listings: Listing[]; onExploreArea: (area: string) => void; children: ReactNode }) {
   const section = useRef<HTMLElement>(null);
@@ -209,12 +210,12 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           <button className="cinema-menu" aria-expanded={menuOpen} aria-controls="cinema-links" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close" : "Menu"}</button>
           <nav id="cinema-links" className={menuOpen ? "is-open" : ""} aria-label="Primary navigation">
             <a href="#residences" onClick={() => setMenuOpen(false)}>Residences</a>
-            <a href={universityUrl}>Find by university</a>
-            <a href="#neighbourhoods" onClick={() => setMenuOpen(false)}>Neighbourhoods</a>
-            <a href="#approach" onClick={() => setMenuOpen(false)}>Our approach</a>
-            <a href="#journal" onClick={() => setMenuOpen(false)}>Bangkok guide</a>
+            <a href={studentHousingHref}>Find by university</a>
+            <a href="/neighbourhoods">Neighbourhoods</a>
+            <a href="/approach">Our approach</a>
+            <a href="/neighbourhoods#guide">Bangkok guide</a>
           </nav>
-          <a className="cinema-contact" href="#assist">Talk to Mark</a>
+          <a className="cinema-contact" href="/contact">Talk to Mark</a>
         </header>
 
         <div ref={copy} className={`cinema-copy ${room > 0 ? "is-room" : ""}`} inert={!showCopy}>
@@ -223,7 +224,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           {room === 0 && <p className="cinema-intro">A home search for exchange students and interns.<br />From your first shortlist to your first morning here.</p>}
           {room === 4 && <p className="cinema-ending">New streets. Familiar comforts. A life that feels like yours.<br /><span>Keep scrolling to find a home that fits your life—and your budget.</span></p>}
           {room === 0 && <div className="cinema-actions">
-            <a className="cinema-primary" href={universityUrl}>Find by university</a>
+            <a className="cinema-primary" href={studentHousingHref}>Find by university</a>
             <a className="cinema-secondary" href="#residences">Explore residences</a>
           </div>}
         </div>
@@ -250,7 +251,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           </div>
           <div className={`screen-panel panel-selected ${phase === 3 ? "is-active" : ""}`} inert={phase !== 3}>
             <ListingImage src={featured?.image ?? "/bangkok/green-condo.jpg"} alt={featured?.name ?? "Bangkok residence"} />
-            <div><p className="screen-kicker">A home to consider</p><h2>{featured?.name}</h2><p>{featured?.district} · ฿{featured?.rent.toLocaleString()} / month</p><a href={`/residences/${featured?.slug ?? ""}`}>View residence details</a><p className="screen-footnote">Next: imagine life at home.<br />The following rooms are AI-created inspiration,<br />not photographs of this listing.</p></div>
+            <div><p className="screen-kicker">A home to consider</p><h2>{featured?.name}</h2><p>{featured?.district} · ฿{featured?.rent.toLocaleString()} / month</p>{featured ? <a href={`/residences/${featured.slug}`}>View residence details</a> : <Link href="/residences">Browse residences</Link>}<p className="screen-footnote">Next: imagine life at home.<br />The following rooms are AI-created inspiration,<br />not photographs of this listing.</p></div>
           </div>
         </div>
 

@@ -101,7 +101,7 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
       ? <>Eleven views across the living area, kitchen, bedroom, and bathroom.<small>Decorative colours and selected styling details are digitally visualised. Confirm the unit’s current furnishings and condition during the viewing.</small></>
       : "Fifteen owner-supplied views, kept in the supplied sequence across the kitchen, living areas, bedrooms, and bathrooms.";
   return <main className="detail-page">
-    <SiteNav />
+    <SiteNav current="residences" />
     <header className="detail-hero">
       <div className="detail-hero-image">
         <ListingImage src={heroImage} alt={`Interior of ${listing.name} near ${listing.stationName}`} />
@@ -187,6 +187,6 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
       </div>
     </section>}
 
-    <SiteFooter homeHref="/" />
+    <SiteFooter />
   </main>;
 }
