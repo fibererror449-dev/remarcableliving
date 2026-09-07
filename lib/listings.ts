@@ -38,5 +38,5 @@ export async function listListings(includeClosed = false): Promise<Listing[]> {
 }
 
 export async function getListing(slug: string): Promise<Listing | null> {
-  try { await ensureListings(); const db = await getDb(); const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>(); return row ? mapRow(row) : null; } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
+  try { await ensureListings(); const db = await getDb(); const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>(); return row ? mapRow(row) : (fallbackListings.find((listing) => listing.slug === slug) ?? null); } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
 }

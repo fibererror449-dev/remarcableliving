@@ -50,7 +50,7 @@ test("fans the homepage sections out to their own routes", async () => {
   // Every listing is serialised for hydration, so assert on rendered cards.
   assert.match(filtered, /<h3>Centric Ari Station/);
   assert.doesNotMatch(filtered, /<h3>Thru Thonglor/);
-  assert.match(filtered, /<h3>Centurion Park/ ? /Homes in/ : /Homes in/);
+  assert.match(filtered, /Homes in/);
 
   const neighbourhoodsResponse = await render("/neighbourhoods");
   assert.equal(neighbourhoodsResponse.status, 200);
@@ -200,4 +200,20 @@ test("keeps the adapted design safeguards for keyboard focus and reduced motion"
   assert.match(css, /\.concierge label:focus-within/);
   assert.match(css, /@media\(hover:hover\)/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+});
+
+test("renders residence media only when the file exists in public/", async () => {
+  const { collectMedia } = await import("../scripts/generate-media-manifest.mjs");
+  const manifest = await readFile(new URL("../lib/media-manifest.generated.ts", import.meta.url), "utf8");
+  for (const file of collectMedia()) assert.match(manifest, new RegExp(JSON.stringify(file).replaceAll(".", "\\.")), `${file} missing from the committed manifest`);
+  assert.equal((manifest.match(/^ {2}"/gm) ?? []).length, collectMedia().length, "manifest lists files that no longer exist");
+
+  const baanKlang = await (await render("/residences/baan-klang-krung-siam-2br")).text();
+  assert.doesNotMatch(baanKlang, /src="\/properties\/baan-klang-krung-siam\/gallery\//);
+  assert.match(baanKlang, /baan-klang-krung-siam-walkthrough-v2\.mp4/);
+  assert.match(baanKlang, /photographs for this home are being updated/);
+
+  const centurionResponse = await render("/residences/centurion-park-ari-soi-5-1br");
+  assert.equal(centurionResponse.status, 200);
+  assert.match(await centurionResponse.text(), /\/properties\/centurion-park-ari\.jpg/);
 });

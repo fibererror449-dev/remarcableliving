@@ -5,6 +5,7 @@ import SiteFooter from "../../components/SiteFooter";
 import type { Metadata } from "next";
 import { getListingStory } from "../../../lib/listing-stories";
 import { getListing } from "../../../lib/listings";
+import { hasMedia } from "../../../lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const listing = await getListing(slug);
   if (!listing) return {};
   const detailHero = slug === baanKlangSlug ? baanKlangHero : slug === ashtonSlug ? ashtonHero : slug === centricAriSlug ? centricAriHero : listing.image;
-  const image = new URL(detailHero, siteOrigin).toString();
+  const image = new URL(hasMedia(detailHero) ? detailHero : listing.image, siteOrigin).toString();
   const title = `${listing.name} · ฿${listing.rent.toLocaleString()}/month | REMARCABLE LIVING`;
   const description = `${listing.bedrooms} bedroom, ${listing.bathrooms} bathroom condominium in ${listing.district}, Bangkok. ${listing.sizeSqm} sq m near ${listing.stationType} ${listing.stationName}.`;
   const canonical = `${siteOrigin}/residences/${slug}`;
@@ -83,23 +84,32 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
   const listing = await getListing(slug);
   if (!listing) notFound();
   const story = getListingStory(slug);
-  const listingVideo = slug === baanKlangSlug
+  // Media is only rendered when the file exists in public/ (lib/media-manifest.generated.ts),
+  // so a gallery that was never committed shows a short note instead of rows of 404 tiles.
+  const supplementaryVideo = slug === baanKlangSlug
     ? "/properties/baan-klang-krung-siam-walkthrough-v2.mp4"
     : slug === centricAriSlug
       ? "/properties/centric-ari-station/cinematic-walkthrough.mp4"
       : null;
-  const gallery = slug === baanKlangSlug ? baanKlangGallery : slug === ashtonSlug ? ashtonGallery : slug === centricAriSlug ? centricAriGallery : [];
-  const heroImage = slug === baanKlangSlug ? baanKlangHero : slug === ashtonSlug ? ashtonHero : slug === centricAriSlug ? centricAriHero : listing.image;
+  const listingVideo = supplementaryVideo && hasMedia(supplementaryVideo) ? supplementaryVideo : null;
+  const captionsTrack = "/properties/baan-klang-krung-siam-walkthrough-v2.vtt";
+  const gallerySource = slug === baanKlangSlug ? baanKlangGallery : slug === ashtonSlug ? ashtonGallery : slug === centricAriSlug ? centricAriGallery : [];
+  const gallery = gallerySource.filter((photo) => hasMedia(photo.src));
+  const missingGalleryCount = gallerySource.length - gallery.length;
+  const detailHero = slug === baanKlangSlug ? baanKlangHero : slug === ashtonSlug ? ashtonHero : slug === centricAriSlug ? centricAriHero : listing.image;
+  const heroImage = hasMedia(detailHero) ? detailHero : listing.image;
   const usesDigitalStyling = slug === centricAriSlug;
   const delta = 0.006;
   const map = `https://www.openstreetmap.org/export/embed.html?bbox=${listing.longitude-delta}%2C${listing.latitude-delta}%2C${listing.longitude+delta}%2C${listing.latitude+delta}&layer=mapnik&marker=${listing.latitude}%2C${listing.longitude}`;
   const whatsapp = `https://wa.me/66634962466?text=${encodeURIComponent(`Hi Mark, I am interested in ${listing.name} at ฿${listing.rent.toLocaleString()}/month.`)}`;
   const statusLabel = listing.status === "available" ? "Available now" : listing.status === "viewing" ? "Viewing in progress" : listing.status === "rented" ? "Rented" : "Availability to confirm";
-  const galleryLede = slug === ashtonSlug
-    ? "Nine owner-supplied views across the panoramic living areas, bedrooms, bathroom suite, and private hallway."
-    : usesDigitalStyling
-      ? <>Eleven views across the living area, kitchen, bedroom, and bathroom.<small>Decorative colours and selected styling details are digitally visualised. Confirm the unit’s current furnishings and condition during the viewing.</small></>
-      : "Fifteen owner-supplied views, kept in the supplied sequence across the kitchen, living areas, bedrooms, and bathrooms.";
+  const galleryLede = missingGalleryCount > 0
+    ? `${gallery.length} of ${gallerySource.length} owner-supplied views are currently available. Ask Mark for the full set.`
+    : slug === ashtonSlug
+      ? "Nine owner-supplied views across the panoramic living areas, bedrooms, bathroom suite, and private hallway."
+      : usesDigitalStyling
+        ? <>Eleven views across the living area, kitchen, bedroom, and bathroom.<small>Decorative colours and selected styling details are digitally visualised. Confirm the unit’s current furnishings and condition during the viewing.</small></>
+        : "Fifteen owner-supplied views, kept in the supplied sequence across the kitchen, living areas, bedrooms, and bathrooms.";
   return <main className="detail-page">
     <SiteNav current="residences" />
     <header className="detail-hero">
@@ -127,12 +137,15 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         </div>
         <video controls playsInline preload="metadata" poster={heroImage} aria-label={`${listing.name} walkthrough`}>
           <source src={listingVideo} type="video/mp4" />
-          {slug === baanKlangSlug && <track kind="captions" src="/properties/baan-klang-krung-siam-walkthrough-v2.vtt" srcLang="en" label="English" default />}
+          {slug === baanKlangSlug && hasMedia(captionsTrack) && <track kind="captions" src={captionsTrack} srcLang="en" label="English" default />}
           Your browser does not support this property video.
         </video>
       </div>
     </section>}
 
+    {gallery.length === 0 && gallerySource.length > 0 && <section className="section residence-gallery-note" aria-label="Gallery status">
+      <div className="container"><p className="notice" role="status">The room-by-room photographs for this home are being updated. Ask Mark for the current set before your viewing.</p></div>
+    </section>}
     {gallery.length > 0 && <section className={`residence-gallery section ${usesDigitalStyling ? "portrait-gallery" : ""}`} aria-labelledby="gallery-title">
       <div className="container">
         <header className="sec-head">
