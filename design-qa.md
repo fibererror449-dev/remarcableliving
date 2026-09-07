@@ -101,3 +101,7 @@ Headless Chrome (puppeteer-core, dev server on 4173), reduced motion on, at 1440
 - `/student-housing?university=Mahidol%20University`: the university card is marked current and the select is prefilled.
 
 Known gap unchanged: Baan Klang and Centric Ari gallery media are still absent from the repo; the media manifest work is the next PR.
+
+## Media manifest — 2026-09-07
+
+`scripts/generate-media-manifest.mjs` (run by `prebuild`/`predev`) writes `lib/media-manifest.generated.ts` from `public/properties` and `public/bangkok`. The residence page and `ListingImage` only request files listed there. Headless Chrome, reduced motion: `/residences/baan-klang-krung-siam-2br` at 1440 renders the walkthrough video, no gallery tiles, one status note, and zero failed requests; `/residences/centric-ari-station-1br` at 390 renders one fallback hero tile, the note, and zero failed requests. `getListing` now also serves a curated listing when D1 is bound but has no row.
