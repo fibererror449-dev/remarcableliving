@@ -56,3 +56,30 @@ Scope: the local cinematic hero's half-filled screen, zoom sizing, room-transiti
 - [x] Search/filter and motion-toggle checks.
 - [x] Build, regression suite, and targeted lint.
 - [x] Keep changes local; no commit, push, or deployment.
+
+# Layout below the hero — 2026-09-07
+
+final result: passed
+
+Scope: PR #2 implements the approved layout canvas for the homepage below the hero, the residence detail page, and the inventory page. The cinematic hero and its handoff are untouched. Admin is out of scope.
+
+## Evidence
+
+- Approved canvas: https://claude.ai/code/artifact/654dcf89-30f5-42dc-840a-a0107b6a4ac4
+- `design/qa/layout/home-1440.png`, `home-390.png`: full homepage, reduced-motion mode so the collection sits in flow.
+- `design/qa/layout/handoff-1440.png`: motion mode, story scrolled to progress 1.000; destination transform `none`, collection top equals stage top, so the hero still releases into the live collection.
+- `design/qa/layout/res-1440.png`, `res-390.png`: Baan Klang Krung Siam detail. Its gallery media is absent from the repo, so every tile shows the honest fallback rather than a broken image.
+- `design/qa/layout/inv-1440.png`, `inv-390.png`: inventory with 742 units.
+
+## Checks
+
+- Type floor: no `font-size` under 12px in `app/styles/{base,home,residence,inventory,tokens}.css`; computed h1/h2/eyebrow/body at 1440 and 390 read 93.6/100.8/13/17 px on the home and 44/39/13/16 px on mobile. The hero's own chrome keeps its existing sizes.
+- `document.documentElement.scrollWidth` equals the viewport at 1440 and 390 on all three surfaces.
+- No page errors or console errors on any surface.
+- Server-rendered images that 404 before hydration now switch to the fallback on mount (`app/ListingImage.tsx`).
+- `npm run build`, `npm test` (6 pass, 2 pre-existing skips), targeted ESLint on the changed files: 0 new errors. The `media-has-caption` error on the residence video is present on `main` and not part of this change.
+
+## Limits
+
+- Browser checks were headless Chrome captures and DOM measurements, not a manual keyboard traverse; focus rings come from the unchanged safeguard block in `app/globals.css`, which covers every link, button, input, and select.
+- `/residences/ashton-asoke-3br-42f` 404s locally because that listing exists only in D1, not in the fallback data. Unchanged by this PR.

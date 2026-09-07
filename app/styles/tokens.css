@@ -1,0 +1,22 @@
+/* Design tokens for every surface below the hero. Values match the approved
+   layout canvas (2026-09-07). The hero keeps consuming --ink, --paper, --gold,
+   --line, --font-display and --font-body, so those names never change. */
+:root{
+  --ink:#11110f;--ink-2:#171815;--paper:#f3f0e8;--paper-2:#e9e4d9;
+  --gold:#cda96a;--gold-light:#e2c189;--gold-deep:#8d6f3d;
+  --green:#315b45;--amber:#8b652a;--wa:#1d6b48;
+  --muted:#6b665c;--muted-light:rgba(255,255,255,.72);
+  --line:rgba(255,255,255,.22);--line-dark:rgba(17,17,15,.16);
+  --font-display:var(--font-geist-sans,"Geist"),Arial,sans-serif;--font-body:var(--font-geist-sans,"Geist"),Arial,sans-serif;
+
+  --text-label:13px;--text-meta:14px;
+  --text-body:clamp(16px,.95rem + .2vw,17px);
+  --text-lede:clamp(17px,1rem + .5vw,19px);
+  --text-h3:clamp(24px,1.2rem + 1vw,28px);
+  --text-h2:clamp(40px,2rem + 3vw,64px);
+  --text-h1:clamp(48px,2.4rem + 4vw,96px);
+  --tracking-label:.08em;--tracking-display:-.035em;
+
+  --space-section:clamp(72px,9vw,112px);--gutter:clamp(20px,4.5vw,64px);
+  --container:1320px;--control-h:52px;--touch:44px;
+}
