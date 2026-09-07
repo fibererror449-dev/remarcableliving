@@ -1,0 +1,17 @@
+/* Homepage explore strip: four doors to the rest of the site */
+.explore{background:var(--paper-2)}
+.explore-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line-dark);border-left:1px solid var(--line-dark)}
+.explore-tile{display:flex;flex-direction:column;gap:14px;min-height:280px;padding:28px 24px;border-right:1px solid var(--line-dark);border-bottom:1px solid var(--line-dark);background:var(--paper)}
+.explore-tile b{font-size:var(--text-meta);font-weight:600;color:var(--gold-deep)}
+.explore-tile strong{font:500 var(--text-h3)/1.15 var(--font-display);letter-spacing:-.02em}
+.explore-tile>span{font-size:16px;line-height:1.5;color:var(--muted)}
+.explore-tile .text-link{margin-top:auto}
+
+@media(max-width:900px){
+  .explore-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .explore-tile{min-height:220px}
+}
+@media(max-width:620px){
+  .explore-grid{grid-template-columns:1fr}
+  .explore-tile{min-height:0;padding:24px 20px}
+}

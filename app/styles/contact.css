@@ -1,0 +1,33 @@
+/* Intake (/contact and /student-housing) */
+.concierge{position:relative;overflow:hidden;background:#0f110f;color:#fff}
+.concierge-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.22;pointer-events:none}
+.concierge-grid{position:relative;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:80px;align-items:start}
+.concierge-intro{display:flex;flex-direction:column;gap:28px}
+.concierge-intro .lede{max-width:460px}
+.concierge-steps{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:8px}
+.concierge-steps div{display:grid;grid-template-columns:40px 1fr;padding:16px 0;border-bottom:1px solid var(--line);font-size:16px}
+.concierge-steps b{color:var(--gold);font-weight:600}
+.concierge-card{display:flex;flex-direction:column;gap:24px;padding:40px;background:rgba(17,17,15,.82);border:1px solid var(--line)}
+.intake-switcher{display:grid;grid-template-columns:1fr 1fr;border:1px solid rgba(255,255,255,.4)}
+.intake-switcher button{appearance:none;min-height:48px;padding:0 16px;border:0;color:#fff;background:none;font-size:var(--text-meta);font-weight:600;cursor:pointer}
+.intake-switcher button[aria-selected="true"]{background:var(--gold);color:#17130e}
+.concierge-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.concierge-form label{display:flex;flex-direction:column;gap:8px;min-width:0}
+.concierge-form label span{font-size:var(--text-label);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.concierge-form input,.concierge-form select{width:100%;height:var(--control-h);padding:0 16px;border:1px solid rgba(255,255,255,.28);background-color:rgba(255,255,255,.06);color:#fff;font-size:16px}
+.concierge-form select{appearance:none;-webkit-appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+.concierge-form select option{color:var(--ink);background:#fff}
+.concierge-form input::placeholder{color:rgba(255,255,255,.55)}
+.concierge-form input::-webkit-calendar-picker-indicator{filter:invert(1)}
+.concierge-form .btn{grid-column:1/-1;justify-content:space-between}
+.concierge .notice{align-self:flex-start}
+.concierge-links{display:flex;flex-wrap:wrap;gap:12px 28px}
+
+@media(max-width:900px){
+  .concierge-grid{grid-template-columns:1fr;gap:40px}
+  .concierge-card{padding:28px}
+}
+@media(max-width:620px){
+  .concierge-card{padding:24px 20px}
+  .concierge-form{grid-template-columns:1fr;gap:18px}
+}

@@ -1,0 +1,29 @@
+/* Neighbourhood cards (/neighbourhoods) */
+.neighbourhoods{background:var(--paper-2)}
+.neighbourhood-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.neighbourhood-card{position:relative;isolation:isolate;aspect-ratio:16/10;padding:0;overflow:hidden;border:0;background:#222;color:#fff;text-align:left;cursor:pointer;font:inherit}
+.neighbourhood-image,.neighbourhood-shade{position:absolute;inset:0;width:100%;height:100%}
+.neighbourhood-image{z-index:-2;background-position:center;background-size:cover;transition:transform .7s ease}
+.neighbourhood-shade{z-index:-1;background:linear-gradient(0deg,rgba(8,10,9,.88),rgba(8,10,9,.05) 60%)}
+.neighbourhood-index{position:absolute;top:20px;left:24px;font-size:var(--text-meta);font-weight:600}
+.neighbourhood-copy{position:absolute;left:28px;right:28px;bottom:28px;display:grid;gap:10px}
+.neighbourhood-copy small{font-size:var(--text-label);font-weight:600;letter-spacing:var(--tracking-label);text-transform:uppercase;color:rgba(255,255,255,.75)}
+.neighbourhood-copy strong{font:500 32px/1 var(--font-display);letter-spacing:-.02em}
+.neighbourhood-copy>span{font-size:15px;line-height:1.5;color:rgba(255,255,255,.8)}
+.neighbourhood-copy b{display:flex;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,.35);font-size:var(--text-meta);font-weight:600;color:var(--gold-light)}
+.neighbourhood-card.selected .neighbourhood-copy strong{box-shadow:inset 0 -3px 0 var(--gold);padding-bottom:6px;width:max-content}
+.neighbourhood-card.selected .neighbourhood-copy b::after{content:"Selected"}
+
+/* Residences in the selected area, beneath the cards */
+.area-listings{display:flex;flex-direction:column;gap:32px;padding-top:64px;margin-top:64px;border-top:1px solid var(--line-dark)}
+.area-listings-head{display:flex;justify-content:space-between;align-items:end;gap:32px;flex-wrap:wrap}
+.area-listings-head div{display:flex;flex-direction:column;gap:12px}
+.area-listings-head .h3{font-size:var(--text-h2);font-weight:400;letter-spacing:var(--tracking-display);line-height:.98}
+
+@media(max-width:620px){
+  .neighbourhood-grid{grid-template-columns:1fr;gap:16px}
+  .neighbourhood-card{aspect-ratio:4/3}
+  .neighbourhood-copy{left:20px;right:20px;bottom:20px;gap:8px}
+  .neighbourhood-copy strong{font-size:30px}
+  .area-listings{padding-top:40px;margin-top:40px;gap:24px}
+}

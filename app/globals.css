@@ -1,7 +1,13 @@
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/base.css";
-@import "./styles/home.css";
+@import "./styles/collection.css";
+@import "./styles/explore.css";
+@import "./styles/neighbourhoods.css";
+@import "./styles/approach.css";
+@import "./styles/guide.css";
+@import "./styles/contact.css";
+@import "./styles/pages.css";
 @import "./styles/residence.css";
 @import "./styles/inventory.css";
 @import "./styles/admin.css";
