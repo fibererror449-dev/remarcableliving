@@ -81,7 +81,7 @@
 .story-label{margin:0;font-size:var(--text-label);font-weight:600;letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--gold)}
 .story-editorial h3{margin:0;font:500 clamp(26px,2.2vw,32px)/1.15 var(--font-display);letter-spacing:-.02em}
 .story-editorial article>p:last-child{margin:0;color:rgba(255,255,255,.72)}
-.nearby-places{display:grid;grid-template-columns:.8fr repeat(2,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.nearby-places{display:grid;grid-template-columns:.8fr repeat(3,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .nearby-places>.story-label{padding:28px 28px 28px 0}
 .nearby-places article{display:flex;flex-direction:column;gap:10px;padding:28px;border-left:1px solid var(--line)}
 .nearby-places h4{margin:0;font:500 22px/1.2 var(--font-display)}
@@ -119,3 +119,6 @@
   .map-card iframe{min-height:260px}
   .residence-story .container{gap:32px}
 }
+
+.detail-page .listing-photo-fallback p{font-size:18px;font-weight:500}
+.detail-page .listing-photo-fallback small{font-size:var(--text-meta);font-weight:400}

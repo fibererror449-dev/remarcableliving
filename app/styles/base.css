@@ -46,11 +46,11 @@ em{color:var(--gold);font-style:normal;font-weight:400}
 .chip.rented{background:#773b3b}
 .field{display:flex;flex-direction:column;gap:8px;min-width:0}
 .field>span{font-size:var(--text-label);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.field input,.field select{width:100%;height:var(--control-h);padding:0 16px;border:1px solid var(--line-dark);background:#fff;color:var(--ink);font-size:16px}
+.field input,.field select{width:100%;height:var(--control-h);padding:0 16px;border:1px solid var(--line-dark);background-color:#fff;color:var(--ink);font-size:16px}
 .field select{appearance:none;-webkit-appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%2311110f' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
 .field input::placeholder{color:#8a857b}
 .on-dark .field>span{color:rgba(255,255,255,.7)}
-.on-dark .field input,.on-dark .field select{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.28);color:#fff}
+.on-dark .field input,.on-dark .field select{background-color:rgba(255,255,255,.06);border-color:rgba(255,255,255,.28);color:#fff}
 .on-dark .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E")}
 .on-dark .field select option{color:var(--ink);background:#fff}
 .on-dark .field input::placeholder{color:rgba(255,255,255,.55)}
@@ -105,3 +105,4 @@ em{color:var(--gold);font-style:normal;font-weight:400}
 }
 .site-nav-mobile-contact{display:none}
 @media(max-width:699px){.site-nav-mobile-contact{display:flex}}
+.site-footer .cols a.brand{display:flex}

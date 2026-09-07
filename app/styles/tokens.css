@@ -7,7 +7,7 @@
   --green:#315b45;--amber:#8b652a;--wa:#1d6b48;
   --muted:#6b665c;--muted-light:rgba(255,255,255,.72);
   --line:rgba(255,255,255,.22);--line-dark:rgba(17,17,15,.16);
-  --font-display:var(--font-geist-sans),Arial,sans-serif;--font-body:var(--font-geist-sans),Arial,sans-serif;
+  --font-display:var(--font-geist-sans,"Geist"),Arial,sans-serif;--font-body:var(--font-geist-sans,"Geist"),Arial,sans-serif;
 
   --text-label:13px;--text-meta:14px;
   --text-body:clamp(16px,.95rem + .2vw,17px);

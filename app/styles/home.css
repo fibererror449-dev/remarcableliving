@@ -86,7 +86,7 @@
 .concierge-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .concierge-form label{display:flex;flex-direction:column;gap:8px;min-width:0}
 .concierge-form label span{font-size:var(--text-label);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.7)}
-.concierge-form input,.concierge-form select{width:100%;height:var(--control-h);padding:0 16px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;font-size:16px}
+.concierge-form input,.concierge-form select{width:100%;height:var(--control-h);padding:0 16px;border:1px solid rgba(255,255,255,.28);background-color:rgba(255,255,255,.06);color:#fff;font-size:16px}
 .concierge-form select{appearance:none;-webkit-appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M2 5l5 5 5-5' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
 .concierge-form select option{color:var(--ink);background:#fff}
 .concierge-form input::placeholder{color:rgba(255,255,255,.55)}
