@@ -6,7 +6,7 @@ export default function ExploreStrip() {
     <section className="explore section" aria-labelledby="explore-title">
       <div className="container">
         <header className="sec-head">
-          <div><p className="eyebrow dark"><span /> Keep exploring</p><h2 className="h2" id="explore-title">Choose the area.<br />Then the <em>room.</em></h2></div>
+          <div><p className="eyebrow dark"><span /> Keep exploring</p><h2 className="h2" id="explore-title">Pick your<br />next <em>step.</em></h2></div>
           <p className="lede">Each part of the search has its own page, so you can compare neighbourhoods, read how we work, and send your brief without scrolling past everything else.</p>
         </header>
         <div className="explore-grid">

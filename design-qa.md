@@ -83,3 +83,21 @@ Scope: PR #2 implements the approved layout canvas for the homepage below the he
 
 - Browser checks were headless Chrome captures and DOM measurements, not a manual keyboard traverse; focus rings come from the unchanged safeguard block in `app/globals.css`, which covers every link, button, input, and select.
 - `/residences/ashton-asoke-3br-42f` 404s locally because that listing exists only in D1, not in the fallback data. Unchanged by this PR.
+
+## Fan-out into pages — 2026-09-07
+
+Owner asked for the homepage to stop carrying every section and for the 404s to be fixed. Live probe before the change: `/student-housing` (linked three times as "Find by university"), `/residences`, `/neighbourhoods`, `/sitemap.xml` and `/robots.txt` all returned 404; the seven residence detail pages resolved. `/residences/ashton-asoke-3br-42f` resolves in production (row present in the production D1) and 404s locally, which corrects the note above that said the reverse.
+
+Routes now: `/` (hero + collection + explore strip), `/residences` (filters synced to `?area=&budget=`), `/neighbourhoods` (area cards, per-area residences, guide at `#guide`), `/approach`, `/contact` (`?persona=&listing=`), `/student-housing`, plus branded `not-found`, `sitemap.xml`, `robots.txt`.
+
+Headless Chrome (puppeteer-core, dev server on 4173), reduced motion on, at 1440 and 390 — screenshots in `design/qa/fan-out/`:
+- Every route 200; `/does-not-exist` 404 with the branded page; sitemap lists the seven static routes and every listing slug, omits `/admin`.
+- `scrollWidth` equals the viewport on every page at both widths; no console errors; no text under 12px outside the untouched cinematic hero.
+- `aria-current="page"` set on the matching nav link on every page.
+- `/residences`: selecting Ari updates the URL to `/residences?area=Ari` (3 cards); adding "Under ฿20,000" gives `?area=Ari&budget=under-20k` (1 card).
+- `/neighbourhoods`: selecting Thonglor sets `aria-pressed="true"`, heading "1 residence in Thonglor", link `/residences?area=Thonglor`.
+- Hero handoff at progress 1.000: destination transform `none`, collection top equals stage top. "Skip to search" lands with `#search` at viewport top.
+- `/contact?persona=intern&listing=Test%20Unit`: Intern tab selected, notice "Viewing request started for Test Unit."
+- `/student-housing?university=Mahidol%20University`: the university card is marked current and the select is prefilled.
+
+Known gap unchanged: Baan Klang and Centric Ari gallery media are still absent from the repo; the media manifest work is the next PR.
