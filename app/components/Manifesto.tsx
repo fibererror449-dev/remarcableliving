@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Manifesto() {
   return (
     <section className="manifesto on-dark reveal delay-3" id="approach" data-reveal>
@@ -14,7 +15,7 @@ export default function Manifesto() {
           <div><b>02</b><span>Neighbourhood-first matching</span></div>
           <div><b>03</b><span>Assistance through move-in</span></div>
         </div>
-        <a className="text-link" href="#assist">Start with your requirements →</a>
+        <Link className="text-link" href="/contact">Start with your requirements →</Link>
       </div>
     </section>
   );

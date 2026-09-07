@@ -1,0 +1,28 @@
+/* Page headers shared by /residences, /neighbourhoods, /contact, /student-housing, 404 */
+.page-hero{background:var(--ink);color:#fff;padding:96px var(--gutter) 80px}
+.page-hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:64px;align-items:end}
+.page-hero-grid>div{display:flex;flex-direction:column;gap:24px}
+.page-hero h1{margin:0;font:400 clamp(44px,5.5vw,80px)/.98 var(--font-display);letter-spacing:var(--tracking-display)}
+.page-hero p{margin:0;color:var(--muted-light)}
+.page-hero .lede{max-width:520px}
+.page-hero-links{display:flex;flex-wrap:wrap;gap:12px 28px}
+
+/* Student housing */
+.student-universities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.student-universities a{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:var(--control-h);padding:14px 20px;border:1px solid var(--line-dark);background:#fff;font-size:16px;font-weight:500}
+.student-universities a[aria-current="true"]{border-color:var(--gold-deep);box-shadow:inset 0 -3px 0 var(--gold)}
+.student-universities span{color:var(--gold-deep)}
+
+/* Not found */
+.not-found{min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:24px}
+.not-found h1{margin:0;font:400 var(--text-h1)/.98 var(--font-display);letter-spacing:var(--tracking-display)}
+.not-found .page-hero-links{margin-top:8px}
+
+@media(max-width:900px){
+  .page-hero-grid{grid-template-columns:1fr;gap:32px}
+  .student-universities{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .page-hero{padding:56px var(--gutter) 48px}
+  .student-universities{grid-template-columns:1fr}
+}

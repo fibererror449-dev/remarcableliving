@@ -1,26 +1,28 @@
-const universityUrl = "https://www.remarcableliving.co/student-housing";
-const whatsapp = "https://wa.me/66634962466";
+import Link from "next/link";
+import { studentHousingHref, whatsappUrl } from "../../lib/site-data";
 
-export default function SiteFooter({ homeHref = "" }: { homeHref?: string }) {
+export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="container">
         <div className="cols">
           <div>
-            <a className="brand" href={homeHref || "#home"} aria-label="REMARCABLE LIVING home"><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
+            <Link className="brand" href="/" aria-label="REMARCABLE LIVING home"><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></Link>
             <p className="tagline">Mark your place. Find your space.</p>
           </div>
           <div>
             <h4>Site</h4>
-            <a href={`${homeHref}#residences`}>Residences</a>
-            <a href={`${homeHref}#neighbourhoods`}>Neighbourhoods</a>
-            <a href={`${homeHref}#approach`}>Our approach</a>
-            <a href="/inventory">Complete inventory</a>
-            <a href={universityUrl}>Find by university</a>
+            <Link href="/residences">Residences</Link>
+            <Link href="/neighbourhoods">Neighbourhoods</Link>
+            <Link href="/approach">Our approach</Link>
+            <Link href="/neighbourhoods#guide">Bangkok guide</Link>
+            <Link href="/inventory">Complete inventory</Link>
+            <Link href={studentHousingHref}>Find by university</Link>
           </div>
           <div>
             <h4>Contact</h4>
-            <a href={whatsapp} target="_blank" rel="noreferrer">Talk to Mark on WhatsApp</a>
+            <Link href="/contact">Send your brief to Mark</Link>
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">Talk to Mark on WhatsApp</a>
             <p className="note">Hero interiors are AI-created inspiration, not photographs of listed homes.</p>
           </div>
         </div>

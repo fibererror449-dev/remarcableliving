@@ -29,19 +29,93 @@ test("renders the REMARCABLE LIVING home and featured Baan Klang Krung listing",
   assert.doesNotMatch(html, /REMARKABLE LIVING/);
   assert.match(html, /Baan Klang Krung Siam/);
   assert.match(html, /\/residences\/baan-klang-krung-siam-2br/);
-  assert.match(html, /Explore by/);
-  assert.match(html, /neighbourhood/);
-  assert.match(html, /From your brief/);
-  assert.match(html, /Reconfirm current availability and asking rent/);
+  assert.match(html, /id="residences"/);
+  assert.match(html, /id="search"/);
+  assert.match(html, /href="\/student-housing"/);
+  assert.match(html, /href="\/neighbourhoods"/);
+  assert.match(html, /href="\/approach"/);
+  assert.match(html, /href="\/contact"/);
+  assert.doesNotMatch(html, /remarcableliving\.co\/student-housing/);
+});
+
+test("fans the homepage sections out to their own routes", async () => {
+  const residences = await (await render("/residences")).text();
+  assert.match(residences, /class="search-strip/);
+  assert.match(residences, /<h3>Centurion Park/);
+  assert.match(residences, /<h3>Thru Thonglor/);
+
+  const filteredResponse = await render("/residences?area=Ari&budget=under-20k");
+  assert.equal(filteredResponse.status, 200);
+  const filtered = await filteredResponse.text();
+  // Every listing is serialised for hydration, so assert on rendered cards.
+  assert.match(filtered, /<h3>Centric Ari Station/);
+  assert.doesNotMatch(filtered, /<h3>Thru Thonglor/);
+  assert.match(filtered, /<h3>Centurion Park/ ? /Homes in/ : /Homes in/);
+
+  const neighbourhoodsResponse = await render("/neighbourhoods");
+  assert.equal(neighbourhoodsResponse.status, 200);
+  const neighbourhoods = await neighbourhoodsResponse.text();
+  assert.match(neighbourhoods, /Explore by/);
+  assert.match(neighbourhoods, /id="neighbourhoods"/);
+  assert.match(neighbourhoods, /id="guide"/);
+  assert.match(neighbourhoods, /aria-pressed="false"/);
+
+  const approachResponse = await render("/approach");
+  assert.equal(approachResponse.status, 200);
+  const approach = await approachResponse.text();
+  assert.match(approach, /id="approach"/);
+  assert.match(approach, /From your brief/);
+  assert.match(approach, /Reconfirm current availability and asking rent/);
+
+  const contactResponse = await render("/contact");
+  assert.equal(contactResponse.status, 200);
+  const contact = await contactResponse.text();
+  assert.match(contact, /Exchange student/);
+  assert.match(contact, /id="exchange-intake"/);
+  const intern = await (await render("/contact?persona=intern&listing=Test%20Unit")).text();
+  assert.match(intern, /aria-selected="true"[^>]*>Intern</);
+  assert.match(intern, /Viewing request started for Test Unit\./);
+
+  const studentResponse = await render("/student-housing");
+  assert.equal(studentResponse.status, 200);
+  const student = await studentResponse.text();
+  assert.match(student, /Chulalongkorn University/);
+  assert.match(student, /id="exchange-intake"/);
+  assert.doesNotMatch(student, /id="intern-intake"/);
+});
+
+test("answers unknown routes with the branded 404 and publishes crawl metadata", async () => {
+  const missing = await render("/does-not-exist");
+  assert.equal(missing.status, 404);
+  assert.match(await missing.text(), /Page not found/);
+
+  const sitemapResponse = await render("/sitemap.xml");
+  assert.equal(sitemapResponse.status, 200);
+  assert.match(sitemapResponse.headers.get("content-type") ?? "", /xml/);
+  const sitemap = await sitemapResponse.text();
+  for (const route of ["", "/residences", "/neighbourhoods", "/approach", "/contact", "/student-housing", "/inventory", "/residences/baan-klang-krung-siam-2br"]) {
+    assert.match(sitemap, new RegExp(`<loc>https://www\\.remarcableliving\\.co${route.replaceAll("/", "\\/")}</loc>`));
+  }
+  assert.doesNotMatch(sitemap, /\/admin/);
+
+  const robots = await (await render("/robots.txt")).text();
+  assert.match(robots, /Disallow: \/admin/);
+  assert.match(robots, /Sitemap: https:\/\/www\.remarcableliving\.co\/sitemap\.xml/);
 });
 
 test("keeps boutique discovery sections evidence-safe and interactive", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /id="neighbourhoods"/);
-  assert.match(page, /aria-pressed=\{location === area\.name\}/);
-  assert.match(page, /setLocation\(name\)/);
-  assert.match(page, /id="journey-title"/);
-  assert.doesNotMatch(page, /award-winning|five-star|clients served|off-market access/i);
+  const neighbourhoods = await readFile(new URL("../app/neighbourhoods/NeighbourhoodsClient.tsx", import.meta.url), "utf8");
+  assert.match(neighbourhoods, /id="neighbourhoods"/);
+  assert.match(neighbourhoods, /aria-pressed=\{location === area\.name\}/);
+  assert.match(neighbourhoods, /setLocation\(name/);
+  const journey = await readFile(new URL("../app/components/JourneySteps.tsx", import.meta.url), "utf8");
+  assert.match(journey, /id="journey-title"/);
+  const sources = ["../app/HomeClient.tsx", "../app/residences/ResidencesClient.tsx", "../app/neighbourhoods/NeighbourhoodsClient.tsx", "../app/approach/page.tsx", "../app/contact/page.tsx", "../app/student-housing/page.tsx", "../app/components/Manifesto.tsx", "../app/components/ExploreStrip.tsx", "../lib/site-data.ts", "../app/CinematicHero.tsx", "../app/components/SiteNav.tsx", "../app/components/SiteFooter.tsx"];
+  for (const source of sources) {
+    const text = await readFile(new URL(source, import.meta.url), "utf8");
+    assert.doesNotMatch(text, /award-winning|five-star|clients served|off-market access/i, source);
+    assert.doesNotMatch(text, /remarcableliving\.co\/student-housing/, `${source} links the old external student-housing URL`);
+  }
 });
 
 test("ships the complete Baan Klang Krung gallery, tour, and route metadata", async () => {
@@ -66,7 +140,7 @@ test("ships the complete Baan Klang Krung gallery, tour, and route metadata", as
 // no longer defines centricAriHero. Kept rather than deleted so the disclosure
 // wording ("Digitally styled owner photography", "AI-assisted walkthrough
 // concept") is not silently lost if the listing is ever rebuilt.
-test("ships the curated Centric Ari gallery and disclosed cinematic walkthrough", { skip: "media removed and centricAriHero no longer in app/page.tsx" }, async () => {
+test("ships the curated Centric Ari gallery and disclosed cinematic walkthrough", { skip: "media removed; centricAriHero was never carried into the homepage split (app/HomeClient.tsx)" }, async () => {
   const page = await readFile(new URL("../app/residences/[slug]/page.tsx", import.meta.url), "utf8");
   const home = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(page, /centric-ari-station\/cinematic-walkthrough\.mp4/);

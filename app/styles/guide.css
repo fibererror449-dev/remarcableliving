@@ -1,0 +1,16 @@
+/* Bangkok guide (/neighbourhoods#guide) */
+.before-sign{background:var(--paper-2);padding-top:96px;padding-bottom:96px}
+.before-sign-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:64px;align-items:start}
+.before-sign-head{display:flex;flex-direction:column;gap:24px}
+.before-sign-list{display:flex;flex-direction:column;border-top:1px solid var(--line-dark)}
+.before-sign-list a{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:24px 0;border-bottom:1px solid var(--line-dark)}
+.before-sign-list a>span:first-child{display:flex;flex-direction:column;gap:6px}
+.before-sign-list strong{font-size:20px;font-weight:500}
+
+@media(max-width:900px){
+  .before-sign-grid{grid-template-columns:1fr;gap:40px}
+}
+@media(max-width:620px){
+  .before-sign{padding-top:72px;padding-bottom:72px}
+  .before-sign-list a{grid-template-columns:1fr;gap:8px;padding:20px 0}
+}

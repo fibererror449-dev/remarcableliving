@@ -1,0 +1,36 @@
+/* Approach (/approach): manifesto + journey */
+.manifesto{display:grid;grid-template-columns:1.05fr .95fr;color:#fff;background:var(--ink)}
+.manifesto-image{position:relative;min-height:520px}
+.manifesto-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.manifesto-caption{position:absolute;left:24px;bottom:20px;padding:6px 10px;background:rgba(17,17,15,.72);color:#fff;font-size:var(--text-meta)}
+.manifesto-copy{padding:var(--space-section) clamp(24px,6vw,96px);display:flex;flex-direction:column;justify-content:center;gap:28px}
+.manifesto-copy .lede{max-width:520px}
+.principles{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.principles div{display:grid;grid-template-columns:56px 1fr;padding:20px 0;border-bottom:1px solid var(--line)}
+.principles b{color:var(--gold);font-size:var(--text-meta);font-weight:600}
+.principles span{font-size:18px}
+
+.journey-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line-dark)}
+.journey-steps article{display:flex;flex-direction:column;gap:16px;padding:32px 28px 40px;border-right:1px solid var(--line-dark)}
+.journey-steps article:first-child{padding-left:0}
+.journey-steps article:last-child{padding-right:0;border-right:0}
+.journey-steps b{font-size:var(--text-meta);font-weight:600;color:var(--gold-deep)}
+.journey-steps h3{margin:0}
+.journey-steps p{margin:0;font-size:16px;color:var(--muted)}
+.journey-cta{display:flex;justify-content:space-between;align-items:center;padding:24px 0;border-top:1px solid var(--line-dark);border-bottom:1px solid var(--gold-deep);font-size:16px;font-weight:600;color:#6f5428}
+.journey-cta span{font-size:20px;color:var(--gold-deep)}
+
+@media(max-width:900px){
+  .manifesto{grid-template-columns:1fr}
+  .manifesto-image{min-height:0;aspect-ratio:4/3}
+  .journey-steps{grid-template-columns:1fr 1fr}
+  .journey-steps article{padding:28px 24px 32px}
+  .journey-steps article:nth-child(odd){padding-left:0}
+  .journey-steps article:nth-child(even){border-right:0;padding-right:0}
+  .journey-steps article:nth-child(-n+2){border-bottom:1px solid var(--line-dark)}
+}
+@media(max-width:620px){
+  .journey-steps{grid-template-columns:1fr}
+  .journey-steps article,.journey-steps article:nth-child(odd),.journey-steps article:nth-child(even){padding:24px 0;border-right:0;border-bottom:1px solid var(--line-dark)}
+  .journey-steps article:last-child{border-bottom:0}
+}
