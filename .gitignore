@@ -56,3 +56,9 @@ yarn-error.log*
 # build artefacts, committed by accident in 0ad5f9b
 /server.log
 /tsconfig.tsbuildinfo
+
+# Codex working checkpoint: carries local filesystem paths, .codex/RTK.md
+# references and sandbox operating constraints. Same class of internal note as
+# CODEX-AUDIT-BRIEF.md above, so it must not reach this public repository.
+# The published QA record is design-qa.md.
+/design/HERO-CHECKPOINT.md

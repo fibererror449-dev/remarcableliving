@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import CinematicHero from "./CinematicHero";
+import ListingImage from "./ListingImage";
 
 type Persona = "exchange" | "intern";
 type PublicListing = { id:number; slug:string; name:string; district:string; rent:number; image:string; bedrooms:number; bathrooms:number; sizeSqm:number; status:string; stationType:string; stationName:string; walkMinutes:number };
@@ -40,10 +42,45 @@ const workplaceOptions = [
   "Other area",
 ];
 
+// Layout coordinates ignore the cinematic transform on the live collection.
+// Native anchor scrolling uses its temporary on-screen laptop position instead.
+function scrollToContent(id: string) {
+  let node = document.getElementById(id);
+  if (!node) return;
+  const story = node.closest<HTMLElement>(".cinema:not(.cinema-static)");
+  const stage = story?.querySelector<HTMLElement>(".cinema-stage");
+  let top = 0;
+  while (node) {
+    if (node === stage && story) {
+      // Sticky offsetTop includes its current pinned displacement. Use the
+      // story's document origin instead, even during a smooth anchor jump.
+      top += window.scrollY + story.getBoundingClientRect().top + story.offsetHeight - stage.offsetHeight;
+      break;
+    }
+    top += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  window.scrollTo({ top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+}
+
+function handleContentLink(event: MouseEvent) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = (event.target as Element).closest("a");
+  const hash = link?.getAttribute("href");
+  if (hash !== "#residences" && hash !== "#search") return;
+  event.preventDefault();
+  window.history.pushState(null, "", hash);
+  scrollToContent(hash.slice(1));
+}
+
 export default function Home() {
+  useEffect(() => {
+    // Delegated anchor handling also receives native keyboard link activation.
+    document.addEventListener("click", handleContentLink);
+    return () => document.removeEventListener("click", handleContentLink);
+  }, []);
   const [location, setLocation] = useState("All Bangkok areas");
   const [budget, setBudget] = useState("Any budget");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [properties, setProperties] = useState<PublicListing[]>(previewListings);
   const [persona, setPersona] = useState<Persona>("exchange");
@@ -87,7 +124,7 @@ export default function Home() {
 
   function exploreNeighbourhood(name: string) {
     setLocation(name);
-    document.querySelector("#residences")?.scrollIntoView({ behavior: "smooth" });
+    scrollToContent("residences");
   }
 
   function sendWhatsappMessage(payload: string) {
@@ -146,45 +183,26 @@ export default function Home() {
 
   return (
     <main>
-      <section className="hero" id="home" data-reveal>
-        <div className="hero-image" aria-hidden="true" /><div className="hero-shade" aria-hidden="true" />
-        <nav className="nav" aria-label="Primary navigation">
-          <a className="brand" href="#home" aria-label="REMARCABLE LIVING home"><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
-          <button className="menu-button" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}><span /><span /></button>
-          <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-            <a href="#residences" onClick={() => setMenuOpen(false)}>Residences</a>
-            <a href="#neighbourhoods" onClick={() => setMenuOpen(false)}>Neighbourhoods</a>
-            <a href="#approach" onClick={() => setMenuOpen(false)}>Our approach</a>
-            <a href="#journal" onClick={() => setMenuOpen(false)}>Bangkok guide</a>
-            <a className="nav-whatsapp" href="https://wa.me/66634962466" target="_blank" rel="noreferrer">WhatsApp Mark</a>
-          </div>
-        </nav>
-        <div className="hero-copy reveal delay-1" data-reveal>
-          <p className="eyebrow"><span /> Bangkok condominium assistance</p>
-          <h1>Mark your place.<br /><em>Find your space.</em></h1>
-          <p className="hero-intro">Bangkok condos at prices that make sense—with useful neighbourhood context and one person helping you from shortlist to keys.</p>
-          <div className="hero-actions"><a className="primary-button" href="#search">Search Bangkok areas <span>↓</span></a><button className="text-button" onClick={() => requestViewing()}>Ask Mark for help</button></div>
-        </div>
-        <div className="hero-index reveal delay-2" data-reveal><b>BKK</b><span>—</span><small>Curated Bangkok-wide</small></div>
-        <a className="scroll-cue" href="#search"><span>Find your area</span><i>↓</i></a>
-      </section>
+      <CinematicHero listings={properties} onExploreArea={exploreNeighbourhood}>
 
-      <section className="search-strip reveal delay-3" id="search" aria-label="Bangkok condominium search" data-reveal>
+      <section className="collection" id="residences">
+        <header className="section-heading"><div><p className="eyebrow dark"><span /> Selected for real Bangkok life</p><h2>Prices that<br /><em>make sense.</em></h2></div><p>Representative asking rents based on current neighbourhood ranges. Final availability and negotiated rent are always confirmed before viewing.<a className="inventory-link" href="/inventory">Browse the complete available inventory →</a></p></header>
+
+      <section className="search-strip" id="search" aria-label="Bangkok condominium search">
         <label><span>Bangkok area</span><select value={location} onChange={(event) => setLocation(event.target.value)}><option>All Bangkok areas</option><option>Ratchathewi</option><option>Thonglor</option><option>Phrom Phong</option><option>Sathorn</option><option>Ari</option><option>Rama 9</option><option>On Nut</option></select></label>
         <label><span>Monthly budget</span><select value={budget} onChange={(event) => setBudget(event.target.value)}><option>Any budget</option><option>Under ฿20,000</option><option>฿20,000–฿25,000</option><option>฿25,000+</option></select></label>
         <div><span>What we check</span><strong>Price · commute · condition</strong></div>
         <a href="#residences">Show {visibleProperties.length} matches <span>→</span></a>
       </section>
 
-      <section className="collection reveal delay-4" id="residences" data-reveal>
-        <header className="section-heading"><div><p className="eyebrow dark"><span /> Selected for real Bangkok life</p><h2>Prices that<br /><em>make sense.</em></h2></div><p>Representative asking rents based on current neighbourhood ranges. Final availability and negotiated rent are always confirmed before viewing.<a className="inventory-link" href="/inventory">Browse the complete available inventory →</a></p></header>
         {visibleProperties.length ? <div className="property-grid">{visibleProperties.map((property, index) => (
           <article className="property-card" key={property.name}>
-            <div className="property-visual"><img src={property.image} alt={`Bangkok condominium option in ${property.district}`} /><span className="property-number">0{index + 1}</span><span className={`property-tag status-${property.status}`}>{property.status === "available" ? "Available" : property.status === "viewing" ? "Viewing" : "Confirm status"}</span><a className="card-link" aria-label={`View ${property.name}`} href={`/residences/${property.slug}`}>↗</a></div>
+            <div className="property-visual"><ListingImage src={property.image} alt={`Bangkok condominium option in ${property.district}`} /><span className="property-number">0{index + 1}</span><span className={`property-tag status-${property.status}`}>{property.status === "available" ? "Available" : property.status === "viewing" ? "Viewing" : "Confirm status"}</span><a className="card-link" aria-label={`View ${property.name}`} href={`/residences/${property.slug}`}>↗</a></div>
             <div className="property-info"><div><p>{property.district} · {property.stationType} {property.stationName} · {property.walkMinutes} min walk</p><h3>{property.name}</h3></div><div className="property-meta"><b>฿{property.rent.toLocaleString()} / month</b><span>{property.bedrooms} bed · {property.bathrooms} bath · {property.sizeSqm} sq m</span></div></div>
           </article>
         ))}</div> : <div className="empty-state"><h3>No exact match yet.</h3><p>Try another budget or ask Mark to search beyond the sample collection.</p><button onClick={() => requestViewing()}>Start a custom search</button></div>}
       </section>
+      </CinematicHero>
 
       <section className="neighbourhoods reveal delay-2" id="neighbourhoods" data-reveal>
         <header className="neighbourhood-heading">

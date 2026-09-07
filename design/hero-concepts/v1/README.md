@@ -1,0 +1,37 @@
+# Hero cinematic keyframes — concept v1
+
+Generated using the built-in image-generation tool on 2026-09-07. Concept imagery, not photographs of actual listed properties.
+
+## Files
+- 01-bangkok-opening.png — Bangkok panorama and centred laptop.
+- 02-living-room-reveal.png — same composition inside an inviting condo.
+- 03-balcony-ending.png — intimate balcony ending.
+  
+## Intended sequence
+Bangkok panorama → zoom into laptop → live website → neighbourhoods → apartments → featured apartment → pull back into living room → bedroom → kitchen → balcony → browse CTA.
+
+These three frames establish the visual direction only. No application source or deployment has been changed. Blank laptop screens are intentional: HTML interface content will be composited during implementation. Generated foregrounds are visually similar, not guaranteed pixel-identical; a single shared laptop foreground and matching background plates should be prepared before final animation. Mobile composition needs its own treatment.
+
+## Generation prompts
+
+### 01 — Bangkok opening
+Use case: photorealistic-natural.
+Create ONE high-resolution cinematic 16:9 landscape photographic keyframe for REMARCABLE LIVING's scroll-driven Bangkok housing website. This is frame 01, BANGKOK OPENING, and will be the visual master for matching living room and balcony images.
+Scene: believable Bangkok skyline from a modest elevated covered terrace at golden hour, dense tropical city, distinctly Bangkok buildings including a distant recognizable MahaNakhon silhouette, atmospheric warm haze, patches of trees, no New York skyline. Beautiful but attainable residential setting, not an extravagant penthouse.
+Composition: camera perfectly level and centred, approximately seated human eye level, 35mm architectural photography, natural straight verticals. An open unbranded graphite silver 14-inch laptop faces the viewer almost square-on, centred precisely at x=50%, screen centre approximately y=57%. Laptop occupies about 28% of total image width; whole laptop including keyboard fully visible. It rests physically on a matte warm pale travertine rectangular table whose surface crosses the lower quarter and extends beyond both frame sides. Laptop bottom at approximately 83% frame height. Laptop lid open 105 degrees. No floating objects. This table and laptop composition must be reusable unchanged in future frames.
+Laptop screen: clean very dark charcoal nonreflective display, completely blank, ready for compositing live website content. No fake text or painted UI. Thin realistic bezels, detailed keyboard, restrained soft screen reflection.
+Background: open Bangkok panorama fills upper 70%, subtle terrace framing only near far edges; deliberate uncluttered darker area in upper left for eventual white headline, no text generated. Gold sunlight from camera left, soft coherent shadows falling right. Warm cream stone, graphite laptop, muted gold highlights, desaturated teal urban shadows, quiet editorial property photography, cinematic film still with subtle fine grain, natural photographic texture, sophisticated understated atmosphere. Skyline detailed and legible, not heavily defocused.
+Constraints: no people, no logos, no watermarks, no text, no headings, no collage, no split panels, no rounded border, no added coffee cups or props. Full-bleed single photograph. Preserve believable apartment scale and Bangkok identity. Output largest available landscape resolution, preferably 3840x2160.
+
+### 02 — Living room reveal
+Input: frame 01 as edit target.
+Use case: precise-object-edit. Reference image is the edit target and master keyframe of a cinematic Bangkok housing scroll animation. Produce ONE full-bleed landscape frame 02 LIVING ROOM REVEAL with identical image dimensions and framing.
+Preserve the entire laptop EXACTLY in its current pixel position, size, silhouette, screen corners, opening angle, keyboard, colour, perspective and blank dark screen. Preserve the foreground travertine table EXACTLY, including its edges, perspective, texture and contact shadow. No zoom, no camera rotation, no repositioning. The laptop and table must be the same visual anchor for a match cut.
+CHANGE ONLY THE BACKGROUND ABOVE THE TABLE behind the laptop into an inviting realistic Bangkok condominium living room. Camera now looks from the dining table into the living area. Human-scale comfortable 45-65sqm apartment, warm cream plaster walls, light oak joinery, a modest low cream linen sofa toward the back right with muted olive cushions, understated rug and low wood coffee table, a framed understated art print, sliding window on the left illuminating the room with the same golden late-afternoon light from camera left. Glimpse Bangkok buildings outside left window. Do not block or overlap the laptop. Maintain broad upper area and balanced negative space, refined realistic lived-in housing editorial photography. Warm cream, graphite, muted gold and subdued teal shadow palette; consistent colour grade and camera lens with reference. Architectural photography, realistic details, subtle film grain, attractive but attainable not mansion or hotel lobby. Laptop screen remains plain dark charcoal for later live UI compositing. No text, logos, watermark, people, split panels, extra laptops, magical effects. Only background changes; laptop and foreground table must remain completely unchanged.
+
+### 03 — Balcony ending
+Inputs: frame 01 as edit target; frame 02 as same-home style reference.
+Use case: precise-object-edit. Image 1 is edit target/master Bangkok opening keyframe. Image 2 is supporting same-home living room style reference. Produce ONE full-bleed cinematic 16:9 landscape frame 03 BALCONY ENDING with the identical dimensions and camera framing as image 1.
+Preserve image 1 laptop EXACTLY at its current position, scale, shape, screen corners, angle, keyboard, graphite silver finish and blank charcoal display. Preserve foreground travertine table and its front edge, perspective and laptop contact shadow. These are immovable match-cut anchors. No zoom or camera angle change.
+Replace ONLY background behind the laptop above the table. We are now on the intimate covered balcony of the warm Bangkok condo seen in image 2, at the same golden late afternoon. A compact believable balcony with slim dark railing and clear glass, modest light textured wall framing at far right and a sliding glazed door at far left revealing a sliver of the same oak/cream living room. A small woven balcony chair and some natural green tropical leaves may sit at the extreme right edge behind the table. Beyond: quiet, expansive Bangkok skyline with urban greenery and distant MahaNakhon, same atmospheric lighting geography as image 1. Frame the skyline more intimately through the balcony architecture so this feels like the home version of the city panorama in image 1. Broad open sky area upper left/centre suitable for later headline and CTA overlays (but do not generate text). Natural warm sunlight from left, muted gold, cream stone and desaturated teal shadows. Subtle film grain, editorial property photography, accurate architectural perspective, natural realistic materials. Restrained and human-scale, not resort terrace, no oversized luxury furniture. No people, no text, no logos, no watermark, no extra laptops, no collage. Laptop screen blank for later HTML compositing. Same laptop and foreground table completely unchanged; only surroundings transition.
+
