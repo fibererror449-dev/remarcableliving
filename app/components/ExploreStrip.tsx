@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { exploreTiles } from "../../lib/site-data";
 
 export default function ExploreStrip() {
@@ -11,12 +10,12 @@ export default function ExploreStrip() {
         </header>
         <div className="explore-grid">
           {exploreTiles.map((tile, index) => (
-            <Link key={tile.href} href={tile.href} className="explore-tile">
+            <a key={tile.href} href={tile.href} className="explore-tile">
               <b>{String(index + 1).padStart(2, "0")}</b>
               <strong>{tile.title}</strong>
               <span>{tile.note}</span>
               <span className="text-link">Open →</span>
-            </Link>
+            </a>
           ))}
         </div>
       </div>

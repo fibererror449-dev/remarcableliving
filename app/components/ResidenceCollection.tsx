@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo } from "react";
 import ListingCard from "./ListingCard";
 import { areaOptions, budgetOptions, filterListings, type PublicListing } from "../../lib/listings-data";
@@ -30,7 +29,7 @@ export default function ResidenceCollection({ listings, area, budget, onAreaChan
         </section>
         {visible.length
           ? <div className="property-grid">{visible.map((listing, index) => <ListingCard key={listing.slug} listing={listing} index={index} />)}</div>
-          : <div className="empty-state"><h3 className="h3">No exact match yet.</h3><p>Try another budget or ask Mark to search beyond the sample collection.</p><Link className="btn" href="/contact">Start a custom search</Link></div>}
+          : <div className="empty-state"><h3 className="h3">No exact match yet.</h3><p>Try another budget or ask Mark to search beyond the sample collection.</p><a className="btn" href="/contact">Start a custom search</a></div>}
       </div>
     </section>
   );

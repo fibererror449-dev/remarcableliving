@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import ResidenceCollection from "../components/ResidenceCollection";
 import SiteFooter from "../components/SiteFooter";
@@ -32,8 +31,8 @@ export default function ResidencesClient({ listings, initialArea, initialBudget 
           <div>
             <p className="lede">Representative asking rents based on current neighbourhood ranges. Final availability and negotiated rent are always confirmed before viewing.</p>
             <div className="page-hero-links">
-              <Link className="text-link" href="/inventory">Browse the complete available inventory →</Link>
-              <Link className="text-link" href="/neighbourhoods">Compare neighbourhoods →</Link>
+              <a className="text-link" href="/inventory">Browse the complete available inventory →</a>
+              <a className="text-link" href="/neighbourhoods">Compare neighbourhoods →</a>
             </div>
           </div>
         </div>

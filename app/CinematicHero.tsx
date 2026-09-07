@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import "./cinematic-hero.css";
-import Link from "next/link";
 import ListingImage from "./ListingImage";
 import { studentHousingHref } from "../lib/site-data";
 
@@ -251,7 +250,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           </div>
           <div className={`screen-panel panel-selected ${phase === 3 ? "is-active" : ""}`} inert={phase !== 3}>
             <ListingImage src={featured?.image ?? "/bangkok/green-condo.jpg"} alt={featured?.name ?? "Bangkok residence"} />
-            <div><p className="screen-kicker">A home to consider</p><h2>{featured?.name}</h2><p>{featured?.district} · ฿{featured?.rent.toLocaleString()} / month</p>{featured ? <a href={`/residences/${featured.slug}`}>View residence details</a> : <Link href="/residences">Browse residences</Link>}<p className="screen-footnote">Next: imagine life at home.<br />The following rooms are AI-created inspiration,<br />not photographs of this listing.</p></div>
+            <div><p className="screen-kicker">A home to consider</p><h2>{featured?.name}</h2><p>{featured?.district} · ฿{featured?.rent.toLocaleString()} / month</p>{featured ? <a href={`/residences/${featured.slug}`}>View residence details</a> : <a href="/residences">Browse residences</a>}<p className="screen-footnote">Next: imagine life at home.<br />The following rooms are AI-created inspiration,<br />not photographs of this listing.</p></div>
           </div>
         </div>
 

@@ -23,6 +23,12 @@ const eslintConfig = defineConfig([
   jsxA11y.flatConfigs.recommended,
   next.configs["core-web-vitals"],
   {
+    // The production host answers RSC navigation requests with a redirect, so
+    // next/link client navigation silently fails there. Page links are plain
+    // full-navigation anchors on purpose.
+    rules: { "@next/next/no-html-link-for-pages": "off" },
+  },
+  {
     languageOptions: {
       globals: {
         ...globals.browser,

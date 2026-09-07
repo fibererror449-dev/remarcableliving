@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { studentHousingHref, whatsappUrl } from "../../lib/site-data";
 
 export default function SiteFooter() {
@@ -7,21 +6,21 @@ export default function SiteFooter() {
       <div className="container">
         <div className="cols">
           <div>
-            <Link className="brand" href="/" aria-label="REMARCABLE LIVING home"><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></Link>
+            <a className="brand" href="/" aria-label="REMARCABLE LIVING home"><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
             <p className="tagline">Mark your place. Find your space.</p>
           </div>
           <div>
             <h4>Site</h4>
-            <Link href="/residences">Residences</Link>
-            <Link href="/neighbourhoods">Neighbourhoods</Link>
-            <Link href="/approach">Our approach</Link>
-            <Link href="/neighbourhoods#guide">Bangkok guide</Link>
-            <Link href="/inventory">Complete inventory</Link>
-            <Link href={studentHousingHref}>Find by university</Link>
+            <a href="/residences">Residences</a>
+            <a href="/neighbourhoods">Neighbourhoods</a>
+            <a href="/approach">Our approach</a>
+            <a href="/neighbourhoods#guide">Bangkok guide</a>
+            <a href="/inventory">Complete inventory</a>
+            <a href={studentHousingHref}>Find by university</a>
           </div>
           <div>
             <h4>Contact</h4>
-            <Link href="/contact">Send your brief to Mark</Link>
+            <a href="/contact">Send your brief to Mark</a>
             <a href={whatsappUrl} target="_blank" rel="noreferrer">Talk to Mark on WhatsApp</a>
             <p className="note">Hero interiors are AI-created inspiration, not photographs of listed homes.</p>
           </div>

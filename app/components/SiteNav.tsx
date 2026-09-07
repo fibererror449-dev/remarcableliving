@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { studentHousingHref } from "../../lib/site-data";
 
 export type SiteSection = "residences" | "neighbourhoods" | "approach" | "contact" | "student-housing" | "inventory";
@@ -18,13 +17,13 @@ export default function SiteNav({ current }: { current?: SiteSection }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="site-nav">
-      <Link className="brand" href="/" aria-label="REMARCABLE LIVING home" onClick={() => setOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></Link>
+      <a className="brand" href="/" aria-label="REMARCABLE LIVING home" onClick={() => setOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
       <button className="site-nav-menu" type="button" aria-expanded={open} aria-controls="site-links" onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>
       <nav id="site-links" className={open ? "is-open" : ""} aria-label="Primary navigation">
-        {links.map((link) => <Link key={link.href} href={link.href} aria-current={current === link.section ? "page" : undefined} onClick={() => setOpen(false)}>{link.label}</Link>)}
-        <Link className="site-nav-mobile-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined} onClick={() => setOpen(false)}>Talk to Mark</Link>
+        {links.map((link) => <a key={link.href} href={link.href} aria-current={current === link.section ? "page" : undefined} onClick={() => setOpen(false)}>{link.label}</a>)}
+        <a className="site-nav-mobile-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined} onClick={() => setOpen(false)}>Talk to Mark</a>
       </nav>
-      <Link className="site-nav-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined}>Talk to Mark</Link>
+      <a className="site-nav-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined}>Talk to Mark</a>
     </header>
   );
 }

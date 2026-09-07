@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import IntakeForm from "../components/IntakeForm";
 import SiteFooter from "../components/SiteFooter";
@@ -31,8 +30,8 @@ export default async function StudentHousingPage({ searchParams }: { searchParam
           <div>
             <p className="lede">Tell us where you will study, when you arrive, and what you can spend each month. Commute, unit condition, and asking rent are compared before anything reaches your shortlist.</p>
             <div className="page-hero-links">
-              <Link className="text-link" href="/residences">See the current collection →</Link>
-              <Link className="text-link" href="/neighbourhoods">Compare neighbourhoods →</Link>
+              <a className="text-link" href="/residences">See the current collection →</a>
+              <a className="text-link" href="/neighbourhoods">Compare neighbourhoods →</a>
             </div>
           </div>
         </div>

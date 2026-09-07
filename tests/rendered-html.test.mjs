@@ -41,15 +41,15 @@ test("renders the REMARCABLE LIVING home and featured Baan Klang Krung listing",
 test("fans the homepage sections out to their own routes", async () => {
   const residences = await (await render("/residences")).text();
   assert.match(residences, /class="search-strip/);
-  assert.match(residences, /<h3>Centurion Park/);
-  assert.match(residences, /<h3>Thru Thonglor/);
+  assert.match(residences, /<h3><a [^>]*>Centurion Park/);
+  assert.match(residences, /<h3><a [^>]*>Thru Thonglor/);
 
   const filteredResponse = await render("/residences?area=Ari&budget=under-20k");
   assert.equal(filteredResponse.status, 200);
   const filtered = await filteredResponse.text();
   // Every listing is serialised for hydration, so assert on rendered cards.
-  assert.match(filtered, /<h3>Centric Ari Station/);
-  assert.doesNotMatch(filtered, /<h3>Thru Thonglor/);
+  assert.match(filtered, /<h3><a [^>]*>Centric Ari Station/);
+  assert.doesNotMatch(filtered, /<h3><a [^>]*>Thru Thonglor/);
   assert.match(filtered, /Homes in/);
 
   const neighbourhoodsResponse = await render("/neighbourhoods");
