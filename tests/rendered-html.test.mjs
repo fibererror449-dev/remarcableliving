@@ -33,7 +33,7 @@ test("renders the REMARCABLE LIVING home and featured Baan Klang Krung listing",
   assert.match(html, /id="search"/);
   assert.match(html, /href="\/student-housing"/);
   assert.match(html, /href="\/neighbourhoods"/);
-  assert.match(html, /href="\/approach"/);
+  assert.match(html, /href="\/about"/);
   assert.match(html, /href="\/contact"/);
   assert.doesNotMatch(html, /remarcableliving\.co\/student-housing/);
 });
@@ -60,12 +60,20 @@ test("fans the homepage sections out to their own routes", async () => {
   assert.match(neighbourhoods, /id="guide"/);
   assert.match(neighbourhoods, /aria-pressed="false"/);
 
+  const aboutResponse = await render("/about");
+  assert.equal(aboutResponse.status, 200);
+  const about = await aboutResponse.text();
+  assert.match(about, /id="about"/);
+  assert.match(about, /About us/);
+  assert.match(about, /Who we are/);
+  assert.match(about, /What we stand for/);
+  assert.match(about, /From your brief/);
+  assert.match(about, /Reconfirm current availability and asking rent/);
+  assert.doesNotMatch(about, /Our approach/);
+
   const approachResponse = await render("/approach");
-  assert.equal(approachResponse.status, 200);
-  const approach = await approachResponse.text();
-  assert.match(approach, /id="approach"/);
-  assert.match(approach, /From your brief/);
-  assert.match(approach, /Reconfirm current availability and asking rent/);
+  assert.equal(approachResponse.status, 308);
+  assert.equal(approachResponse.headers.get("location"), "/about");
 
   const contactResponse = await render("/contact");
   assert.equal(contactResponse.status, 200);
@@ -93,7 +101,7 @@ test("answers unknown routes with the branded 404 and publishes crawl metadata",
   assert.equal(sitemapResponse.status, 200);
   assert.match(sitemapResponse.headers.get("content-type") ?? "", /xml/);
   const sitemap = await sitemapResponse.text();
-  for (const route of ["", "/residences", "/neighbourhoods", "/approach", "/contact", "/student-housing", "/inventory", "/residences/baan-klang-krung-siam-2br"]) {
+  for (const route of ["", "/residences", "/neighbourhoods", "/about", "/contact", "/student-housing", "/inventory", "/residences/baan-klang-krung-siam-2br"]) {
     assert.match(sitemap, new RegExp(`<loc>https://www\\.remarcableliving\\.co${route.replaceAll("/", "\\/")}</loc>`));
   }
   assert.doesNotMatch(sitemap, /\/admin/);
@@ -110,7 +118,7 @@ test("keeps boutique discovery sections evidence-safe and interactive", async ()
   assert.match(neighbourhoods, /setLocation\(name/);
   const journey = await readFile(new URL("../app/components/JourneySteps.tsx", import.meta.url), "utf8");
   assert.match(journey, /id="journey-title"/);
-  const sources = ["../app/HomeClient.tsx", "../app/residences/ResidencesClient.tsx", "../app/neighbourhoods/NeighbourhoodsClient.tsx", "../app/approach/page.tsx", "../app/contact/page.tsx", "../app/student-housing/page.tsx", "../app/components/Manifesto.tsx", "../app/components/ExploreStrip.tsx", "../lib/site-data.ts", "../app/CinematicHero.tsx", "../app/components/SiteNav.tsx", "../app/components/SiteFooter.tsx"];
+  const sources = ["../app/HomeClient.tsx", "../app/residences/ResidencesClient.tsx", "../app/neighbourhoods/NeighbourhoodsClient.tsx", "../app/about/page.tsx", "../app/components/AboutValues.tsx", "../app/components/AboutAudience.tsx", "../app/components/AboutMark.tsx", "../app/contact/page.tsx", "../app/student-housing/page.tsx", "../app/components/Manifesto.tsx", "../app/components/ExploreStrip.tsx", "../lib/site-data.ts", "../app/CinematicHero.tsx", "../app/components/SiteNav.tsx", "../app/components/SiteFooter.tsx"];
   for (const source of sources) {
     const text = await readFile(new URL(source, import.meta.url), "utf8");
     assert.doesNotMatch(text, /award-winning|five-star|clients served|off-market access/i, source);

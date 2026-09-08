@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { studentHousingHref } from "../../lib/site-data";
 
-export type SiteSection = "residences" | "neighbourhoods" | "approach" | "contact" | "student-housing" | "inventory";
+export type SiteSection = "residences" | "neighbourhoods" | "about" | "contact" | "student-housing" | "inventory";
 
 const links: { href: string; label: string; section: SiteSection }[] = [
   { href: "/residences", label: "Residences", section: "residences" },
   { href: "/neighbourhoods", label: "Neighbourhoods", section: "neighbourhoods" },
-  { href: "/approach", label: "Our approach", section: "approach" },
+  { href: "/about", label: "About us", section: "about" },
   { href: "/inventory", label: "Inventory", section: "inventory" },
   { href: studentHousingHref, label: "Find by university", section: "student-housing" },
 ];

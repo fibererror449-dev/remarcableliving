@@ -13,7 +13,7 @@ export default function SiteFooter() {
             <h4>Site</h4>
             <a href="/residences">Residences</a>
             <a href="/neighbourhoods">Neighbourhoods</a>
-            <a href="/approach">Our approach</a>
+            <a href="/about">About us</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
             <a href="/inventory">Complete inventory</a>
             <a href={studentHousingHref}>Find by university</a>

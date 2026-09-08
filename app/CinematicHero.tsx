@@ -218,7 +218,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
             <a href="#residences" onClick={() => setMenuOpen(false)}>Residences</a>
             <a href={studentHousingHref}>Find by university</a>
             <a href="/neighbourhoods">Neighbourhoods</a>
-            <a href="/approach">Our approach</a>
+            <a href="/about">About us</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
             <a className="cinema-menu-contact" href="/contact">Talk to Mark</a>
           </nav>

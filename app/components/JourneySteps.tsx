@@ -5,7 +5,7 @@ export default function JourneySteps() {
     <section className="service-journey section reveal delay-1" aria-labelledby="journey-title" data-reveal>
       <div className="container">
         <header className="sec-head">
-          <div><p className="eyebrow dark"><span /> A clear route to the viewing</p><h2 className="h2" id="journey-title">From your brief<br />to the <em>front door.</em></h2></div>
+          <div><p className="eyebrow dark"><span /> How we work</p><h2 className="h2" id="journey-title">From your brief<br />to the <em>front door.</em></h2></div>
           <p className="lede">One practical sequence keeps the search personal without making it vague. Each step reduces the list before you spend time travelling across Bangkok.</p>
         </header>
         <div className="journey-steps">
