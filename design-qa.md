@@ -105,3 +105,12 @@ Known gap unchanged: Baan Klang and Centric Ari gallery media are still absent f
 ## Media manifest — 2026-09-07
 
 `scripts/generate-media-manifest.mjs` (run by `prebuild`/`predev`) writes `lib/media-manifest.generated.ts` from `public/properties` and `public/bangkok`. The residence page and `ListingImage` only request files listed there. Headless Chrome, reduced motion: `/residences/baan-klang-krung-siam-2br` at 1440 renders the walkthrough video, no gallery tiles, one status note, and zero failed requests; `/residences/centric-ari-station-1br` at 390 renders one fallback hero tile, the note, and zero failed requests. `getListing` now also serves a curated listing when D1 is bound but has no row.
+
+## Tablet responsiveness — 2026-09-08
+
+Owner photo of the site on a tablet showed the hero's laptop page spilling over the keyboard and the nav wrapping onto two lines.
+
+- Cause: on portrait viewports the in-laptop page needs more height than the photographed lid offers. The extra height was revealed in proportion to the zoom, so it hung below the bezel from the first scroll.
+- Fix: the page stays clipped to the bezel until the zoom completes, then the extra height opens over a darkened room (`.cinema-backdrop`). Desktop landscape is unchanged because there is no extra height there.
+- Navigation: links no longer wrap; both navs collapse into the Menu button at ≤1100px (was ≤699px) so Talk to Mark is always reachable. Inline nav verified at 1101px, no horizontal overflow at 820/1024/1100.
+- Screenshots: `design/qa/tablet/`. Verified at 390×844, 820×1180, 1024×768, 1440×900 across scroll positions 0–1.
