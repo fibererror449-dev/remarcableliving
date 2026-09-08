@@ -26,6 +26,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
   const section = useRef<HTMLElement>(null);
   const plane = useRef<HTMLDivElement>(null);
   const screen = useRef<HTMLDivElement>(null);
+  const backdrop = useRef<HTMLDivElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const progressBar = useRef<HTMLDivElement>(null);
   const destination = useRef<HTMLDivElement>(null);
@@ -111,6 +112,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           transform: `translate3d(${cameraX}px, ${cameraY}px, 0) scale(${cameraScale})`,
         });
       }
+      const reveal = ramp(p, .23, .28) * (1 - leave);
       const screenScale = pw * screenW * introScale / targetW;
       const photographedHeight = ph * screenH * targetW / (pw * screenW);
       const layoutHeight = Math.max(targetH, photographedHeight);
@@ -119,11 +121,15 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
         Object.assign(screen.current.style, {
         left: "0px", top: "0px", width: `${targetW}px`, height: `${layoutHeight}px`,
         transform: `translate3d(${introX + pw * screenX * introScale}px, ${introY + ph * screenY * introScale}px, 0) scale(${screenScale})`,
-        // Portrait screens reveal extra page height as the laptop fills the view.
-        clipPath: `inset(0 0 ${(layoutHeight - photographedHeight) * (1 - zoom * (1 - livingMix))}px 0)`,
+        // Portrait screens need more page height than the laptop lid offers.
+        // Keep the page inside the bezel while the laptop is still visible as
+        // a laptop; the extra height is revealed only once the zoom is
+        // complete, over a darkened room, so it never spills onto the keyboard.
+        clipPath: `inset(0 0 ${(layoutHeight - photographedHeight) * (1 - reveal * (1 - livingMix))}px 0)`,
         opacity: String(staticMode ? 0 : (1 - ramp(p, .635, .67))),
         });
       }
+      if (backdrop.current) backdrop.current.style.opacity = String(layoutHeight > photographedHeight + 1 ? reveal * (1 - ramp(p, .635, .67)) : 0);
       let roomIndex = 0;
       if (p >= .55) roomIndex = 1;
       if (p >= .715) roomIndex = 2;
@@ -204,6 +210,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           {scenes.map((scene, index) => <img key={scene.file} ref={(el) => { sceneImages.current[index] = el; }} className="cinema-photo" src={`/hero/${scene.file}.webp`} alt="" fetchPriority={index === 0 ? "high" : "auto"} style={{ opacity: index ? 0 : 1 }} />)}
         </div>
         <div className="cinema-shade" aria-hidden="true" />
+        <div className="cinema-backdrop" ref={backdrop} aria-hidden="true" />
         <header className="cinema-nav" inert={!chromeVisible}>
           <a className="cinema-brand" href="#home" onClick={() => setMenuOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
           <button className="cinema-menu" aria-expanded={menuOpen} aria-controls="cinema-links" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close" : "Menu"}</button>
@@ -213,6 +220,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
             <a href="/neighbourhoods">Neighbourhoods</a>
             <a href="/approach">Our approach</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
+            <a className="cinema-menu-contact" href="/contact">Talk to Mark</a>
           </nav>
           <a className="cinema-contact" href="/contact">Talk to Mark</a>
         </header>
