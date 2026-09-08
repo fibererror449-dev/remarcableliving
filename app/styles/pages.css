@@ -5,6 +5,7 @@
 .page-hero h1{margin:0;font:400 clamp(44px,5.5vw,80px)/.98 var(--font-display);letter-spacing:var(--tracking-display)}
 .page-hero p{margin:0;color:var(--muted-light)}
 .page-hero .lede{max-width:520px}
+.student-hero-copy{font-style:italic;font-weight:400}
 .page-hero-links{display:flex;flex-wrap:wrap;gap:12px 28px}
 
 /* Student housing */

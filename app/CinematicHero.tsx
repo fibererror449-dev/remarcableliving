@@ -6,10 +6,10 @@ import ListingImage from "./ListingImage";
 import { studentHousingHref } from "../lib/site-data";
 
 type Listing = { id: number; slug: string; name: string; district: string; rent: number; image: string; bedrooms: number; sizeSqm: number };
-const areas = [
-  { name: "Ari", image: "/bangkok/green-condo.jpg", station: "BTS Ari" },
-  { name: "Ratchathewi", image: "/properties/baan-klang-krung-siam.jpg", station: "BTS Ratchathewi" },
-  { name: "Thonglor", image: "/bangkok/night-city.jpg", station: "BTS Thong Lo" },
+const featuredUniversities = [
+  { name: "Chulalongkorn University", image: "/bangkok/green-condo.jpg", location: "Pathum Wan" },
+  { name: "KU Kasetsart University", image: "/properties/baan-klang-krung-siam.jpg", location: "Bang Khen" },
+  { name: "Thammasat University", image: "/bangkok/night-city.jpg", location: "Tha Prachan & Rangsit" },
 ];
 const scenes = [
   { name: "Bangkok", file: "bangkok", at: 0, title: "Arrive in Bangkok.", line: "Feel at home." },
@@ -215,42 +215,42 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           <a className="cinema-brand" href="#home" onClick={() => setMenuOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
           <button className="cinema-menu" aria-expanded={menuOpen} aria-controls="cinema-links" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close" : "Menu"}</button>
           <nav id="cinema-links" className={menuOpen ? "is-open" : ""} aria-label="Primary navigation">
-            <a href="#residences" onClick={() => setMenuOpen(false)}>Residences</a>
-            <a href={studentHousingHref}>Find by university</a>
+            <a href={studentHousingHref}>Your University</a>
+            <a href="#residences" onClick={() => setMenuOpen(false)}>Condo/Apartment</a>
             <a href="/neighbourhoods">Neighbourhoods</a>
-            <a href="/about">About us</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
-            <a className="cinema-menu-contact" href="/contact">Talk to Mark</a>
+            <a href="/about">About Us</a>
+            <a className="cinema-menu-contact" href="/contact">Mark your place, Find your space.</a>
           </nav>
-          <a className="cinema-contact" href="/contact">Talk to Mark</a>
+          <a className="cinema-contact" href="/contact">Mark your place, Find your space.</a>
         </header>
 
         <div ref={copy} className={`cinema-copy ${room > 0 ? "is-room" : ""}`} inert={!showCopy}>
-          <p className="cinema-eyebrow">{room === 0 ? "A new city. Your own corner of it." : room === 4 ? "Chao Phraya · Bangkok" : `At home in Bangkok · ${activeScene.name}`}</p>
+          <p className="cinema-eyebrow">{room === 0 ? "Leave your finding room behind, just enjoy Bangkok." : room === 4 ? "Chao Phraya · Bangkok" : `At home in Bangkok · ${activeScene.name}`}</p>
           {room === 0 ? <h1>{activeScene.title}<br /><em>{activeScene.line}</em></h1> : <h2>{activeScene.title}<br /><em>{activeScene.line}</em></h2>}
-          {room === 0 && <p className="cinema-intro">A home search for exchange students and interns.<br />From your first shortlist to your first morning here.</p>}
+          {room === 0 && <p className="cinema-intro">We’ll handle everything—from before you arrive, to the moment you land, right up to your new front door.</p>}
           {room === 4 && <p className="cinema-ending">New streets. Familiar comforts. A life that feels like yours.<br /><span>Keep scrolling to find a home that fits your life—and your budget.</span></p>}
           {room === 0 && <div className="cinema-actions">
             <a className="cinema-primary" href={studentHousingHref}>Find by university</a>
-            <a className="cinema-secondary" href="#residences">Explore residences</a>
+            <a className="cinema-secondary" href="#residences">Explore units</a>
           </div>}
         </div>
 
         <div className="cinema-screen" ref={screen} inert={!uiInteractive} aria-hidden={!uiInteractive}>
-          <div className="screen-masthead"><span>REMARCABLE LIVING</span><small>Find your space.</small></div>
+          <div className="screen-masthead"><span>REMARCABLE LIVING</span><small>Mark your place, Find your space.</small></div>
           <div className={`screen-panel panel-welcome ${phase === 0 ? "is-active" : ""}`} inert={phase !== 0}>
             <img src="/bangkok/green-condo.jpg" alt="" />
             <div><p className="screen-kicker">Your Bangkok chapter</p><h2>A city of possibilities.<br /><em>One place for you.</em></h2><p>Start with the neighbourhood.<br />Find the home that fits.</p></div>
           </div>
           <div className={`screen-panel panel-discovery ${phase === 1 ? "is-active" : ""}`} inert={phase !== 1}>
-            <p className="screen-kicker">First, find your rhythm</p><h2>Which Bangkok<br /><em>feels like you?</em></h2>
-            <div className="screen-area-grid">{areas.map((item) => <button key={item.name} className={area === item.name ? "is-selected" : ""} onClick={() => { setArea(item.name); setSelected(null); goTo(.425); }}>
-              <img src={item.image} alt={item.name + " neighbourhood inspiration"} /><span><small>{item.station}</small><strong>{item.name}</strong><b>Explore homes</b></span>
-            </button>)}</div>
-            <p className="screen-footnote">Choose an area, or keep scrolling to explore {area}.</p>
+            <p className="screen-kicker">First, select your university</p><h2>Which university<br /><em>earned your spot?</em></h2>
+            <div className="screen-area-grid">{featuredUniversities.map((item) => <a key={item.name} href={`/student-housing?university=${encodeURIComponent(item.name)}#student-intake`}>
+              <img src={item.image} alt="" /><span><small>{item.location}</small><strong>{item.name}</strong><b>Explore units</b></span>
+            </a>)}</div>
+            <p className="screen-footnote">Choose your university to update your exchange brief, or keep scrolling to explore the current collection.</p>
           </div>
           <div className={`screen-panel panel-discovery ${phase === 2 ? "is-active" : ""}`} inert={phase !== 2}>
-            <p className="screen-kicker">{area} · Your shortlist</p><h2>Find a place<br /><em>to call your own.</em></h2>
+            <p className="screen-kicker">{area} · Your shortlist</p><h2>Find a place<br /><em>to call your own.</em></h2><p className="screen-panel-note">Here for six months? Just pick up the phone and WhatsApp Mark.</p>
             <div className="screen-listing-grid">{filtered.slice(0, 3).map((item) => <button key={item.id} className={featured?.id === item.id ? "is-selected" : ""} onClick={() => { setSelected(item.id); goTo(.515); }}>
               <ListingImage src={item.image} alt={item.name} /><span><small>{item.bedrooms} bed · {item.sizeSqm} sq m</small><strong>{item.name}</strong><b>฿{item.rent.toLocaleString()} / month</b></span>
             </button>)}</div>

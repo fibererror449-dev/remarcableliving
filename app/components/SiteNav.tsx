@@ -5,12 +5,12 @@ import { studentHousingHref } from "../../lib/site-data";
 
 export type SiteSection = "residences" | "neighbourhoods" | "about" | "contact" | "student-housing" | "inventory";
 
-const links: { href: string; label: string; section: SiteSection }[] = [
-  { href: "/residences", label: "Residences", section: "residences" },
+const links: { href: string; label: string; section?: SiteSection }[] = [
+  { href: studentHousingHref, label: "Your University", section: "student-housing" },
+  { href: "/residences", label: "Condo/Apartment", section: "residences" },
   { href: "/neighbourhoods", label: "Neighbourhoods", section: "neighbourhoods" },
-  { href: "/about", label: "About us", section: "about" },
-  { href: "/inventory", label: "Inventory", section: "inventory" },
-  { href: studentHousingHref, label: "Find by university", section: "student-housing" },
+  { href: "/neighbourhoods#guide", label: "Bangkok guide" },
+  { href: "/about", label: "About Us", section: "about" },
 ];
 
 export default function SiteNav({ current }: { current?: SiteSection }) {
@@ -20,10 +20,10 @@ export default function SiteNav({ current }: { current?: SiteSection }) {
       <a className="brand" href="/" aria-label="REMARCABLE LIVING home" onClick={() => setOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
       <button className="site-nav-menu" type="button" aria-expanded={open} aria-controls="site-links" onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>
       <nav id="site-links" className={open ? "is-open" : ""} aria-label="Primary navigation">
-        {links.map((link) => <a key={link.href} href={link.href} aria-current={current === link.section ? "page" : undefined} onClick={() => setOpen(false)}>{link.label}</a>)}
-        <a className="site-nav-mobile-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined} onClick={() => setOpen(false)}>Talk to Mark</a>
+        {links.map((link) => <a key={link.href} href={link.href} aria-current={link.section && current === link.section ? "page" : undefined} onClick={() => setOpen(false)}>{link.label}</a>)}
+        <a className="site-nav-mobile-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined} onClick={() => setOpen(false)}>Mark your place, Find your space.</a>
       </nav>
-      <a className="site-nav-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined}>Talk to Mark</a>
+      <a className="site-nav-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined}>Mark your place, Find your space.</a>
     </header>
   );
 }
