@@ -40,7 +40,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
             </div>
             <div className="concierge-links">
               <a className="text-link" href="/residences">See the current collection →</a>
-              <a className="text-link" href="/approach">How the search works →</a>
+              <a className="text-link" href="/about">About us →</a>
             </div>
           </div>
           <IntakeForm initialPersona={persona} listingName={listing} />

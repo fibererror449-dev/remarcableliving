@@ -40,9 +40,16 @@ export const journeySteps = [
   { title: "View", note: "Visit the strongest options and continue with the home that fits." },
 ];
 
+export const aboutValues = [
+  { title: "We only shortlist what we would view ourselves", note: "Every home on your list has been compared on building, commute, unit condition, and asking rent. If it falls short on any of the four, it does not go on the list." },
+  { title: "Availability and rent are confirmed before you travel", note: "Bangkok listings go stale quickly. We reconfirm that the unit is still available and what the owner is asking before we arrange a viewing." },
+  { title: "The commute is measured door to door", note: "A district name says little about your day. We look at the walk to the station, the line you will ride, and the time to your campus or office." },
+  { title: "The decision stays yours", note: "We answer questions, arrange viewings, and help with the steps to move-in. We do not push a unit because it is convenient for us." },
+];
+
 export const exploreTiles = [
   { title: "Neighbourhoods", note: "Compare Ari, Ratchathewi, Thonglor and Rama 9 by commute, space and rent.", href: "/neighbourhoods" },
-  { title: "Our approach", note: "How a brief becomes a shortlist, and what is checked before you travel.", href: "/approach" },
+  { title: "About us", note: "Who we are, what we stand for, and how a brief becomes a home.", href: "/about" },
   { title: "Bangkok guide", note: "What to know about the area before you sign for the room.", href: "/neighbourhoods#guide" },
   { title: "Talk to Mark", note: "Send your requirements and get a practical shortlist back.", href: "/contact" },
 ];
