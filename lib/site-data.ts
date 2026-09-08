@@ -19,6 +19,10 @@ export const universityOptions = [
   "Kasem Bundit University",
   "Bangkok University",
   "UTCC",
+  "KU Kasetsart University",
+  "Dhurakij Pundit University",
+  "Thammasat University, Tha Prachan Campus",
+  "Thammasat University, Rangsit Campus",
   "Another Bangkok university",
 ];
 

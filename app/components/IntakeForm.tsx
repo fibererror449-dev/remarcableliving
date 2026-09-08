@@ -45,7 +45,7 @@ export default function IntakeForm({ initialPersona = "exchange", personas = ["e
         <label><span>Expected start date</span><input name="startDate" type="month" /></label>
         <label><span>Room setup</span><input name="roomType" placeholder="Single studio / shared room" /></label>
         <label><span>Must-haves</span><input name="note" placeholder="Quiet floor, fast internet" /></label>
-        <button className="btn gold" type="submit">Exchange intake to Mark <span>↗</span></button>
+        <button className="btn gold" type="submit">Send details to Mark’s Team <span>↗</span></button>
       </form>}
       {personas.includes("intern") && <form id="intern-intake" role={personas.length > 1 ? "tabpanel" : undefined} hidden={persona !== "intern"} onSubmit={(event) => handleSubmit(event, "intern")} className="concierge-form">
         <label><span>Your name</span><input required name="name" placeholder="Full name" /></label>
