@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import BrandLogo from "./BrandLogo";
 import { studentHousingHref } from "../../lib/site-data";
 
 export type SiteSection = "residences" | "neighbourhoods" | "about" | "contact" | "student-housing" | "inventory";
@@ -17,7 +18,7 @@ export default function SiteNav({ current }: { current?: SiteSection }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="site-nav">
-      <a className="brand" href="/" aria-label="REMARCABLE LIVING home" onClick={() => setOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
+      <a className="brand" href="/" aria-label="REMARCABLE LIVING home" onClick={() => setOpen(false)}><BrandLogo /></a>
       <button className="site-nav-menu" type="button" aria-expanded={open} aria-controls="site-links" onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>
       <nav id="site-links" className={open ? "is-open" : ""} aria-label="Primary navigation">
         {links.map((link) => <a key={link.href} href={link.href} aria-current={link.section && current === link.section ? "page" : undefined} onClick={() => setOpen(false)}>{link.label}</a>)}

@@ -73,3 +73,46 @@
  .cinema-ending{font-size:12px;line-height:1.6}.cinema-ending span{font-size:10px;max-width:240px}.cinema-destination .search-strip{padding:24px 20px;margin-bottom:35px}
 }
 @media(prefers-reduced-motion:reduce){.cinema{height:auto}.cinema-stage{position:relative}.cinema-screen,.cinema-progress,.cinema-chapters{display:none!important}.cinema-plane{transform:none!important}.cinema-photo:not(:first-child){display:none}.cinema-copy{opacity:1!important}html{scroll-behavior:auto}}
+
+/* Keep copy readable and contained while the laptop camera moves behind it. */
+.cinema-copy{z-index:7;width:min(55%,48rem);max-width:calc(100% - 14%);overflow-wrap:break-word}
+.cinema-eyebrow{font-size:14px;line-height:1.5;letter-spacing:.08em;max-width:48ch}
+.cinema-intro{font-size:18px;line-height:1.55;max-width:42ch}
+.cinema-actions{font-size:16px;flex-wrap:wrap;gap:16px 24px}
+.cinema-caption,.cinema-skip,.cinema-motion-toggle,.cinema-chapters button{font-size:12px}
+.cinema-ending,.cinema-ending span{font-size:16px}
+.cinema-nav nav{gap:20px}
+.screen-masthead .brand-logo{height:85%;gap:.6cqw}
+.screen-masthead .brand-symbol{filter:none;mix-blend-mode:multiply;width:2.4cqw;height:100%}
+.screen-masthead .brand-wordmark{font-size:1.1cqw}
+.screen-masthead .brand-tagline{font-size:.55cqw;margin-top:.3cqw}
+.cinema-contact{flex-shrink:0;white-space:nowrap;text-align:center;font-size:14px;line-height:1.4;padding:10px 14px}
+@media(min-width:1101px) and (max-width:1399px){
+  .cinema-nav{gap:14px;padding-inline:24px}
+  .cinema-nav nav{gap:14px;font-size:14px}
+  .cinema-nav .brand-wordmark{font-size:14px}
+  .cinema-nav .brand-symbol{width:32px}
+}
+@media(max-width:900px){
+  .cinema-copy{width:72%}
+  .cinema-caption{display:none}
+}
+@media(max-width:699px){
+  .cinema-copy,.cinema-copy.is-room{width:auto;max-width:none}
+  .cinema-eyebrow{font-size:12px;line-height:1.4;margin-bottom:14px}
+  .cinema-intro{font-size:16px;max-width:38ch;margin:18px 0}
+  .cinema-actions{font-size:14px;gap:14px}
+  .cinema-caption{display:none}
+  .cinema-ending,.cinema-ending span{font-size:14px}
+  .screen-masthead .brand-symbol{width:5cqw}
+  .screen-masthead .brand-wordmark{font-size:2.4cqw}
+  .screen-masthead .brand-tagline{font-size:1.2cqw}
+  .screen-panel-note{font-size:3cqw;line-height:1.4;margin:0 0 4cqw}
+}
+@media(max-height:650px){
+  .cinema-copy,.cinema-copy.is-room{top:100px}
+  .cinema h1,.cinema-copy.is-room h2{font-size:clamp(32px,7vh,60px)}
+  .cinema-eyebrow{margin-bottom:10px}
+  .cinema-intro{margin:12px 0;font-size:16px}
+  .cinema-actions{margin-top:12px}
+}
