@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import "./cinematic-hero.css";
 import ListingImage from "./ListingImage";
+import BrandLogo from "./components/BrandLogo";
 import { studentHousingHref } from "../lib/site-data";
 
 type Listing = { id: number; slug: string; name: string; district: string; rent: number; image: string; bedrooms: number; sizeSqm: number };
@@ -126,7 +127,8 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
         // a laptop; the extra height is revealed only once the zoom is
         // complete, over a darkened room, so it never spills onto the keyboard.
         clipPath: `inset(0 0 ${(layoutHeight - photographedHeight) * (1 - reveal * (1 - livingMix))}px 0)`,
-        opacity: String(staticMode ? 0 : (1 - ramp(p, .635, .67))),
+        // Reveal the laptop UI only after the readable hero copy has faded.
+        opacity: String(staticMode ? 0 : ramp(p, .09, .15) * (1 - ramp(p, .635, .67))),
         });
       }
       if (backdrop.current) backdrop.current.style.opacity = String(layoutHeight > photographedHeight + 1 ? reveal * (1 - ramp(p, .635, .67)) : 0);
@@ -212,7 +214,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
         <div className="cinema-shade" aria-hidden="true" />
         <div className="cinema-backdrop" ref={backdrop} aria-hidden="true" />
         <header className="cinema-nav" inert={!chromeVisible}>
-          <a className="cinema-brand" href="#home" onClick={() => setMenuOpen(false)}><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
+          <a className="cinema-brand" href="#home" aria-label="REMARCABLE LIVING home" onClick={() => setMenuOpen(false)}><BrandLogo /></a>
           <button className="cinema-menu" aria-expanded={menuOpen} aria-controls="cinema-links" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close" : "Menu"}</button>
           <nav id="cinema-links" className={menuOpen ? "is-open" : ""} aria-label="Primary navigation">
             <a href={studentHousingHref}>Your University</a>
@@ -237,7 +239,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
         </div>
 
         <div className="cinema-screen" ref={screen} inert={!uiInteractive} aria-hidden={!uiInteractive}>
-          <div className="screen-masthead"><span>REMARCABLE LIVING</span><small>Mark your place, Find your space.</small></div>
+          <div className="screen-masthead"><BrandLogo /></div>
           <div className={`screen-panel panel-welcome ${phase === 0 ? "is-active" : ""}`} inert={phase !== 0}>
             <img src="/bangkok/green-condo.jpg" alt="" />
             <div><p className="screen-kicker">Your Bangkok chapter</p><h2>A city of possibilities.<br /><em>One place for you.</em></h2><p>Start with the neighbourhood.<br />Find the home that fits.</p></div>
