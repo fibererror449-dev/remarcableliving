@@ -1,15 +1,16 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "../../chatgpt-auth";
+import { getAdminUser, isSameOrigin } from "../../../lib/admin";
 import { ensureListings, listListings } from "../../../lib/listings";
 
 export async function GET(request: Request) {
   const includeClosed = new URL(request.url).searchParams.get("admin") === "1";
-  if (includeClosed && !(await getChatGPTUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
+  if (includeClosed && !(await getAdminUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
   return Response.json({ listings: await listListings(includeClosed) });
 }
 
 export async function POST(request: Request) {
-  if (!(await getChatGPTUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
+  if (!(await getAdminUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
+  if (!isSameOrigin(request)) return Response.json({ error: "Invalid request origin" }, { status: 403 });
   const body = await request.json() as Record<string, unknown>;
   const required = ["name", "district", "rent", "sizeSqm", "stationType", "stationName", "walkMinutes", "latitude", "longitude", "lastVerified"];
   if (required.some((key) => body[key] === undefined || body[key] === "")) return Response.json({ error: "Complete all required fields" }, { status: 400 });

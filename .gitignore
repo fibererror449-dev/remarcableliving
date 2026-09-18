@@ -62,3 +62,7 @@ yarn-error.log*
 # CODEX-AUDIT-BRIEF.md above, so it must not reach this public repository.
 # The published QA record is design-qa.md.
 /design/HERO-CHECKPOINT.md
+
+# Local preview runtime values
+/.dev.vars
+/.sites-runtime/

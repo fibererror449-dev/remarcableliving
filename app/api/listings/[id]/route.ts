@@ -1,10 +1,11 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "../../../chatgpt-auth";
+import { getAdminUser, isSameOrigin } from "../../../../lib/admin";
 import { ensureListings } from "../../../../lib/listings";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  if (!(await getChatGPTUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
+  if (!(await getAdminUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await context.params;
+  if (!isSameOrigin(request)) return Response.json({ error: "Invalid request origin" }, { status: 403 });
   const body = await request.json() as { status?: string };
   if (!body.status || !["available", "viewing", "rented", "verify"].includes(body.status)) return Response.json({ error: "Invalid status" }, { status: 400 });
   await ensureListings();
