@@ -7,6 +7,7 @@
 .concierge-steps{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:8px}
 .concierge-steps div{display:grid;grid-template-columns:40px 1fr;padding:16px 0;border-bottom:1px solid var(--line);font-size:16px}
 .concierge-steps b{color:var(--gold);font-weight:600}
+.concierge-steps strong{display:block;margin-bottom:4px;color:#fff;font-weight:600}
 .concierge-card{display:flex;flex-direction:column;gap:24px;padding:40px;background:rgba(17,17,15,.82);border:1px solid var(--line)}
 .intake-switcher{display:grid;grid-template-columns:1fr 1fr;border:1px solid rgba(255,255,255,.4)}
 .intake-switcher button{appearance:none;min-height:48px;padding:0 16px;border:0;color:#fff;background:none;font-size:var(--text-meta);font-weight:600;cursor:pointer}

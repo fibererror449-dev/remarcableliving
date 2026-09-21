@@ -1,4 +1,5 @@
 import { studentHousingHref, whatsappUrl } from "../../lib/site-data";
+import BrandLogo from "./BrandLogo";
 
 export default function SiteFooter() {
   return (
@@ -6,17 +7,17 @@ export default function SiteFooter() {
       <div className="container">
         <div className="cols">
           <div>
-            <a className="brand" href="/" aria-label="REMARCABLE LIVING home"><span className="brand-mark">R</span><span>REMARCABLE LIVING</span></a>
+            <a className="brand" href="/" aria-label="REMARCABLE LIVING home"><BrandLogo /></a>
             <p className="tagline">Mark your place. Find your space.</p>
           </div>
           <div>
             <h4>Site</h4>
-            <a href="/residences">Residences</a>
+            <a href={studentHousingHref}>Your University</a>
+            <a href="/residences">Condo/Apartment</a>
             <a href="/neighbourhoods">Neighbourhoods</a>
-            <a href="/about">About us</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
+            <a href="/about">About Us</a>
             <a href="/inventory">Complete inventory</a>
-            <a href={studentHousingHref}>Find by university</a>
           </div>
           <div>
             <h4>Contact</h4>

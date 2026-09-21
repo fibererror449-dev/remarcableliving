@@ -109,3 +109,23 @@ em{color:var(--gold);font-style:normal;font-weight:400}
 .site-nav-mobile-contact{display:none}
 @media(max-width:1100px){.site-nav-mobile-contact{display:flex}}
 .site-footer .cols a.brand{display:flex}
+
+/* One consistent lockup across navigation, footer and the cinematic laptop. */
+.brand-logo{display:inline-flex;align-items:center;gap:10px;max-width:100%;color:inherit}
+.brand-symbol{display:block;width:40px;height:48px;object-fit:contain;flex:none;filter:invert(1);mix-blend-mode:screen}
+.brand-wordmark{display:block;font-family:var(--font-body);font-size:16px;font-weight:700;letter-spacing:.07em;line-height:1.25;white-space:nowrap}
+.brand-tagline{display:block;margin-top:5px;font-size:9px;font-weight:400;letter-spacing:.09em;text-transform:uppercase}
+.site-footer .brand-logo .brand-wordmark{font-size:18px}
+.site-nav nav{gap:20px}
+.site-nav-contact{flex-shrink:0;white-space:nowrap;text-align:center;font-size:14px;line-height:1.4;padding:10px 14px}
+@media(min-width:1101px) and (max-width:1399px){
+  .site-nav{gap:14px;padding-inline:24px}
+  .site-nav nav{gap:14px;font-size:14px}
+  .site-nav .brand-wordmark{font-size:14px}
+  .site-nav .brand-symbol{width:32px}
+}
+@media(max-width:699px){
+  .brand-wordmark{font-size:13px}
+  .brand-tagline{font-size:7px}
+  .brand-symbol{width:30px;height:38px}
+}

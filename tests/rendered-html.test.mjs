@@ -88,6 +88,14 @@ test("fans the homepage sections out to their own routes", async () => {
   assert.equal(studentResponse.status, 200);
   const student = await studentResponse.text();
   assert.match(student, /Chulalongkorn University/);
+  assert.match(student, /KU Kasetsart University/);
+  assert.match(student, /Dhurakij Pundit University/);
+  assert.match(student, /Thammasat University, Tha Prachan Campus/);
+  assert.match(student, /Thammasat University, Rangsit Campus/);
+  assert.match(student, /Start With a Tap/);
+  assert.match(student, /Arrive Stress-Free/);
+  assert.match(student, /Send details to Mark’s Team/);
+  assert.doesNotMatch(student, /Compare neighbourhoods →/);
   assert.match(student, /id="exchange-intake"/);
   assert.doesNotMatch(student, /id="intern-intake"/);
 });
