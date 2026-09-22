@@ -40,3 +40,14 @@ export async function listListings(includeClosed = false): Promise<Listing[]> {
 export async function getListing(slug: string): Promise<Listing | null> {
   try { await ensureListings(); const db = await getDb(); const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>(); return row ? mapRow(row) : (fallbackListings.find((listing) => listing.slug === slug) ?? null); } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
 }
+
+export type ListingMedia = { id: string; mime: string; caption: string; attribution: "owner" | "agent" | "admin"; cover: boolean };
+
+/** Approved import media in publication order; drafts never reach listing_media. */
+export async function listListingMedia(listingId: number): Promise<ListingMedia[]> {
+  try {
+    const db = await getDb();
+    const result = await db.prepare("SELECT m.id, m.mime, p.caption, p.attribution, p.cover FROM listing_media p JOIN import_media m ON m.id = p.media_id WHERE p.listing_id = ? ORDER BY p.position").bind(listingId).all();
+    return result.results.map((row) => ({ id: String(row.id), mime: String(row.mime), caption: String(row.caption), attribution: row.attribution as ListingMedia["attribution"], cover: row.cover === 1 }));
+  } catch { return []; }
+}

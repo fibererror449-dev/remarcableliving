@@ -15,6 +15,34 @@
       "when": 1787750390504,
       "tag": "0001_tense_jamie_braddock",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790101029062,
+      "tag": "0002_lucky_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790101258981,
+      "tag": "0003_silly_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790101313073,
+      "tag": "0004_watery_catseye",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790108612658,
+      "tag": "0005_solid_quasar",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const body = await request.json() as { status?: string };
   if (!body.status || !["available", "viewing", "rented", "verify"].includes(body.status)) return Response.json({ error: "Invalid status" }, { status: 400 });
   await ensureListings();
-  await env.DB.prepare("UPDATE listings SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(body.status, Number(id)).run();
+  await env.DB.prepare("UPDATE listings SET status = ?, publication_version = publication_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(body.status, Number(id)).run();
   return Response.json({ ok: true });
 }

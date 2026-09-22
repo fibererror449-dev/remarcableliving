@@ -1,0 +1,70 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {chromium} from '@playwright/test';
+import {appHarness} from './app-harness.mjs';
+
+test('admin can open the import review queue and review an incomplete draft',async t=>{
+  const h=await appHarness();t.after(h.close);
+  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
+  const context=await browser.newContext({extraHTTPHeaders:{'oai-authenticated-user-id':'test-admin','oai-authenticated-user-email':'admin@example.test'}});
+  const page=await context.newPage();
+  await page.goto(h.url+'/admin');
+  await page.getByRole('link',{name:'Review imports'}).click({timeout:5000});
+  await page.getByRole('heading',{name:'Listing imports',exact:true}).waitFor();
+  const response=await context.request.post(h.url+'/api/admin/imports/credentials',{headers:{origin:h.url},data:{name:'browser test',expiresInDays:1}});
+  assert.equal(response.status(),201);const {token}=await response.json();
+  const job=await (await context.request.post(h.url+'/api/v1/imports',{headers:{authorization:`Bearer ${token}`,'idempotency-key':'browser'},data:{namespace:'browser',listings:[{reference:'one',name:'Browser draft'}]}})).json();
+  await page.reload();await page.getByRole('link',{name:'Review Browser draft'}).click();
+  await page.getByRole('heading',{name:'Browser draft',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Publish listing',exact:true}).isDisabled(),true);
+  await page.getByLabel('Name',{exact:true}).fill('Edited browser draft');
+  await page.getByRole('button',{name:'Save revision',exact:true}).click();
+  await page.getByRole('heading',{name:'Edited browser draft',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Reject draft',exact:true}).click();
+  await page.getByText('Draft rejected.',{exact:true}).waitFor();
+  const anonymous=await browser.newContext();const visitor=await anonymous.request.get(h.url+`/admin/imports/${job.results[0].draftId}`,{maxRedirects:0});
+  assert.ok([302,303,307].includes(visitor.status()));
+});
+
+test('admin completes missing facts, chooses the cover photo and publishes the listing',async t=>{
+  const h=await appHarness();t.after(h.close);
+  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
+  const context=await browser.newContext({extraHTTPHeaders:{'oai-authenticated-user-id':'test-admin','oai-authenticated-user-email':'admin@example.test'}});
+  const {token}=await (await context.request.post(h.url+'/api/admin/imports/credentials',{headers:{origin:h.url},data:{name:'publish test',expiresInDays:1}})).json();
+  const agent={authorization:`Bearer ${token}`};
+  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64');
+  const media=await (await context.request.post(h.url+'/api/v1/media',{headers:{...agent,'content-type':'image/png','x-file-name':'living.png'},data:png})).json();
+  const listing={reference:'ready',name:'Browser listing',district:'Ari',bedrooms:1,bathrooms:1,sizeSqm:34,stationType:'BTS',stationName:'Ari',walkMinutes:6,latitude:13.78,longitude:100.54,lastVerified:'2026-09-01',status:'available',media:[{id:media.id,caption:'Living room',attribution:'owner'}]};
+  const job=await (await context.request.post(h.url+'/api/v1/imports',{headers:{...agent,'idempotency-key':'ready'},data:{namespace:'browser',listings:[listing]}})).json();
+  const page=await context.newPage();
+  await page.goto(h.url+job.results[0].reviewUrl);
+  await page.getByRole('heading',{name:'Browser listing',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Publish listing',exact:true}).isDisabled(),true);
+  await page.getByLabel('Monthly rent (THB)',{exact:true}).fill('18000');
+  await page.getByLabel('Use as cover photo',{exact:true}).check();
+  await page.getByRole('button',{name:'Save revision',exact:true}).click();
+  await page.getByText('Revision saved.',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Publish listing',exact:true}).click();
+  await page.getByRole('link',{name:'View the live listing ↗'}).first().click();
+  await page.getByRole('heading',{level:1,name:'Browser listing'}).waitFor();
+  assert.ok(await page.locator(`img[src="/listing-media/${media.id}"]`).count()>0);
+});
+
+test('admin registers a chat connection, sees its client details once and can revoke it',async t=>{
+  const h=await appHarness();t.after(h.close);
+  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
+  const context=await browser.newContext({extraHTTPHeaders:{'oai-authenticated-user-id':'test-admin','oai-authenticated-user-email':'admin@example.test'}});
+  const page=await context.newPage();
+  await page.goto(h.url+'/admin/imports');
+  await page.getByText(`${h.url}/mcp`,{exact:true}).waitFor();
+  await page.getByLabel('Connection name',{exact:true}).fill('Claude');
+  await page.getByLabel('Callback URLs',{exact:true}).fill('https://claude.ai/api/mcp/auth_callback');
+  await page.getByRole('button',{name:'Register connection',exact:true}).click();
+  const clientId=await page.getByLabel('Client ID',{exact:true}).inputValue();
+  assert.match(clientId,/^[0-9a-f-]{36}$/);
+  assert.match(await page.getByLabel('Client secret',{exact:true}).inputValue(),/^rls_/);
+  await page.getByRole('button',{name:'Revoke Claude',exact:true}).click();
+  await page.getByText('Revoked',{exact:false}).first().waitFor();
+  const authorize=await context.request.get(h.url+`/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent('https://claude.ai/api/mcp/auth_callback')}`,{maxRedirects:0});
+  assert.equal(authorize.status(),400);
+});

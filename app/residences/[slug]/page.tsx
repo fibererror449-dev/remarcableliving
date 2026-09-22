@@ -4,7 +4,7 @@ import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import type { Metadata } from "next";
 import { getListingStory } from "../../../lib/listing-stories";
-import { getListing } from "../../../lib/listings";
+import { getListing, listListingMedia } from "../../../lib/listings";
 import { hasMedia } from "../../../lib/media";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ const centricAriSlug = "centric-ari-station-1br";
 const baanKlangHero = "/properties/baan-klang-krung-siam/gallery/ad-09-living-wide.jpg";
 const ashtonHero = "/properties/ashton-asoke/786342964_2664258444007827_8397648305202113964_n.jpg";
 const centricAriHero = "/properties/centric-ari-station/06-living-room-rug-edited.png";
+const suppliers = { owner: "Owner-supplied", agent: "Agent-supplied", admin: "REMARCABLE LIVING" };
 
 const baanKlangGallery = [
   { src: "/properties/baan-klang-krung-siam/gallery/ad-01-kitchen-close.jpg", alt: "Fitted kitchen with wood cabinetry, oven, refrigerator, and washing machine", caption: "Kitchen · fitted appliances" },
@@ -91,10 +92,16 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
     : slug === centricAriSlug
       ? "/properties/centric-ari-station/cinematic-walkthrough.mp4"
       : null;
-  const listingVideo = supplementaryVideo && hasMedia(supplementaryVideo) ? supplementaryVideo : null;
   const captionsTrack = "/properties/baan-klang-krung-siam-walkthrough-v2.vtt";
   const gallerySource = slug === baanKlangSlug ? baanKlangGallery : slug === ashtonSlug ? ashtonGallery : slug === centricAriSlug ? centricAriGallery : [];
-  const gallery = gallerySource.filter((photo) => hasMedia(photo.src));
+  // Imported listings carry their approved, ordered media instead of a curated gallery.
+  const importedMedia = gallerySource.length || supplementaryVideo ? [] : await listListingMedia(listing.id);
+  const importedVideo = importedMedia.find((item) => item.mime.startsWith("video/"));
+  const importedCover = importedMedia.find((item) => item.cover);
+  const listingVideo = supplementaryVideo && hasMedia(supplementaryVideo) ? supplementaryVideo : importedVideo ? `/listing-media/${importedVideo.id}` : null;
+  const gallery = gallerySource.length
+    ? gallerySource.filter((photo) => hasMedia(photo.src))
+    : importedMedia.filter((item) => item.mime.startsWith("image/")).map((item, index) => ({ src: `/listing-media/${item.id}`, alt: item.caption || `${listing.name}, photo ${index + 1}`, caption: [item.caption, suppliers[item.attribution]].filter(Boolean).join(" · ") }));
   const missingGalleryCount = gallerySource.length - gallery.length;
   const detailHero = slug === baanKlangSlug ? baanKlangHero : slug === ashtonSlug ? ashtonHero : slug === centricAriSlug ? centricAriHero : listing.image;
   const heroImage = hasMedia(detailHero) ? detailHero : listing.image;
@@ -103,7 +110,9 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
   const map = `https://www.openstreetmap.org/export/embed.html?bbox=${listing.longitude-delta}%2C${listing.latitude-delta}%2C${listing.longitude+delta}%2C${listing.latitude+delta}&layer=mapnik&marker=${listing.latitude}%2C${listing.longitude}`;
   const whatsapp = `https://wa.me/66634962466?text=${encodeURIComponent(`Hi Mark, I am interested in ${listing.name} at ฿${listing.rent.toLocaleString()}/month.`)}`;
   const statusLabel = listing.status === "available" ? "Available now" : listing.status === "viewing" ? "Viewing in progress" : listing.status === "rented" ? "Rented" : "Availability to confirm";
-  const galleryLede = missingGalleryCount > 0
+  const galleryLede = importedMedia.length
+    ? `${gallery.length} ${gallery.length === 1 ? "view" : "views"} of this home, in the order they were supplied.`
+    : missingGalleryCount > 0
     ? `${gallery.length} of ${gallerySource.length} owner-supplied views are currently available. Ask Mark for the full set.`
     : slug === ashtonSlug
       ? "Nine owner-supplied views across the panoramic living areas, bedrooms, bathroom suite, and private hallway."
@@ -115,7 +124,7 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
     <header className="detail-hero">
       <div className="detail-hero-image">
         <ListingImage src={heroImage} alt={`Interior of ${listing.name} near ${listing.stationName}`} />
-        <span>{usesDigitalStyling ? "Digitally styled owner photography" : "Owner-supplied photography"}</span>
+        <span>{usesDigitalStyling ? "Digitally styled owner photography" : importedCover ? `${suppliers[importedCover.attribution]} photography` : "Owner-supplied photography"}</span>
       </div>
       <div className="detail-hero-copy">
         <span className={`chip ${listing.status}`}>{statusLabel}</span>
@@ -133,10 +142,10 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         <div className="residence-film-copy">
           <p className="eyebrow dark"><span /> {usesDigitalStyling ? "AI-assisted walkthrough concept" : "Walk through the home"}</p>
           <h2>{usesDigitalStyling ? "Move through the compact plan." : "See how the rooms connect."}</h2>
-          <p>{usesDigitalStyling ? "This cinematic walkthrough was created from the supplied room photographs to illustrate the flow between spaces. Confirm scale, finishes, and furnishings during the viewing." : "The complete REMARCABLE LIVING tour is included so you can judge the scale, daylight, layout, and condition before arranging a viewing."}</p>
+          <p>{usesDigitalStyling ? "This cinematic walkthrough was created from the supplied room photographs to illustrate the flow between spaces. Confirm scale, finishes, and furnishings during the viewing." : importedVideo ? `${importedVideo.caption ? `${importedVideo.caption}. ` : ""}${importedVideo.attribution === "admin" ? "Filmed by REMARCABLE LIVING" : `Supplied by the ${importedVideo.attribution}`} so you can judge the scale, daylight, and layout before arranging a viewing.` : "The complete REMARCABLE LIVING tour is included so you can judge the scale, daylight, layout, and condition before arranging a viewing."}</p>
         </div>
         <video controls playsInline preload="metadata" poster={heroImage} aria-label={`${listing.name} walkthrough`}>
-          <source src={listingVideo} type="video/mp4" />
+          <source src={listingVideo} type={importedVideo && !supplementaryVideo ? importedVideo.mime : "video/mp4"} />
           {slug === baanKlangSlug && hasMedia(captionsTrack) && <track kind="captions" src={captionsTrack} srcLang="en" label="English" default />}
           Your browser does not support this property video.
         </video>
