@@ -26,13 +26,17 @@ export function canonical(value: unknown): string {
   if (value && typeof value === 'object') return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical((value as Record<string,unknown>)[k])).join(',')+'}';
   return JSON.stringify(value);
 }
-export async function bodyJson(request: Request, max = 1048576): Promise<Record<string, unknown>> {
-  if (!request.headers.get('content-type')?.startsWith('application/json')) throw new ApiError(415,'Use application/json');
-  if (!request.body) throw new ApiError(400,'JSON body required');
+export async function bodyText(request: Request, max: number): Promise<string> {
+  if (!request.body) throw new ApiError(400,'Request body required');
   const reader = request.body.getReader(); const chunks: Uint8Array[]=[]; let size=0;
   while(true) { const {value,done}=await reader.read(); if(done) break; size+=value.length; if(size>max){await reader.cancel(); throw new ApiError(413,`Request exceeds ${max/1048576} MiB`);} chunks.push(value); }
   const bytes=new Uint8Array(size); let offset=0; for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
-  try { const value=JSON.parse(new TextDecoder().decode(bytes)); if(!value || typeof value!=='object' || Array.isArray(value)) throw new Error(); return value; }
+  return new TextDecoder().decode(bytes);
+}
+export async function bodyJson(request: Request, max = 1048576): Promise<Record<string, unknown>> {
+  if (!request.headers.get('content-type')?.startsWith('application/json')) throw new ApiError(415,'Use application/json');
+  const text=await bodyText(request,max);
+  try { const value=JSON.parse(text); if(!value || typeof value!=='object' || Array.isArray(value)) throw new Error(); return value; }
   catch { throw new ApiError(400,'Expected a JSON object'); }
 }
 export function audit(env: ImportEnv, actor: Actor, action: string, subject: string) {

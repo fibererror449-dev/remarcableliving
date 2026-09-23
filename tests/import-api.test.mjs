@@ -2,6 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { harness, adminHeaders } from './import-harness.mjs';
 
+test('enum fields must be strings rather than arrays that stringify to valid enum values',async t=>{
+  const h=await harness();t.after(h.close);const {token}=await h.issue();
+  const response=await h.request('/api/v1/imports/validate',{method:'POST',token,json:{namespace:'drive',listings:[{reference:'typed',name:'Typed listing',status:['available'],stationType:['BTS']}]}});
+  assert.equal((await response.json()).results[0].outcome,'invalid');
+});
+
 test('an admin-issued credential creates a private retrievable incomplete draft', async t => {
   const h = await harness(); t.after(h.close);
   const {token} = await h.issue();

@@ -14,7 +14,7 @@ export async function harness(bindings = {}) {
     for (const statement of sql.split('--> statement-breakpoint').map(s=>s.trim()).filter(Boolean)) await db.prepare(statement).run();
   }
   async function request(path, { method = 'GET', json, token, headers = {}, body, redirect = 'manual' } = {}) {
-    const response = await mf.dispatchFetch(origin + path, { method, redirect, headers: { ...(json === undefined ? {} : {'content-type':'application/json'}), ...(token ? {authorization:`Bearer ${token}`} : {}), ...headers }, body: json === undefined ? body : JSON.stringify(json) });
+    const response = await mf.dispatchFetch(origin + path, { method, redirect, ...(body instanceof ReadableStream ? {duplex:'half'} : {}), headers: { ...(json === undefined ? {} : {'content-type':'application/json'}), ...(token ? {authorization:`Bearer ${token}`} : {}), ...headers }, body: json === undefined ? body : JSON.stringify(json) });
     return response;
   }
   async function issue() {

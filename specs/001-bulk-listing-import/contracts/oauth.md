@@ -27,10 +27,12 @@ Revoking a client revokes all its grants immediately.
    callback with `code` (one-use, 5 minutes) or `error=access_denied`, plus `state` and `iss`.
 4. `POST /oauth/token` (form) `grant_type=authorization_code, code, redirect_uri, client_id,
    code_verifier, resource?` → `{access_token (1 h), token_type:'Bearer', expires_in, refresh_token
-   (30 days), scope}`. The first attempt consumes the code; replaying a redeemed code revokes the
-   grant it created.
-5. `grant_type=refresh_token, refresh_token, client_id` rotates both tokens. Replaying a used refresh
+   (30 days), scope}`. Successful redemption consumes the code and creates its grant/tokens atomically; invalid
+   verification from its registered client also consumes the code. Replaying a redeemed code revokes
+   the grant it created, including concurrent redemption.
+5. `grant_type=refresh_token, refresh_token, client_id, resource?` rotates both tokens atomically.
+   A supplied resource must match the original grant. A supplied scope must match its granted scopes. Replaying a used refresh
    token revokes the grant. Errors: 400 `invalid_request|invalid_grant|unsupported_grant_type`,
-   401 `invalid_client`.
+   401 `invalid_client`. Form bodies are bounded by actual streamed bytes: 4 KiB consent, 8 KiB token.
 All codes, consents and tokens are random 256-bit values stored as SHA-256 hashes. Access also
 requires the owner to remain in ADMIN_EMAILS. Kill switch off → 503 on /oauth/*.

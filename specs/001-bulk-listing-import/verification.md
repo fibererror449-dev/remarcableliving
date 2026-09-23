@@ -49,3 +49,17 @@ Local evidence only. External checks (T013, T014) are pending and must not be re
 Register Claude (`https://claude.ai/api/mcp/auth_callback`) and ChatGPT callbacks as shown in each
 client, connect `<SITE_ORIGIN>/mcp`, import one draft from each, refresh after an hour, revoke, and
 record results here. Not yet performed.
+
+
+## Cleanup review — 2026-09-23
+PR #10 was already merged at 8be89a7. Reviewed the merged implementation before first deployment.
+- Fixed MCP Origin validation (foreign browser origins rejected; headerless server clients allowed).
+- Made authorization-code consumption + grant/token issuance one atomic D1 batch, and refresh
+  consumption + rotation one atomic batch. Concurrent/replayed codes revoke the resulting grant.
+- Bound refresh requests to their original resource and granted scopes.
+- Enforced OAuth form sizes on actual streamed bytes, including bodies without Content-Length.
+- Rejected non-string enum values instead of accepting arrays through string coercion.
+- Added five public-interface regressions for these cases. TypeScript check passed. Full `npm test` passed:
+  46 tests, 44 passed, 2 existing skips, 0 failures.
+- Read-only production check: spoofed oai-authenticated headers on /api/media received 403.
+- Deployment preserves public audience and leaves IMPORTS_ENABLED=0 until account smoke testing.
