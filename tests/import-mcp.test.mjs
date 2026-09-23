@@ -44,6 +44,35 @@ async function connect(h,{scope,redeem=true}={}) {
 const mcp=(h,token,message)=>h.request('/mcp',{method:'POST',token,headers:{accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},json:message});
 const call=async (h,token,name,args)=>(await (await mcp(h,token,rpc('tools/call',{name,arguments:args}))).json()).result;
 
+test('MCP rejects foreign browser origins but accepts server clients without Origin',async t=>{
+  const h=await harness();t.after(h.close);const {token}=await h.issue();
+  const denied=await h.request('/mcp',{method:'POST',token,headers:{origin:'https://attacker.example'},json:rpc('ping')});
+  assert.equal(denied.status,403);
+  assert.equal((await mcp(h,token,rpc('ping'))).status,200);
+});
+
+test('refresh refuses a different resource without consuming the valid refresh token',async t=>{
+  const h=await harness();t.after(h.close);const {client,tokens}=await connect(h);
+  const refresh=resource=>h.request('/oauth/token',{method:'POST',...form({grant_type:'refresh_token',refresh_token:tokens.refresh_token,client_id:client.id,resource})});
+  assert.equal((await refresh('https://elsewhere.example/mcp')).status,400);
+  assert.equal((await refresh(`${origin}/mcp`)).status,200);
+});
+
+test('concurrent code redemption revokes any token issued for the replayed code',async t=>{
+  const h=await harness();t.after(h.close);const {exchange}=await connect(h,{redeem:false});
+  const responses=await Promise.all([exchange({}),exchange({})]);
+  assert.deepEqual(responses.map(r=>r.status).sort(),[200,400]);
+  const tokens=await responses.find(r=>r.status===200).json();
+  assert.equal((await mcp(h,tokens.access_token,rpc('ping'))).status,401);
+});
+
+test('OAuth form limits apply to streamed bodies without a Content-Length header',async t=>{
+  const h=await harness();t.after(h.close);
+  const body=new ReadableStream({start(controller){controller.enqueue(new TextEncoder().encode('padding='+'x'.repeat(9000)));controller.close();}});
+  const response=await h.request('/oauth/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body});
+  assert.equal(response.status,413);
+});
+
 test('an admin-approved chat client saves private drafts through MCP tools but cannot publish',async t=>{
   const h=await harness();t.after(h.close);
   const {client,query,tokens}=await connect(h);

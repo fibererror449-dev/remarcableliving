@@ -19,8 +19,8 @@ export function validatePayload(value: unknown): {payload?:DraftPayload;errors:s
   for(const [key,max] of Object.entries(strings)) if(row[key]!==undefined && (typeof row[key]!=='string' || (row[key] as string).length>max || (['reference','name'].includes(key) && !(row[key] as string).trim()))) errors.push(`${key} must be text (${max} characters maximum)`);
   for(const key of ['reference','name']) if(typeof row[key]!=='string' || !(row[key] as string).trim()) errors.push(`${key} is required`);
   for(const [key,[min,max,integer]] of Object.entries(numbers)) if(row[key]!==undefined && (typeof row[key]!=='number' || !Number.isFinite(row[key]) || (row[key] as number)<min || (row[key] as number)>max || (integer&&!Number.isInteger(row[key])))) errors.push(`${key} must be ${integer?'an integer':'a number'} between ${min} and ${max}`);
-  if(row.status!==undefined && !['available','viewing','rented','verify'].includes(String(row.status))) errors.push('Invalid status');
-  if(row.stationType!==undefined && !['BTS','MRT'].includes(String(row.stationType))) errors.push('stationType must be BTS or MRT');
+  if(row.status!==undefined && (typeof row.status!=='string'||!['available','viewing','rented','verify'].includes(row.status))) errors.push('Invalid status');
+  if(row.stationType!==undefined && (typeof row.stationType!=='string'||!['BTS','MRT'].includes(row.stationType))) errors.push('stationType must be BTS or MRT');
   if(row.lastVerified!==undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(String(row.lastVerified)) || !Number.isFinite(Date.parse(String(row.lastVerified))) || new Date(String(row.lastVerified)).toISOString().slice(0,10)!==row.lastVerified || String(row.lastVerified)>new Date().toISOString().slice(0,10))) errors.push('lastVerified must be a real, non-future YYYY-MM-DD date');
   if(row.sourceUrl) { try {const url=new URL(String(row.sourceUrl));if(!['https:','http:'].includes(url.protocol)||url.username||url.password) throw new Error();} catch {errors.push('sourceUrl must be an HTTP(S) URL without credentials');} }
   if(row.media!==undefined) {

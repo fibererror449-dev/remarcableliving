@@ -51,6 +51,8 @@ const reply=(id:unknown,body:Record<string,unknown>,status=200)=>json({jsonrpc:'
 const failure=(id:unknown,code:number,message:string,status=200)=>reply(id,{error:{code,message}},status);
 
 export async function handleMcp(request:Request,env:ImportEnv):Promise<Response> {
+  const browserOrigin=request.headers.get('origin');
+  if(browserOrigin && browserOrigin!==siteOrigin(request,env)) return json({error:'Invalid request origin'},403);
   if(request.method==='OPTIONS') return new Response(null,{status:204,headers:{...cors,'access-control-allow-methods':'POST, OPTIONS','access-control-max-age':'86400'}});
   if(request.method!=='POST') return new Response(null,{status:405,headers:{...cors,allow:'POST, OPTIONS'}});
   if(env.IMPORTS_ENABLED!=='1') return json({error:'Agent imports are disabled'},503,cors);

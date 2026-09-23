@@ -1,4 +1,4 @@
-import { allowed, ApiError, audit, hash, json, scopes, secret, type Actor, type ImportEnv } from './core';
+import { allowed, ApiError, audit, bodyText, hash, json, scopes, secret, type Actor, type ImportEnv } from './core';
 
 // Opaque, hashed, D1-backed OAuth for chat clients. Clients are registered by an admin with exact
 // callbacks; the admin approves each connection while signed in; codes and consents are one-use;
@@ -96,7 +96,8 @@ export async function approve(request:Request,env:ImportEnv) {
   if(!email||!admin) return page(401,'Admin sign-in required','<p>Sign in with the admin account and start the connection again from your chat client.</p>');
   if(request.headers.get('origin')!==new URL(request.url).origin) return page(403,'Request blocked','<p>This approval did not come from this site.</p>');
   if(Number(request.headers.get('content-length')??0)>4096) return page(413,'Request too large','<p>Start the connection again from your chat client.</p>');
-  const form=await request.formData().catch(()=>null);
+  if(!request.headers.get('content-type')?.startsWith('application/x-www-form-urlencoded')) return page(415,'Invalid form','<p>Start the connection again from your chat client.</p>');
+  const form=new URLSearchParams(await bodyText(request,4096));
   const token=form?.get('consent');
   const consent=typeof token==='string' ? await env.DB.prepare('UPDATE oauth_consents SET consumed_at=?1 WHERE token_hash=?2 AND consumed_at IS NULL AND expires_at>?1 AND owner=?3 RETURNING *').bind(Date.now(),await hash(token),email).first<{client_id:string;owner:string;redirect_uri:string;code_challenge:string;resource:string;scopes:string;state:string|null}>() : null;
   if(!consent) return page(400,'This approval has expired','<p>Start the connection again from your chat client.</p>');
@@ -130,7 +131,7 @@ async function verifier(value:unknown) {
 export async function token(request:Request,env:ImportEnv) {
   try {
     if(!request.headers.get('content-type')?.startsWith('application/x-www-form-urlencoded')||Number(request.headers.get('content-length')??0)>8192) throw new OAuthError('invalid_request');
-    const form=new URLSearchParams(await request.text());
+    const form=new URLSearchParams(await bodyText(request,8192));
     let clientId=form.get('client_id'),clientSecret=form.get('client_secret');
     const basic=/^Basic (\S+)$/i.exec(request.headers.get('authorization')??'')?.[1];
     if(basic) {
@@ -145,31 +146,50 @@ export async function token(request:Request,env:ImportEnv) {
     const now=Date.now();
     if(form.get('grant_type')==='authorization_code') {
       const codeHash=await hash(form.get('code')??'');
-      const code=await env.DB.prepare('UPDATE oauth_codes SET consumed_at=? WHERE code_hash=? AND consumed_at IS NULL RETURNING *').bind(now,codeHash).first<{id:string;client_id:string;owner:string;redirect_uri:string;code_challenge:string;resource:string;scopes:string;expires_at:number}>();
-      if(!code) {
-        const used=await env.DB.prepare('SELECT grant_id FROM oauth_codes WHERE code_hash=?').bind(codeHash).first<{grant_id:string|null}>();
-        if(used?.grant_id) await revokeGrant(env,used.grant_id);
+      const code=await env.DB.prepare('SELECT * FROM oauth_codes WHERE code_hash=?').bind(codeHash).first<{id:string;client_id:string;owner:string;redirect_uri:string;code_challenge:string;resource:string;scopes:string;expires_at:number;consumed_at:number|null;grant_id:string|null}>();
+      if(!code || code.client_id!==client.id) throw new OAuthError('invalid_grant');
+      if(code.consumed_at!==null) {
+        if(code.grant_id) await revokeGrant(env,code.grant_id);
         throw new OAuthError('invalid_grant');
       }
       const resource=form.get('resource');
-      if(code.client_id!==client.id||code.redirect_uri!==form.get('redirect_uri')||code.expires_at<=now||(resource&&resource!==code.resource)||await verifier(form.get('code_verifier'))!==code.code_challenge||!allowed(env,code.owner)) throw new OAuthError('invalid_grant');
-      const grantId=crypto.randomUUID(),pair=await tokenPair(env,grantId,code.scopes);
-      await env.DB.batch([
+      if(code.redirect_uri!==form.get('redirect_uri')||code.expires_at<=now||(resource&&resource!==code.resource)||await verifier(form.get('code_verifier'))!==code.code_challenge||!allowed(env,code.owner)) {
+        await env.DB.prepare('UPDATE oauth_codes SET consumed_at=? WHERE id=? AND consumed_at IS NULL').bind(now,code.id).run();
+        throw new OAuthError('invalid_grant');
+      }
+      const grantId=crypto.randomUUID(),pair=await tokenPair(env,grantId,code.scopes),guard=crypto.randomUUID();
+      try { await env.DB.batch([
+        env.DB.prepare('INSERT INTO import_guards (id,valid) SELECT ?,CASE WHEN EXISTS (SELECT 1 FROM oauth_codes c JOIN oauth_clients client ON client.id=c.client_id WHERE c.id=? AND c.consumed_at IS NULL AND c.expires_at>? AND client.revoked_at IS NULL) THEN 1 ELSE 0 END').bind(guard,code.id,now),
         env.DB.prepare('INSERT INTO oauth_grants (id,client_id,owner,resource,scopes,created_at) VALUES (?,?,?,?,?,?)').bind(grantId,client.id,code.owner,code.resource,code.scopes,now),
-        env.DB.prepare('UPDATE oauth_codes SET grant_id=? WHERE id=?').bind(grantId,code.id),
+        env.DB.prepare('UPDATE oauth_codes SET consumed_at=?,grant_id=? WHERE id=?').bind(now,grantId,code.id),
         ...pair.statements,
         audit(env,{id:`oauth:${grantId}`,owner:code.owner,scopes},'oauth.granted',client.id),
-      ]);
+        env.DB.prepare('DELETE FROM import_guards WHERE id=?').bind(guard),
+      ]); } catch(error) {
+        if(!String(error).includes('import_guard_valid')) throw error;
+        const used=await env.DB.prepare('SELECT grant_id FROM oauth_codes WHERE id=?').bind(code.id).first<{grant_id:string|null}>();
+        if(used?.grant_id) await revokeGrant(env,used.grant_id);
+        throw new OAuthError('invalid_grant');
+      }
       return json(pair.body,200,{...cors,pragma:'no-cache'});
     }
     if(form.get('grant_type')==='refresh_token') {
-      const row=await env.DB.prepare("SELECT t.id,t.expires_at,t.consumed_at,g.id AS grant_id,g.client_id,g.owner,g.scopes,g.revoked_at FROM oauth_tokens t JOIN oauth_grants g ON g.id=t.grant_id WHERE t.token_hash=? AND t.kind='refresh'").bind(await hash(form.get('refresh_token')??'')).first<{id:string;expires_at:number;consumed_at:number|null;grant_id:string;client_id:string;owner:string;scopes:string;revoked_at:number|null}>();
+      const row=await env.DB.prepare("SELECT t.id,t.expires_at,t.consumed_at,g.id AS grant_id,g.client_id,g.owner,g.scopes,g.resource,g.revoked_at FROM oauth_tokens t JOIN oauth_grants g ON g.id=t.grant_id WHERE t.token_hash=? AND t.kind='refresh'").bind(await hash(form.get('refresh_token')??'')).first<{id:string;expires_at:number;consumed_at:number|null;grant_id:string;client_id:string;owner:string;scopes:string;resource:string;revoked_at:number|null}>();
       if(!row||row.client_id!==client.id||row.revoked_at||row.expires_at<=now||!allowed(env,row.owner)) throw new OAuthError('invalid_grant');
-      const consumed=row.consumed_at===null&&(await env.DB.prepare('UPDATE oauth_tokens SET consumed_at=? WHERE id=? AND consumed_at IS NULL').bind(now,row.id).run()).meta.changes===1;
-      // A replayed refresh token means it leaked or raced: end the whole connection.
-      if(!consumed) { await revokeGrant(env,row.grant_id); throw new OAuthError('invalid_grant'); }
-      const pair=await tokenPair(env,row.grant_id,row.scopes);
-      await env.DB.batch(pair.statements);
+      if(form.get('resource') && form.get('resource')!==row.resource) throw new OAuthError('invalid_target');
+      if(form.get('scope') && form.get('scope')!.split(' ').filter(Boolean).sort().join(' ')!==row.scopes.split(' ').sort().join(' ')) throw new OAuthError('invalid_scope');
+      if(row.consumed_at!==null) { await revokeGrant(env,row.grant_id); throw new OAuthError('invalid_grant'); }
+      const pair=await tokenPair(env,row.grant_id,row.scopes),guard=crypto.randomUUID();
+      try { await env.DB.batch([
+        env.DB.prepare('INSERT INTO import_guards (id,valid) SELECT ?,CASE WHEN EXISTS (SELECT 1 FROM oauth_tokens t JOIN oauth_grants g ON g.id=t.grant_id JOIN oauth_clients c ON c.id=g.client_id WHERE t.id=? AND t.consumed_at IS NULL AND t.expires_at>? AND g.revoked_at IS NULL AND c.revoked_at IS NULL) THEN 1 ELSE 0 END').bind(guard,row.id,now),
+        env.DB.prepare('UPDATE oauth_tokens SET consumed_at=? WHERE id=?').bind(now,row.id),
+        ...pair.statements,
+        env.DB.prepare('DELETE FROM import_guards WHERE id=?').bind(guard),
+      ]); } catch(error) {
+        if(!String(error).includes('import_guard_valid')) throw error;
+        await revokeGrant(env,row.grant_id);
+        throw new OAuthError('invalid_grant');
+      }
       return json(pair.body,200,{...cors,pragma:'no-cache'});
     }
     throw new OAuthError('unsupported_grant_type');
