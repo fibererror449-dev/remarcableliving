@@ -28,7 +28,7 @@ export default function AdminClient({ displayName }: { displayName: string }) {
   }, []);
   function showEditor(id: number | null) {
     setEditing(id); setFormKey((key) => key + 1); setMessage(null);
-    requestAnimationFrame(() => document.getElementById("listing-editor")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    requestAnimationFrame(() => document.getElementById("listing-editor")?.scrollIntoView({ behavior: "instant", block: "start" }));
   }
   async function saved(result: SavedListing, created: boolean) {
     setMessage({ text: created ? "Listing added." : "Listing saved.", url: result.url });

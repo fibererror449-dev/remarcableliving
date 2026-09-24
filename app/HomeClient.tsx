@@ -25,14 +25,15 @@ function scrollToContent(id: string) {
     top += node.offsetTop;
     node = node.offsetParent as HTMLElement | null;
   }
-  window.scrollTo({ top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  // Jump directly: a smooth scroll would fast-forward every scroll-driven hero scene on the way.
+  window.scrollTo({ top, behavior: "instant" });
 }
 
 function handleContentLink(event: MouseEvent) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   const link = (event.target as Element).closest("a");
   const hash = link?.getAttribute("href");
-  if (hash !== "#residences" && hash !== "#search") return;
+  if (hash !== "#residences" && hash !== "#search" && hash !== "#home") return;
   event.preventDefault();
   window.history.pushState(null, "", hash);
   scrollToContent(hash.slice(1));
