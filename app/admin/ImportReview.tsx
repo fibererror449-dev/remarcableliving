@@ -58,7 +58,7 @@ const withExpiry = (credentials: Credential[]) => credentials.map((credential) =
 const day = (time: number) => new Date(time).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 function ImportHeader({ displayName, title, crumb }: { displayName: string; title: string; crumb?: boolean }) {
-  return <header className="admin-header"><div><a className="brand" href="/" aria-label="REMARCABLE LIVING home"><BrandLogo /></a>{crumb && <a className="admin-crumb" href="/admin/imports">← All listing imports</a>}<h1>{title}</h1></div><div className="admin-account"><span>{displayName}</span><nav aria-label="Admin account"><a href="/admin">Site admin</a><a href="/">View website</a><a href="/signout-with-chatgpt?return_to=/">Sign out</a></nav></div></header>;
+  return <header className="admin-header"><div><a className="brand" href="/" aria-label="REMARCABLE LIVING home"><BrandLogo /></a>{crumb && <a className="admin-crumb" href="/admin/imports">← All listing imports</a>}<h1>{title}</h1></div><div className="admin-account"><span>{displayName}</span><nav aria-label="Admin account"><a href="/admin">Site admin</a><a href="/admin/help">How-to</a><a href="/">View website</a><a href="/signout-with-chatgpt?return_to=/">Sign out</a></nav></div></header>;
 }
 
 export function ImportQueue({ displayName }: { displayName: string }) {
