@@ -90,7 +90,9 @@ F13 sourceUrl: only a public web listing for this unit. It appears on the public
 
 F14 provenance: private notes for the admin, never shown publicly. Say which file, sheet row or message each fact came from, give message dates, and note anything uncertain. At most 8000 characters.
 
-F15 The API rejects any field not listed here. Fetch the listing schema before you start, and if it differs from this list, follow the schema.
+F15 videoUrl: optional link to this unit's video tour on YouTube or Google Drive. It plays on the public page, so use it only for a video the owner agreed to publish, and set Drive sharing to "Anyone with the link". Upload video files of 50 MiB or less as media instead; use videoUrl for longer tours.
+
+F16 The API rejects any field not listed here. Fetch the listing schema before you start, and if it differs from this list, follow the schema.
 
 G. MEDIA
 
@@ -98,7 +100,7 @@ G1 Upload only real photos and videos of this unit. Leave out floor plans, maps,
 
 G2 Accepted formats are JPEG, PNG, WebP, GIF, MP4, WebM and MOV, up to 50 MiB per file and 60 items per listing. Convert HEIC photos to JPEG without otherwise altering them. Do not compress videos over 50 MiB yourself; list them in the report instead.
 
-G3 Order the media: the best wide living-room view first, then living and dining, kitchen, bedrooms, bathrooms, balcony and view, then building and facilities. The public page plays the first video in the list, so put the full walkthrough first.
+G3 Order the media: the best wide living-room view first, then living and dining, kitchen, bedrooms, bathrooms, balcony and view, then building and facilities. The public page plays one video: the videoUrl link if set, otherwise the first video in the list, so put the full walkthrough first.
 
 G4 Cover: set coverId (or coverFile when using the helper) to one real, well-lit interior photo of the unit that is also in the media list. A video, floor plan or building exterior cannot be the cover.
 
@@ -108,7 +110,7 @@ G6 attribution: who supplied or took the photo, not who uploaded it. Use owner f
 
 H. PRIVACY
 
-H1 These fields are public: name, district, all the listing facts, description, captions, sourceUrl, and photos once published. Never put tenant or owner names, phone numbers, emails, LINE IDs, ID or passport numbers, contract terms or unit access codes in them.
+H1 These fields are public: name, district, all the listing facts, description, captions, sourceUrl, videoUrl, and photos once published. Never put tenant or owner names, phone numbers, emails, LINE IDs, ID or passport numbers, contract terms or unit access codes in them.
 
 H2 Never upload photos that show people, documents, keys or key codes, mail, or screens with personal information.
 

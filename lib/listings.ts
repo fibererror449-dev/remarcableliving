@@ -30,7 +30,7 @@ export async function ensureListings(): Promise<void> {
 }
 
 function mapRow(row: Record<string, unknown>): Listing {
-  return { id: Number(row.id), slug: String(row.slug), name: String(row.name), district: String(row.district), rent: Number(row.rent), bedrooms: Number(row.bedrooms), bathrooms: Number(row.bathrooms), sizeSqm: Number(row.size_sqm), floor: String(row.floor), stationType: String(row.station_type), stationName: String(row.station_name), walkMinutes: Number(row.walk_minutes), latitude: Number(row.latitude), longitude: Number(row.longitude), image: String(row.image), status: row.status as ListingStatus, sourceUrl: String(row.source_url), lastVerified: String(row.last_verified), description: String(row.description) };
+  return { id: Number(row.id), slug: String(row.slug), name: String(row.name), district: String(row.district), rent: Number(row.rent), bedrooms: Number(row.bedrooms), bathrooms: Number(row.bathrooms), sizeSqm: Number(row.size_sqm), floor: String(row.floor), stationType: String(row.station_type), stationName: String(row.station_name), walkMinutes: Number(row.walk_minutes), latitude: Number(row.latitude), longitude: Number(row.longitude), image: String(row.image), status: row.status as ListingStatus, sourceUrl: String(row.source_url), lastVerified: String(row.last_verified), description: String(row.description), videoUrl: String(row.video_url ?? "") };
 }
 
 export async function listListings(includeClosed = false): Promise<Listing[]> {
@@ -43,7 +43,7 @@ export async function getListing(slug: string): Promise<Listing | null> {
 
 export type ListingMedia = { id: string; mime: string; caption: string; attribution: "owner" | "agent" | "admin"; cover: boolean };
 
-/** Approved import media in publication order; drafts never reach listing_media. */
+/** Published media (approved imports and admin attachments) in page order; drafts never reach listing_media. */
 export async function listListingMedia(listingId: number): Promise<ListingMedia[]> {
   try {
     const db = await getDb();

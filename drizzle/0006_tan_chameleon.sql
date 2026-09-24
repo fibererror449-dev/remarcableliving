@@ -1,0 +1,1 @@
+ALTER TABLE `listings` ADD `video_url` text DEFAULT '' NOT NULL;

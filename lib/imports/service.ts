@@ -57,7 +57,7 @@ export async function importBatch(env: ImportEnv, actor: Actor, body: Record<str
   return getImport(env,job.id);
 }
 
-const fieldColumns:Record<string,string>={name:'name',district:'district',rent:'rent',bedrooms:'bedrooms',bathrooms:'bathrooms',sizeSqm:'size_sqm',floor:'floor',stationType:'station_type',stationName:'station_name',walkMinutes:'walk_minutes',latitude:'latitude',longitude:'longitude',lastVerified:'last_verified',status:'status',description:'description',sourceUrl:'source_url'};
+const fieldColumns:Record<string,string>={name:'name',district:'district',rent:'rent',bedrooms:'bedrooms',bathrooms:'bathrooms',sizeSqm:'size_sqm',floor:'floor',stationType:'station_type',stationName:'station_name',walkMinutes:'walk_minutes',latitude:'latitude',longitude:'longitude',lastVerified:'last_verified',status:'status',description:'description',sourceUrl:'source_url',videoUrl:'video_url'};
 function publicFacts(row:Record<string,unknown>) {return {id:row.id,slug:row.slug,...Object.fromEntries(Object.entries(fieldColumns).map(([field,column])=>[field,row[column]]))};}
 export async function listDrafts(env:ImportEnv) {
   return (await env.DB.prepare("SELECT d.id,d.revision,d.state,d.created_at,s.namespace,s.reference,json_extract(d.payload,'$.name') AS name FROM listing_drafts d JOIN import_sources s ON s.current_draft=d.id ORDER BY d.created_at DESC LIMIT 100").all()).results;
@@ -73,11 +73,11 @@ export async function publishDraft(env:ImportEnv,actor:Actor,id:string) {
   const guard=crypto.randomUUID();
   const existing=draft.listing_id ? await env.DB.prepare('SELECT slug FROM listings WHERE id=?').bind(draft.listing_id).first<{slug:string}>() : null;
   const slug=existing?.slug ?? `${p.name.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,65)||'residence'}-${String(draft.source_id).slice(0,8)}`;
-  const values=[p.name,p.district!,p.rent!,p.bedrooms!,p.bathrooms!,p.sizeSqm!,p.floor??'—',p.stationType!,p.stationName!,p.walkMinutes!,p.latitude!,p.longitude!,`/listing-media/${p.coverId}`,p.status!,p.sourceUrl??'',p.lastVerified!,p.description??''];
+  const values=[p.name,p.district!,p.rent!,p.bedrooms!,p.bathrooms!,p.sizeSqm!,p.floor??'—',p.stationType!,p.stationName!,p.walkMinutes!,p.latitude!,p.longitude!,`/listing-media/${p.coverId}`,p.status!,p.sourceUrl??'',p.lastVerified!,p.description??'',p.videoUrl??''];
   const statements=[currentGuard(env,id,guard,true)];
-  if(existing)statements.push(env.DB.prepare('UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(...values,draft.listing_id));
+  if(existing)statements.push(env.DB.prepare('UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(...values,draft.listing_id));
   else {
-    statements.push(env.DB.prepare('INSERT INTO listings (slug,name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)').bind(slug,...values));
+    statements.push(env.DB.prepare('INSERT INTO listings (slug,name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,video_url,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)').bind(slug,...values));
     statements.push(env.DB.prepare('UPDATE import_sources SET listing_id=(SELECT id FROM listings WHERE slug=?) WHERE id=?').bind(slug,draft.source_id));
   }
   statements.push(env.DB.prepare('DELETE FROM listing_media WHERE listing_id=(SELECT listing_id FROM import_sources WHERE id=?)').bind(draft.source_id));

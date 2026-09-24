@@ -29,6 +29,9 @@ The two 409s differ only in message text; clients retry when it contains `busy`.
 Optional facts and limits: GET /api/v1/listing-schema. Unknown fields are errors; missing facts are
 not, they become publication `blockers`. `media`: ≤60 `{id, caption? (≤500), attribution:
 owner|agent|admin}`, no repeated id. A reference repeated within one request is invalid.
+`videoUrl` (optional, ≤2000): a YouTube (`watch?v=`, `youtu.be/`, `shorts/`, `embed/`, `live/`) or
+Google Drive (`/file/d/<id>/…`, `open?id=`, `uc?id=`) link, stored in its canonical form; anything
+else is invalid. The public page plays it instead of any uploaded video.
 
 ## Endpoints
 **GET /api/v1/listing-schema** → 200 `{version, requiredForDraft, requiredForPublication, fields,
@@ -83,3 +86,21 @@ Signed-in allowed admin only; non-GET requests must carry this site's `Origin`. 
 - `GET|POST /api/admin/imports/oauth-clients`, `DELETE …/:id` (revokes every grant): see oauth.md.
 - Published media: `GET|HEAD /listing-media/:id`, public only once a published listing uses it,
   `cache-control: public, max-age=300`, ranges as above.
+
+## Admin listing editor (browser session, same-origin writes)
+Source of truth: lib/admin-listings.ts. Covered by tests/admin-listings.test.mjs.
+- `GET /api/listings?admin=1` → every listing plus `media:{photos, cover, video:'youtube'|'drive'|'upload'|null}`:
+  what its public page shows (hand-curated files that exist, plus attached photos; `cover` is false
+  for the stock `/bangkok/` placeholder).
+- `GET /api/listings/:id` → `{listing, media:[{id, mime, name, size, caption, attribution}], curated:{photos, video}}`.
+- `POST /api/listings` (201) and `PUT /api/listings/:id` (200) take the listing facts (numbers may be
+  strings), `image`, `videoUrl` and `media:[{id, caption?, attribution?}]` (≤60, photos in page order
+  plus at most one video) and return `{id, slug, url}`. PUT replaces every field and the attachment
+  list, keeps the slug and bumps `publication_version`, so a pending import revision becomes stale.
+  A blank or stock cover with photos uses the first photo; `image: /listing-media/:id` must name an
+  attached photo. 400 carries readable `details[]`.
+- `PATCH /api/listings/:id` `{status}` changes availability only.
+- `POST /api/listing-media`: raw file body (same types and 50 MiB limit as /api/v1/media, bytes checked
+  against the type) or JSON `{libraryKey:"uploads/<file>"}` to reuse a media-library file (the same key
+  always returns the same id) → 201 `{item:{id, mime, name, size}}`. Files stay private until a saved
+  listing attaches them.

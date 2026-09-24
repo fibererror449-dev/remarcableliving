@@ -72,7 +72,7 @@ export async function handleMcp(request:Request,env:ImportEnv):Promise<Response>
     const requested=String(params.protocolVersion??'');
     return reply(id,{result:{protocolVersion:versions.includes(requested)?requested:versions[0],capabilities:{tools:{listChanged:false}},
       serverInfo:{name:'remarcable-living-imports',title:'REMARCABLE LIVING listing imports',version:'1.0.0'},
-      instructions:'Prepare rental listings for REMARCABLE LIVING from source files the user gives you. Call get_listing_schema first. Upload real photos with upload_media, then save listings with import_listings. Everything stays a private draft until an admin reviews and publishes it; share the reviewUrl links with the user. Never invent facts, photos or captions.'}});
+      instructions:'Prepare rental listings for REMARCABLE LIVING from source files the user gives you. Call get_listing_schema first. Upload real photos and short videos with upload_media, then save listings with import_listings. For a video tour hosted on YouTube or Google Drive, put its link in videoUrl instead of uploading it. Everything stays a private draft until an admin reviews and publishes it; share the reviewUrl links with the user. Never invent facts, photos or captions.'}});
   }
   if(method==='ping') return reply(id,{result:{}});
   if(method==='tools/list') return reply(id,{result:{tools:tools.map(({name,title,description,inputSchema,annotations})=>({name,title,description,inputSchema,annotations}))}});

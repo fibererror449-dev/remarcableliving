@@ -134,8 +134,11 @@ test("keeps boutique discovery sections evidence-safe and interactive", async ()
   }
 });
 
+// The curated galleries live in lib/residence-galleries.ts so admin media counts can read them too.
+const residenceSource = async () => (await readFile(new URL("../app/residences/[slug]/page.tsx", import.meta.url), "utf8")) + (await readFile(new URL("../lib/residence-galleries.ts", import.meta.url), "utf8"));
+
 test("ships the complete Baan Klang Krung gallery, tour, and route metadata", async () => {
-  const page = await readFile(new URL("../app/residences/[slug]/page.tsx", import.meta.url), "utf8");
+  const page = await residenceSource();
   assert.match(page, /The complete residence\./);
   assert.match(page, /Fifteen owner-supplied views/);
   assert.match(page, /baan-klang-krung-siam-walkthrough-v2\.mp4/);
@@ -157,7 +160,7 @@ test("ships the complete Baan Klang Krung gallery, tour, and route metadata", as
 // wording ("Digitally styled owner photography", "AI-assisted walkthrough
 // concept") is not silently lost if the listing is ever rebuilt.
 test("ships the curated Centric Ari gallery and disclosed cinematic walkthrough", { skip: "media removed; centricAriHero was never carried into the homepage split (app/HomeClient.tsx)" }, async () => {
-  const page = await readFile(new URL("../app/residences/[slug]/page.tsx", import.meta.url), "utf8");
+  const page = await residenceSource();
   const home = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(page, /centric-ari-station\/cinematic-walkthrough\.mp4/);
   assert.match(page, /06-living-room-rug-edited\.png/);

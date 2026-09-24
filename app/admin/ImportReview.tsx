@@ -32,6 +32,7 @@ const fields: { key: string; label: string; type?: "number" | "date" | "url"; st
   { key: "lastVerified", label: "Last verified", type: "date" },
   { key: "status", label: "Availability", options: [["available", "Available"], ["viewing", "Viewing"], ["verify", "Verify first"], ["rented", "Rented / close"]] },
   { key: "sourceUrl", label: "Original listing URL", type: "url" },
+  { key: "videoUrl", label: "Video link (YouTube or Google Drive)", type: "url" },
   { key: "description", label: "Description" },
 ];
 const labels: Record<string, string> = { ...Object.fromEntries(fields.map((field) => [field.key, field.label])), coverId: "Cover photo" };
@@ -248,7 +249,7 @@ export function DraftReview({ id, displayName }: { id: string; displayName: stri
               : field.key === "description"
                 ? <textarea value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} />
                 : <input type={field.type ?? "text"} step={field.step} required={field.key === "name"} value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined} />;
-            return <label key={field.key} className={["description", "sourceUrl"].includes(field.key) ? "wide" : undefined}>{field.label}{control}</label>;
+            return <label key={field.key} className={["description", "sourceUrl", "videoUrl"].includes(field.key) ? "wide" : undefined}>{field.label}{control}</label>;
           })}
         </fieldset>
         <fieldset className="import-panel draft-media" disabled={!open || busy}>
