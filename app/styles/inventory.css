@@ -13,7 +13,7 @@
 .inventory-hero summary{cursor:pointer;font-weight:600;color:var(--gold-light);min-height:var(--touch);display:flex;align-items:center}
 .inventory-hero details p{margin:4px 0 0;font-size:15px}
 
-.inventory-controls{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:20px;align-items:end;padding:20px var(--gutter);background:var(--paper-2);border-bottom:1px solid var(--line-dark)}
+.inventory-controls{position:sticky;top:var(--nav-height);z-index:4;display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:20px;align-items:end;padding:20px var(--gutter);background:var(--paper-2);border-bottom:1px solid var(--line-dark)}
 .inventory-controls .photo-toggle{display:flex;align-items:center;gap:12px;min-height:var(--control-h);font-size:15px;cursor:pointer}
 .inventory-controls .photo-toggle input{width:22px;height:22px;margin:0;accent-color:var(--ink)}
 
