@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MAX_UPLOAD_BYTES, MEDIA_TYPES, type UploadedMedia } from "../../lib/uploads";
 
-export default function MediaLibrary({ onChooseImage }: { onChooseImage: (url: string) => void }) {
+export default function MediaLibrary({ onUse }: { onUse: (item: UploadedMedia) => void }) {
   const [items, setItems] = useState<UploadedMedia[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +65,7 @@ export default function MediaLibrary({ onChooseImage }: { onChooseImage: (url: s
 
   return <section className="media-library" aria-labelledby="media-heading">
     <h2 id="media-heading">Images &amp; videos</h2>
-    <p>Upload property photos and tours. Use an image in a new listing, or copy a media URL for placement on the site.</p>
+    <p>Upload property photos and tours. Add any file to the listing you are adding or editing below, or copy a media URL for placement on the site.</p>
     <div className="media-upload"><label htmlFor="media-file">Choose a file <span>JPG, PNG, WebP, GIF, MP4, WebM or MOV · up to 50 MB</span></label>
       <input ref={input} id="media-file" type="file" accept={Object.keys(MEDIA_TYPES).join(",")} disabled={progress !== null} />
       <button type="button" onClick={uploadFile} disabled={progress !== null}>{progress === null ? "Upload file" : progress === 100 ? "Saving…" : `Uploading ${progress}%`}</button>
@@ -79,7 +79,7 @@ export default function MediaLibrary({ onChooseImage }: { onChooseImage: (url: s
       {item.type.startsWith("video/") ? <video src={item.url} controls muted preload="metadata" aria-label={item.name} /> : <img src={item.url} alt={item.name} loading="lazy" />}
       <h3>{item.name}</h3><p>{(item.size / 1024 / 1024).toFixed(1)} MB · {item.type.startsWith("video/") ? "Video" : "Image"}</p>
       <input aria-label={`URL for ${item.name}`} readOnly value={item.url} onFocus={(event) => event.target.select()} />
-      <div><button type="button" onClick={() => copy(item)}>Copy URL</button>{item.type.startsWith("image/") && <button type="button" onClick={() => { onChooseImage(item.url); setNotice("Image selected in the new listing form."); }}>Use for new listing</button>}</div>
+      <div><button type="button" onClick={() => copy(item)}>Copy URL</button><button type="button" onClick={() => onUse(item)} aria-label={`Add ${item.name} to the listing form`}>Add to listing</button></div>
     </article>)}</div>
     {cursor && <button type="button" disabled={loading} onClick={() => load(cursor)}>Load more</button>}
   </section>;

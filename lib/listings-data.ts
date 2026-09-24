@@ -7,8 +7,15 @@ export type Listing = {
   bedrooms: number; bathrooms: number; sizeSqm: number; floor: string;
   stationType: string; stationName: string; walkMinutes: number;
   latitude: number; longitude: number; image: string; status: ListingStatus;
-  sourceUrl: string; lastVerified: string; description: string;
+  sourceUrl: string; lastVerified: string; description: string; videoUrl?: string;
 };
+
+export type MediaAttribution = "owner" | "agent" | "admin";
+/** What the residence page shows: gallery photos and the one video it plays. */
+export type MediaSummary = { photos: number; cover: boolean; video: "youtube" | "drive" | "upload" | null };
+export type AttachedMedia = { id: string; mime: string; name: string; size: number; caption: string; attribution: MediaAttribution };
+export type AdminListing = Listing & { media: MediaSummary };
+export type AdminListingDetail = { listing: Listing; media: AttachedMedia[]; curated: { photos: number; video: boolean } };
 
 export type PublicListing = Pick<Listing, "id" | "slug" | "name" | "district" | "rent" | "image" | "bedrooms" | "bathrooms" | "sizeSqm" | "status" | "stationType" | "stationName" | "walkMinutes">;
 

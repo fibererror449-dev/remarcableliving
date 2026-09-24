@@ -38,8 +38,9 @@ Local evidence only. External checks (T013, T014) are pending and must not be re
 - OAuth accepts public clients (PKCE) and optional client secrets; no dynamic registration.
 
 ## Rollout preconditions (T013)
-1. Apply migrations 0002–0005 to production D1 before or with the deploy. `PATCH
-   /api/listings/:id` now bumps `publication_version`, so existing status changes fail until 0003 runs.
+1. Apply migrations 0002–0006 to production D1 before or with the deploy. `PATCH
+   /api/listings/:id` now bumps `publication_version`, so existing status changes fail until 0003 runs;
+   the admin listing editor and import publishing write `video_url`, which 0006 adds.
 2. Set `SITE_ORIGIN=https://www.remarcableliving.co`; leave `IMPORTS_ENABLED` unset (off).
 3. Confirm the Sites edge strips client-sent `oai-authenticated-*` headers (admin auth relies on it)
    and that `/signin-with-chatgpt?return_to=/oauth/authorize…` returns to the consent page.
