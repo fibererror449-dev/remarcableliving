@@ -5,6 +5,7 @@ import CinematicHero from "./CinematicHero";
 import ExploreStrip from "./components/ExploreStrip";
 import ResidenceCollection from "./components/ResidenceCollection";
 import SiteFooter from "./components/SiteFooter";
+import SiteNav from "./components/SiteNav";
 import { AREA_ALL, BUDGET_ANY, type PublicListing } from "../lib/listings-data";
 
 // Layout coordinates ignore the cinematic transform on the live collection.
@@ -28,16 +29,24 @@ function contentTop(id: string) {
   return top;
 }
 
+// Content below the start of the listings lands under the pinned site nav, never back inside the hero.
+function landingTop(id: string) {
+  const top = contentTop(id);
+  if (top === null || id === "home" || id === "residences") return top;
+  const nav = document.querySelector<HTMLElement>(".home-nav .site-nav")?.offsetHeight ?? 0;
+  return Math.max(contentTop("residences") ?? 0, top - nav);
+}
+
 // Jump directly: a smooth scroll would fast-forward every scroll-driven hero scene on the way.
 function scrollToContent(id: string) {
-  const top = contentTop(id);
+  const top = landingTop(id);
   if (top !== null) window.scrollTo({ top, behavior: "instant" });
 }
 
 // Records the true position on the history entry so Back and Forward restore it; without it the
 // router scrolls the hash target into view, which lands inside the hero's transformed stage.
 function jumpToContent(hash: string, history: "push" | "replace") {
-  const top = contentTop(hash.slice(1));
+  const top = landingTop(hash.slice(1));
   if (top === null) return;
   const position = { __vinext_scrollX: 0, __vinext_scrollY: top };
   if (history === "push") window.history.pushState(position, "", hash);
@@ -63,20 +72,32 @@ function handleContentLink(event: MouseEvent) {
 
 export default function HomeClient({ listings }: { listings: PublicListing[] }) {
   useEffect(() => {
-    // The site-wide smooth scrolling would replay every hero scene when history restores a position.
-    const root = document.documentElement;
-    const scrollBehavior = root.style.scrollBehavior;
-    root.style.scrollBehavior = "auto";
-    // A shared /#residences link would otherwise open at the top of the hero.
-    if (window.location.hash === "#residences" || window.location.hash === "#search") jumpToContent(window.location.hash, "replace");
+    // A shared /#residences link would otherwise open at the top of the hero. Back, Forward and reload
+    // already restore where the visitor was, so only a fresh visit jumps.
+    const arrival = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    if ((!arrival || arrival.type === "navigate") && (window.location.hash === "#residences" || window.location.hash === "#search")) jumpToContent(window.location.hash, "replace");
     // Delegated anchor handling also receives native keyboard link activation.
     document.addEventListener("click", handleContentLink);
     window.addEventListener("hashchange", correctTypedHash);
     return () => {
-      root.style.scrollBehavior = scrollBehavior;
       document.removeEventListener("click", handleContentLink);
       window.removeEventListener("hashchange", correctTypedHash);
     };
+  }, []);
+  // The site nav takes over once the hero's own nav has faded out or scrolled away.
+  const [siteNavVisible, setSiteNavVisible] = useState(false);
+  useEffect(() => {
+    const heroNav = document.querySelector<HTMLElement>(".cinema-nav");
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setSiteNavVisible(!heroNav || heroNav.getBoundingClientRect().bottom <= 0 || Number(getComputedStyle(heroNav).opacity) < .05);
+    };
+    const requestUpdate = () => { if (!frame) frame = requestAnimationFrame(update); };
+    requestUpdate();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", requestUpdate); window.removeEventListener("resize", requestUpdate); };
   }, []);
   const [location, setLocation] = useState(AREA_ALL);
   const [budget, setBudget] = useState(BUDGET_ANY);
@@ -88,6 +109,7 @@ export default function HomeClient({ listings }: { listings: PublicListing[] }) 
 
   return (
     <main>
+      <div className={`home-nav${siteNavVisible ? " is-visible" : ""}`} inert={!siteNavVisible}><SiteNav homeHref="#home" /></div>
       <CinematicHero listings={listings} onExploreArea={exploreNeighbourhood}>
         <ResidenceCollection
           listings={listings}

@@ -59,8 +59,15 @@ em{color:var(--gold);font-style:normal;font-weight:400}
 .brand{display:flex;align-items:center;gap:14px;font-family:var(--font-display);font-size:var(--text-label);font-weight:600;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 .brand-mark{width:34px;height:34px;border:1px solid rgba(255,255,255,.48);display:grid;place-items:center;font:italic 19px var(--font-display);letter-spacing:0;transform:rotate(45deg)}
 
-/* Shared site nav (residence + inventory pages) */
-.site-nav{position:relative;z-index:5;height:88px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--ink);color:#fff;border-bottom:1px solid var(--line)}
+/* Shared site nav, pinned so the logo and links stay available while scrolling. */
+:root{--nav-height:88px}
+html{scroll-padding-top:var(--nav-height)}
+/* Homepage, where the scroll position drives the hero: scrolls are instant from first paint, so
+   restoring a position on Back, Forward or reload never replays it; scroll anchoring stays off, so the
+   hero settling its height after load cannot push a restored position down the page; and there is
+   no scroll padding, which would let focus scrolling move the hero (its jumps offset themselves). */
+html:has(.home-nav){scroll-behavior:auto;scroll-padding-top:0;overflow-anchor:none}
+.site-nav{position:sticky;top:0;z-index:30;height:var(--nav-height);padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--ink);color:#fff;border-bottom:1px solid var(--line)}
 .site-nav nav{display:flex;gap:32px;font-size:15px}
 .site-nav nav a{white-space:nowrap}
 .site-nav nav a[aria-current="page"]{color:var(--gold-light)}
@@ -100,13 +107,16 @@ em{color:var(--gold);font-style:normal;font-weight:400}
   .site-nav-menu{display:block}
 }
 @media(max-width:699px){
-  .site-nav{height:72px}
+  :root{--nav-height:72px}
   .brand{font-size:12px}
   .brand-mark{width:28px;height:28px;font-size:15px}
   .site-footer{padding:56px var(--gutter) 32px}
   .site-footer .bottom{flex-direction:column;gap:8px}
 }
 .site-nav-mobile-contact{display:none}
+/* Homepage: takes over once the cinematic hero's own nav has faded out. */
+.home-nav{position:fixed;inset:0 0 auto;z-index:30;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s linear .2s}
+.home-nav.is-visible{opacity:1;visibility:visible;transition:opacity .2s ease}
 @media(max-width:1100px){.site-nav-mobile-contact{display:flex}}
 .site-footer .cols a.brand{display:flex}
 
