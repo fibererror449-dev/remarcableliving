@@ -1,0 +1,17 @@
+{
+  "name": "Mark · REMARCABLE LIVING",
+  "short_name": "Mark's card",
+  "id": "/card/mark-7k9q/qr",
+  "start_url": "/card/mark-7k9q/qr",
+  "scope": "/card/mark-7k9q/",
+  "display": "standalone",
+  "background_color": "#11110f",
+  "theme_color": "#11110f",
+  "icons": [
+    {
+      "src": "/business-card/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
