@@ -3,36 +3,7 @@ import assert from 'node:assert/strict';
 import {chromium} from '@playwright/test';
 import {appHarness} from './app-harness.mjs';
 
-// Choosing an area in the neighbourhood rail filters the residences beside (or, on phones, below) it
-// and leaves their heading on screen, so the matching homes are easy to spot.
-test('a neighbourhood filters the residences and keeps them in view',async t=>{
-  const h=await appHarness();t.after(h.close);
-  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
-  for (const [width,height] of [[1440,900],[390,844]]) {
-    const page=await browser.newPage({viewport:{width,height}});
-    await page.goto(h.url+'/neighbourhoods',{waitUntil:'networkidle'});
-    const cards=page.locator('.area-listings .property-card');
-    const districts=()=>page.$$eval('.area-listings .property-info > p.meta',els=>els.map(el=>el.textContent.split(' · ')[0]));
-    const total=await cards.count();
-    const ari=page.locator('.neighbourhood-rail').getByRole('button',{name:/Ari/});
-    const expected=Number((await ari.locator('b').textContent()).match(/\d+/)[0]);
-    assert.ok(expected>0&&expected<total,`${width}px: sample data has Ari and other areas`);
-
-    await ari.click();
-    assert.equal(await ari.getAttribute('aria-pressed'),'true');
-    assert.deepEqual(await districts(),Array(expected).fill('Ari'),`${width}px: only Ari residences remain`);
-    const top=await page.locator('.area-listings-head').evaluate(el=>el.getBoundingClientRect().top);
-    const nav=await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')));
-    assert.ok(top>=nav-1&&top<=height*.6,`${width}px: residences heading on screen (top ${top})`);
-
-    await page.getByRole('button',{name:`Show all ${total} →`}).click();
-    assert.equal(await ari.getAttribute('aria-pressed'),'false');
-    assert.equal(await cards.count(),total,`${width}px: Show all restores every residence`);
-    await page.close();
-  }
-});
-
-test('university and project filters combine with neighbourhoods, survive reload and carry into residences',async t=>{
+test('three ordered sections filter independently, retain selections and show only top cards',async t=>{
   const h=await appHarness();t.after(h.close);
   const admin={'oai-authenticated-user-id':'test-admin','oai-authenticated-user-email':'admin@example.test'};
   const listings=(await (await fetch(h.url+'/api/listings?admin=1',{headers:admin})).json()).listings;
@@ -51,38 +22,64 @@ test('university and project filters combine with neighbourhoods, survive reload
   for(const [width,height] of [[1440,900],[390,844]]){
     const page=await browser.newPage({viewport:{width,height}});
     await page.goto(h.url+'/neighbourhoods',{waitUntil:'networkidle'});
-    const names=()=>page.locator('.area-listings .property-info h3').allTextContents();
-    const university=page.getByLabel('University',{exact:true});
-    const project=page.getByLabel('Development project',{exact:true});
-    await university.selectOption('Test University A');
-    assert.equal((await names()).length,2);
-    await project.selectOption('RHYTHM EKKAMAI ESTATE');
-    assert.deepEqual(await names(),['Centurion Park · 1 Bedroom']);
-    assert.equal(new URL(page.url()).searchParams.get('university'),'Test University A');
-    assert.equal(new URL(page.url()).searchParams.get('project'),'RHYTHM EKKAMAI ESTATE');
+    assert.deepEqual(await page.locator('.discovery-section > header h2').allTextContents(),['Neighbourhoods','Development projects','Universities']);
+    const areas=page.locator('#neighbourhoods');
+    const projects=page.locator('#projects');
+    const universities=page.locator('#universities');
+    const names=section=>section.locator('.property-info h3').allTextContents();
+    for(const section of [areas,projects,universities]){
+      assert.ok(await section.locator('.property-card').count()<=3);
+      assert.ok(await section.locator('.neighbourhood-card').count()<=3);
+    }
+    const areaPreview=await names(areas);
+    await universities.getByLabel('University',{exact:true}).selectOption('Test University A');
+    assert.equal((await names(universities)).length,2);
+    assert.deepEqual(await names(areas),areaPreview);
+    await projects.getByLabel('Development project',{exact:true}).selectOption('RHYTHM EKKAMAI ESTATE');
+    assert.equal((await names(projects)).length,2);
+    assert.equal((await names(universities)).length,2);
+    await areas.getByLabel('Neighbourhood',{exact:true}).selectOption('Rama 9');
+    assert.equal((await names(areas)).length,2);
+    assert.equal((await names(projects)).length,2);
+    assert.equal((await names(universities)).length,2);
     await page.reload({waitUntil:'networkidle'});
-    assert.equal(await university.inputValue(),'Test University A');
-    assert.equal(await project.inputValue(),'RHYTHM EKKAMAI ESTATE');
-    assert.deepEqual(await names(),['Centurion Park · 1 Bedroom']);
-    await page.locator('.neighbourhood-rail').getByRole('button',{name:/Rama 9/}).click();
-    await page.getByRole('heading',{name:'No residences match these filters yet.'}).waitFor();
-    assert.equal((await names()).length,0);
-    await page.getByRole('button',{name:'Clear filters',exact:true}).first().click();
-    assert.equal(await university.inputValue(),'');
-    assert.equal(await project.inputValue(),'');
-    assert.equal((await names()).length,listings.length);
-    assert.equal(new URL(page.url()).search,'');
-    await university.selectOption('Test University A');
-    await project.selectOption('AP Thai The Bangkok');
-    await page.getByRole('link',{name:'Open with filters →'}).click();
+    assert.equal(await areas.getByLabel('Neighbourhood',{exact:true}).inputValue(),'Rama 9');
+    assert.equal(await projects.getByLabel('Development project',{exact:true}).inputValue(),'RHYTHM EKKAMAI ESTATE');
+    assert.equal(await universities.getByLabel('University',{exact:true}).inputValue(),'Test University A');
+    await universities.getByLabel('University',{exact:true}).selectOption('Kasem Bundit University');
+    await universities.getByRole('heading',{name:'No residences listed here yet.'}).waitFor();
+    assert.equal((await names(areas)).length,2);
+    assert.equal((await names(projects)).length,2);
+    await universities.getByRole('button',{name:'Clear university',exact:true}).first().click();
+    assert.equal((await names(universities)).length,3);
+    assert.equal(await universities.getByRole('link',{name:/View all/}).count(),0);
+    const ari=areas.locator('.neighbourhood-rail').getByRole('button',{name:/Ari/});
+    await ari.click();
+    assert.equal(await ari.getAttribute('aria-pressed'),'true');
+    assert.ok((await names(areas)).every(name=>/Ari|Centurion/.test(name)));
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px: no overflow`);
+    await page.screenshot({path:`/private/tmp/discovery-sections-${width}.png`,fullPage:true});
+    const link=projects.getByRole('link',{name:/View all/});
+    const href=new URL(await link.getAttribute('href'),h.url);
+    assert.equal(href.searchParams.get('project'),'RHYTHM EKKAMAI ESTATE');
+    assert.equal(href.searchParams.has('area'),false);
+    assert.equal(href.searchParams.has('university'),false);
+    await link.click();
     await page.waitForURL('**/residences?**');
-    assert.deepEqual(await page.locator('.collection .property-info h3').allTextContents(),['Centric Ari Station · 1 Bedroom']);
-    assert.equal(await university.inputValue(),'Test University A');
-    assert.equal(await project.inputValue(),'AP Thai The Bangkok');
-    await page.getByLabel('Monthly budget').selectOption('Under ฿20,000');
-    await page.reload({waitUntil:'networkidle'});
-    assert.deepEqual(await page.locator('.collection .property-info h3').allTextContents(),['Centric Ari Station · 1 Bedroom']);
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px: no horizontal overflow`);
+    assert.equal((await page.locator('.collection .property-info h3').allTextContents()).length,2);
     await page.close();
   }
+});
+
+test('an unassigned university shows a useful empty state without hiding other sections',async t=>{
+  const h=await appHarness();t.after(h.close);
+  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
+  const page=await browser.newPage();
+  await page.goto(h.url+'/neighbourhoods?university=Kasem+Bundit+University',{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#neighbourhoods .property-card').count(),3);
+  assert.equal(await page.locator('#projects .property-card').count(),3);
+  assert.equal(await page.locator('#universities .property-card').count(),0);
+  await page.locator('#universities').getByRole('button',{name:'Clear university',exact:true}).first().click();
+  await page.getByRole('heading',{name:'University shortlists are coming soon.'}).waitFor();
+  assert.equal(await page.locator('#universities .neighbourhood-card').count(),0);
 });

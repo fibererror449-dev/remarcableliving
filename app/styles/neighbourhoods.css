@@ -87,3 +87,32 @@
 @media(max-width:359px){
   .area-listings .property-grid{grid-template-columns:1fr}
 }
+
+/* Each discovery section has an independent filter and a compact shortlist. */
+.discovery-jumps{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:40px}
+.discovery-jumps a{min-height:48px;display:flex;align-items:center;color:var(--gold-deep);font-weight:600}
+.discovery-section{padding:40px 0 56px;border-top:1px solid var(--line-dark);scroll-margin-top:calc(var(--nav-height) + 24px)}
+.discovery-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px;flex-wrap:wrap}
+.discovery-head .h3{font-size:clamp(32px,3vw,48px);font-weight:400}
+.discovery-filter{display:flex;align-items:end;gap:16px;max-width:100%;width:440px}
+.discovery-filter label{display:grid;gap:10px;min-width:0;flex:1}
+.discovery-filter label>span{font-size:var(--text-label);font-weight:600;letter-spacing:var(--tracking-label);text-transform:uppercase}
+.discovery-filter select{width:100%;min-height:48px;padding:12px 36px 12px 14px;border:1px solid var(--line-dark);background:var(--paper);color:var(--ink);font:inherit;text-overflow:ellipsis}
+.discovery-filter button{min-height:48px;border:0;background:none;font:inherit;cursor:pointer}
+.discovery-section .neighbourhood-rail{position:static}
+.discovery-section .neighbourhood-card{height:150px}
+.discovery-section .neighbourhood-copy strong{font-size:24px;line-height:1.15}
+.discovery-section .empty-state{padding:40px 24px}
+.discovery-section .empty-state .h3{font-size:28px}
+@media(max-width:620px){
+  .discovery-jumps{gap:8px 20px;margin-bottom:20px}
+  .discovery-section{padding:32px 0}
+  .discovery-head{align-items:start;gap:20px}
+  .discovery-filter{width:100%;flex-wrap:wrap}
+  .discovery-filter label{flex-basis:100%}
+  .discovery-section .neighbourhood-rail{grid-template-columns:1fr}
+  .discovery-section .neighbourhood-card{height:120px}
+  .discovery-section .neighbourhood-copy strong{font-size:24px}
+}
+
+.discovery-section .neighbourhood-layout:not(:has(.neighbourhood-rail)){grid-template-columns:1fr}
