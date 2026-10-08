@@ -12,9 +12,9 @@ import { parseVideoLink, VIDEO_LINK_HELP } from "./video";
 
 const PLACEHOLDER_COVER = "/bangkok/skyline.jpg";
 const MAX_MEDIA = 60;
-const labels: Record<string, string> = { name: "Name", district: "District", rent: "Rent", bedrooms: "Bedrooms", bathrooms: "Bathrooms", sizeSqm: "Size", floor: "Floor", stationType: "Station type", stationName: "Station", walkMinutes: "Walk minutes", latitude: "Latitude", longitude: "Longitude", lastVerified: "Last verified date", status: "Status", sourceUrl: "Original listing URL", description: "Description", image: "Cover image", videoUrl: "Video link" };
+const labels: Record<string, string> = { name: "Name", district: "District", university: "University", developmentProject: "Development project", rent: "Rent", bedrooms: "Bedrooms", bathrooms: "Bathrooms", sizeSqm: "Size", floor: "Floor", stationType: "Station type", stationName: "Station", walkMinutes: "Walk minutes", latitude: "Latitude", longitude: "Longitude", lastVerified: "Last verified date", status: "Status", sourceUrl: "Original listing URL", description: "Description", image: "Cover image", videoUrl: "Video link" };
 const required = ["name", "district", "rent", "sizeSqm", "stationType", "stationName", "walkMinutes", "latitude", "longitude", "lastVerified"];
-const texts: Record<string, number> = { name: 200, district: 120, floor: 80, stationName: 120, description: 10000, sourceUrl: 2000, videoUrl: 2000, image: 2000, lastVerified: 10, status: 20, stationType: 20 };
+const texts: Record<string, number> = { name: 200, district: 120, university: 200, developmentProject: 200, floor: 80, stationName: 120, description: 10000, sourceUrl: 2000, videoUrl: 2000, image: 2000, lastVerified: 10, status: 20, stationType: 20 };
 const attributions: MediaAttribution[] = ["owner", "agent", "admin"];
 
 type MediaInput = { id: string; caption: string; attribution: MediaAttribution };
@@ -53,7 +53,7 @@ export function parseListingInput(body: Record<string, unknown>): ListingInput {
   const missing = required.filter((key) => isBlank(body[key]));
   if (missing.length) errors.push(`Complete the required fields: ${missing.map((key) => labels[key]).join(", ")}`);
   const input: ListingInput = {
-    name: text("name"), district: text("district"), rent: number("rent", 0), bedrooms: number("bedrooms", 1), bathrooms: number("bathrooms", 1),
+    name: text("name"), district: text("district"), university: text("university"), developmentProject: text("developmentProject"), rent: number("rent", 0), bedrooms: number("bedrooms", 1), bathrooms: number("bathrooms", 1),
     sizeSqm: number("sizeSqm", 0), floor: text("floor", "—"), stationType: text("stationType"), stationName: text("stationName"),
     walkMinutes: number("walkMinutes", 0), latitude: number("latitude", 0), longitude: number("longitude", 0), image: text("image"),
     status: (text("status", "verify") as Listing["status"]), sourceUrl: text("sourceUrl"), lastVerified: text("lastVerified"),
@@ -115,12 +115,12 @@ export async function saveListing(env: ImportEnv, actor: Actor, id: number | nul
   const existing = id === null ? null : await env.DB.prepare("SELECT slug FROM listings WHERE id = ?").bind(id).first<{ slug: string }>();
   if (id !== null && !existing) throw new ApiError(404, "Listing not found");
   const slug = existing?.slug ?? await freeSlug(env, input.name);
-  const values = [input.name, input.district, input.rent, input.bedrooms, input.bathrooms, input.sizeSqm, input.floor, input.stationType, input.stationName, input.walkMinutes, input.latitude, input.longitude, image, input.status, input.sourceUrl, input.lastVerified, input.description, input.videoUrl, JSON.stringify(input.projectFeatures ?? [])];
+  const values = [input.name, input.district, input.rent, input.bedrooms, input.bathrooms, input.sizeSqm, input.floor, input.stationType, input.stationName, input.walkMinutes, input.latitude, input.longitude, image, input.status, input.sourceUrl, input.lastVerified, input.description, input.videoUrl, JSON.stringify(input.projectFeatures ?? []), input.university, input.developmentProject];
   const listingId = "(SELECT id FROM listings WHERE slug = ?)";
   const statements = [existing
     // Bumping publication_version makes any pending import revision of this unit stale.
-    ? env.DB.prepare("UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,project_features=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE slug=?").bind(...values, slug)
-    : env.DB.prepare("INSERT INTO listings (name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,video_url,project_features,slug,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)").bind(...values, slug),
+    ? env.DB.prepare("UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,project_features=?,university=?,development_project=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE slug=?").bind(...values, slug)
+    : env.DB.prepare("INSERT INTO listings (name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,video_url,project_features,university,development_project,slug,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)").bind(...values, slug),
   env.DB.prepare(`DELETE FROM listing_media WHERE listing_id = ${listingId}`).bind(slug)];
   for (const [position, item] of input.media.entries()) statements.push(env.DB.prepare(`INSERT INTO listing_media (id,listing_id,media_id,position,caption,attribution,cover) VALUES (?,${listingId},?,?,?,?,?)`).bind(crypto.randomUUID(), slug, item.id, position, item.caption, item.attribution, image === `/listing-media/${item.id}` ? 1 : 0));
   statements.push(audit(env, actor, existing ? "listing.updated" : "listing.created", slug));

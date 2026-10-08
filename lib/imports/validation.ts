@@ -3,14 +3,14 @@ import { ApiError } from './core';
 import { parseVideoLink, VIDEO_LINK_HELP } from '../video';
 export type Attachment = { id: string; caption?: string; attribution: 'owner'|'agent'|'admin'; };
 export type DraftPayload = {
-  reference: string; name: string; district?: string; rent?: number; bedrooms?: number; bathrooms?: number;
+  reference: string; name: string; district?: string; university?: string; developmentProject?: string; rent?: number; bedrooms?: number; bathrooms?: number;
   sizeSqm?: number; floor?: string; stationType?: 'BTS'|'MRT'; stationName?: string; walkMinutes?: number;
   latitude?: number; longitude?: number; lastVerified?: string; status?: 'available'|'viewing'|'rented'|'verify';
   projectFeatures?: ProjectFeature[]; description?: string; sourceUrl?: string; videoUrl?: string; provenance?: string; media?: Attachment[]; coverId?: string;
 };
 export const publishRequired = ['district','rent','bedrooms','bathrooms','sizeSqm','stationType','stationName','walkMinutes','latitude','longitude','lastVerified','status','coverId'] as const;
 export function blockers(payload: DraftPayload): string[] { return publishRequired.filter(k=>payload[k]===undefined || payload[k]===null || payload[k]===''); }
-const strings: Record<string,number> = {reference:120,name:200,district:120,floor:80,stationName:120,lastVerified:10,description:10000,sourceUrl:2000,videoUrl:2000,provenance:8000,coverId:100};
+const strings: Record<string,number> = {reference:120,name:200,district:120,university:200,developmentProject:200,floor:80,stationName:120,lastVerified:10,description:10000,sourceUrl:2000,videoUrl:2000,provenance:8000,coverId:100};
 const numbers: Record<string,[number,number,boolean]>={rent:[1,100000000,true],bedrooms:[0,100,true],bathrooms:[1,100,true],sizeSqm:[0.1,100000,false],walkMinutes:[0,1440,true],latitude:[-90,90,false],longitude:[-180,180,false]};
 export function validatePayload(value: unknown): {payload?:DraftPayload;errors:string[];blockers:string[]} {
   const errors:string[]=[];
@@ -35,6 +35,7 @@ export function validatePayload(value: unknown): {payload?:DraftPayload;errors:s
     }}
   }
   const video=typeof row.videoUrl==='string'&&row.videoUrl?parseVideoLink(row.videoUrl):null;
+  for (const key of ['university','developmentProject']) if (typeof row[key] === 'string') row[key] = row[key].trim();
   const payload={...row,...(video?{videoUrl:video.href}:{}),reference:typeof row.reference==='string'?row.reference.trim():row.reference,name:typeof row.name==='string'?row.name.trim():row.name} as DraftPayload;
   return {payload:errors.length?undefined:payload,errors,blockers:errors.length?[]:blockers(payload)};
 }

@@ -55,7 +55,9 @@ test("fans the homepage sections out to their own routes", async () => {
   const neighbourhoodsResponse = await render("/neighbourhoods");
   assert.equal(neighbourhoodsResponse.status, 200);
   const neighbourhoods = await neighbourhoodsResponse.text();
-  assert.match(neighbourhoods, /Explore by/);
+  assert.match(neighbourhoods, /University &amp;/);
+  assert.match(neighbourhoods, /All universities/);
+  assert.match(neighbourhoods, /All development projects/);
   assert.match(neighbourhoods, /id="neighbourhoods"/);
   assert.match(neighbourhoods, /id="guide"/);
   assert.match(neighbourhoods, /aria-pressed="false"/);

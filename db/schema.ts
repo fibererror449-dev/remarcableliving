@@ -7,6 +7,8 @@ export const listings = sqliteTable("listings", {
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   district: text("district").notNull(),
+  university: text("university").notNull().default(""),
+  developmentProject: text("development_project").notNull().default(""),
   rent: integer("rent").notNull(),
   bedrooms: integer("bedrooms").notNull().default(1),
   bathrooms: integer("bathrooms").notNull().default(1),

@@ -12,7 +12,7 @@ export default function NotFound() {
           <p className="lede">The page you asked for is not here. The residences, neighbourhoods, and Mark are.</p>
           <div className="page-hero-links">
             <a className="btn gold" href="/residences">See the current collection</a>
-            <a className="btn line" href="/neighbourhoods">Compare neighbourhoods</a>
+            <a className="btn line" href="/neighbourhoods">University &amp; project search</a>
             <a className="btn line" href="/contact">Talk to Mark</a>
           </div>
         </div>

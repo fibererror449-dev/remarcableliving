@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useImperativeHandle, useRef, useState, type Ref }
 import type { AdminListingDetail, AttachedMedia, MediaAttribution } from "../../lib/listings-data";
 import { MAX_UPLOAD_BYTES, MEDIA_TYPES, type UploadedMedia } from "../../lib/uploads";
 import { parseVideoLink, VIDEO_LINK_HELP, videoKindLabel } from "../../lib/video";
+import { universityOptions } from "../../lib/site-data";
 
 export type EditorHandle = { attachLibraryItem: (item: UploadedMedia) => void };
 export type SavedListing = { id: number; slug: string; url: string };
@@ -15,6 +16,8 @@ type Upload = { key: string; name: string; progress: number };
 const fields: { key: string; label: string; type?: "number" | "date" | "url"; step?: string; min?: string; required?: boolean; wide?: boolean; options?: [string, string][] }[] = [
   { key: "name", label: "Condominium and unit name", required: true, wide: true },
   { key: "district", label: "District", required: true },
+  { key: "university", label: "University" },
+  { key: "developmentProject", label: "Development project" },
   { key: "rent", label: "Rent (THB / month)", type: "number", step: "1", min: "1", required: true },
   { key: "status", label: "Availability", options: [["verify", "Verify first"], ["available", "Available"], ["viewing", "Viewing"], ["rented", "Rented / close"]] },
   { key: "bedrooms", label: "Bedrooms", type: "number", step: "1", min: "0" },
@@ -189,9 +192,10 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
           ? <select value={value} onChange={(event) => change(event.target.value)}>{field.options.map(([option, label]) => <option key={option} value={option}>{label}</option>)}</select>
           : field.key === "description"
             ? <textarea value={value} onChange={(event) => change(event.target.value)} />
-            : <input type={field.type ?? "text"} step={field.step} min={field.min} required={field.required} value={value} onChange={(event) => change(event.target.value)} />;
+            : <input type={field.type ?? "text"} step={field.step} min={field.min} required={field.required} list={field.key === "university" ? "listing-universities" : undefined} value={value} onChange={(event) => change(event.target.value)} />;
         return <label key={field.key} className={field.wide ? "wide" : undefined}>{field.label}{control}</label>;
       })}
+      <datalist id="listing-universities">{universityOptions.map((university) => <option key={university} value={university} />)}</datalist>
     </fieldset>
 
     <ProjectFeaturePicker value={projectFeatures} onChange={setProjectFeatures} disabled={!loaded || busy} />

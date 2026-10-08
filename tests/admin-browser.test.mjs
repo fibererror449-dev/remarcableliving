@@ -18,6 +18,8 @@ test('admin sees media counts, edits a listing, uploads a photo, adds a YouTube 
   await page.getByRole('heading',{name:'Edit Centurion Park · 1 Bedroom',exact:true}).waitFor();
   assert.equal(await page.getByLabel('Rent (THB / month)',{exact:true}).inputValue(),'25000');
   await page.getByLabel('Rent (THB / month)',{exact:true}).fill('26000');
+  await page.getByLabel('University',{exact:true}).fill('Bangkok University');
+  await page.getByLabel('Development project',{exact:true}).fill('Centurion Park');
   await page.locator('.editor-drop input[type=file]').first().setInputFiles({name:'bedroom.png',mimeType:'image/png',buffer:png});
   await page.getByText('1 file uploaded. Save the listing to publish it.',{exact:true}).waitFor();
   await page.getByLabel('Caption',{exact:true}).fill('Bedroom');
@@ -29,6 +31,10 @@ test('admin sees media counts, edits a listing, uploads a photo, adds a YouTube 
   await counts.getByText('1 photo',{exact:true}).waitFor();
   await counts.getByText('YouTube video',{exact:true}).waitFor();
   await page.getByRole('heading',{name:'Add listing',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Edit Centurion Park · 1 Bedroom',exact:true}).click();
+  await page.getByRole('heading',{name:'Edit Centurion Park · 1 Bedroom',exact:true}).waitFor();
+  assert.equal(await page.getByLabel('University',{exact:true}).inputValue(),'Bangkok University');
+  assert.equal(await page.getByLabel('Development project',{exact:true}).inputValue(),'Centurion Park');
   const live=await (await context.request.get(h.url+'/residences/centurion-park-ari-soi-5-1br')).text();
   assert.match(live,/฿26,000/);
   assert.match(live,/Bedroom · Owner-supplied/);

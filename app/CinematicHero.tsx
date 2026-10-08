@@ -219,7 +219,7 @@ export default function CinematicHero({ listings, onExploreArea, children }: { l
           <nav id="cinema-links" className={menuOpen ? "is-open" : ""} aria-label="Primary navigation">
             <a href={studentHousingHref}>Your University</a>
             <a href="#residences" onClick={() => setMenuOpen(false)}>Condo/Apartment</a>
-            <a href="/neighbourhoods">Neighbourhoods</a>
+            <a href="/neighbourhoods">University &amp; project search</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
             <a href="/about">About Us</a>
             <a className="cinema-menu-contact" href="/contact">Mark your place, Find your space.</a>

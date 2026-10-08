@@ -52,7 +52,7 @@ export const aboutValues = [
 ];
 
 export const exploreTiles = [
-  { title: "Neighbourhoods", note: "Compare Ari, Ratchathewi, Thonglor and Rama 9 by commute, space and rent.", href: "/neighbourhoods" },
+  { title: "University & project search", note: "Find residences by university, development project and neighbourhood.", href: "/neighbourhoods" },
   { title: "About us", note: "Who we are, what we stand for, and how a brief becomes a home.", href: "/about" },
   { title: "Bangkok guide", note: "What to know about the area before you sign for the room.", href: "/neighbourhoods#guide" },
   { title: "Talk to Mark", note: "Send your requirements and get a practical shortlist back.", href: "/contact" },

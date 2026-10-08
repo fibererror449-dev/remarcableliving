@@ -3,6 +3,7 @@ import { ProjectFeaturePicker } from "../components/ProjectFeatures";
 import { readProjectFeatures, type ProjectFeature } from "../../lib/project-features";
 import { FormEvent, useEffect, useState } from "react";
 import BrandLogo from "../components/BrandLogo";
+import { universityOptions } from "../../lib/site-data";
 
 type Attribution = "owner" | "agent" | "admin";
 type Attachment = { id: string; caption?: string; attribution: Attribution };
@@ -21,6 +22,8 @@ type ConnectionList = { mcpUrl: string; clients: Connection[] };
 const fields: { key: string; label: string; type?: "number" | "date" | "url"; step?: string; options?: [string, string][] }[] = [
   { key: "name", label: "Name" },
   { key: "district", label: "District" },
+  { key: "university", label: "University" },
+  { key: "developmentProject", label: "Development project" },
   { key: "rent", label: "Monthly rent (THB)", type: "number", step: "1" },
   { key: "bedrooms", label: "Bedrooms", type: "number", step: "1" },
   { key: "bathrooms", label: "Bathrooms", type: "number", step: "1" },
@@ -251,9 +254,10 @@ export function DraftReview({ id, displayName }: { id: string; displayName: stri
               ? <select value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined}><option value="">Not confirmed</option>{field.options.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
               : field.key === "description"
                 ? <textarea value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} />
-                : <input type={field.type ?? "text"} step={field.step} required={field.key === "name"} value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined} />;
+                : <input type={field.type ?? "text"} step={field.step} required={field.key === "name"} list={field.key === "university" ? "draft-universities" : undefined} value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined} />;
             return <label key={field.key} className={["description", "sourceUrl", "videoUrl"].includes(field.key) ? "wide" : undefined}>{field.label}{control}</label>;
           })}
+          <datalist id="draft-universities">{universityOptions.map((university) => <option key={university} value={university} />)}</datalist>
         </fieldset>
         <ProjectFeaturePicker value={projectFeatures} onChange={next => { setProjectFeatures(next); setDirty(true); }} disabled={!open || busy} />
         <fieldset className="import-panel draft-media" disabled={!open || busy}>

@@ -9,7 +9,7 @@ export type SiteSection = "residences" | "neighbourhoods" | "about" | "contact" 
 const links: { href: string; label: string; section?: SiteSection }[] = [
   { href: studentHousingHref, label: "Your University", section: "student-housing" },
   { href: "/residences", label: "Condo/Apartment", section: "residences" },
-  { href: "/neighbourhoods", label: "Neighbourhoods", section: "neighbourhoods" },
+  { href: "/neighbourhoods", label: "University & project search", section: "neighbourhoods" },
   { href: "/neighbourhoods#guide", label: "Bangkok guide" },
   { href: "/about", label: "About Us", section: "about" },
 ];

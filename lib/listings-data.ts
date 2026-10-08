@@ -6,6 +6,7 @@ import type { ProjectFeature } from "./project-features";
 export type ListingStatus = "available" | "viewing" | "rented" | "verify";
 export type Listing = {
   id: number; slug: string; name: string; district: string; rent: number;
+  university?: string; developmentProject?: string;
   bedrooms: number; bathrooms: number; sizeSqm: number; floor: string;
   stationType: string; stationName: string; walkMinutes: number;
   latitude: number; longitude: number; image: string; status: ListingStatus;
@@ -19,11 +20,17 @@ export type AttachedMedia = { id: string; mime: string; name: string; size: numb
 export type AdminListing = Listing & { media: MediaSummary };
 export type AdminListingDetail = { listing: Listing; media: AttachedMedia[]; curated: { photos: number; video: boolean } };
 
-export type PublicListing = Pick<Listing, "id" | "slug" | "name" | "district" | "rent" | "image" | "bedrooms" | "bathrooms" | "sizeSqm" | "status" | "stationType" | "stationName" | "walkMinutes">;
+export type PublicListing = Pick<Listing, "id" | "slug" | "name" | "district" | "university" | "developmentProject" | "rent" | "image" | "bedrooms" | "bathrooms" | "sizeSqm" | "status" | "stationType" | "stationName" | "walkMinutes">;
+
+export function developmentProjectName(listing: Pick<Listing, "name" | "developmentProject">): string {
+  if (listing.developmentProject?.trim()) return listing.developmentProject.trim();
+  const separator = listing.name.indexOf(" · ");
+  return separator > 0 ? listing.name.slice(0, separator).trim() : "";
+}
 
 export function toPublicListing(listing: Listing): PublicListing {
   const { id, slug, name, district, rent, image, bedrooms, bathrooms, sizeSqm, status, stationType, stationName, walkMinutes } = listing;
-  return { id, slug, name, district, rent, image, bedrooms, bathrooms, sizeSqm, status, stationType, stationName, walkMinutes };
+  return { id, slug, name, district, rent, image, bedrooms, bathrooms, sizeSqm, status, stationType, stationName, walkMinutes, university: listing.university ?? "", developmentProject: developmentProjectName(listing) };
 }
 
 export const fallbackListings: Listing[] = [
@@ -51,9 +58,25 @@ export const budgetOptions: { label: string; param: string; test: (rent: number)
   { label: "฿25,000+", param: "25k-plus", test: (rent) => rent > 25000 },
 ];
 
-export function filterListings<T extends Pick<PublicListing, "district" | "rent">>(listings: T[], filters: { area: string; budget: string }): T[] {
+export type ListingFilters = { area?: string; budget?: string; university?: string; developmentProject?: string };
+
+const facetValue = (value: string | undefined) => (value ?? "").trim().toLowerCase();
+
+export function listingFacetOptions(listings: PublicListing[], key: "university" | "developmentProject"): string[] {
+  const values = new Map<string, string>();
+  for (const listing of listings) {
+    const value = listing[key]?.trim();
+    if (value && !values.has(facetValue(value))) values.set(facetValue(value), value);
+  }
+  return [...values.values()].sort((a, b) => a.localeCompare(b));
+}
+
+export function filterListings<T extends Pick<PublicListing, "district" | "rent" | "university" | "developmentProject">>(listings: T[], filters: ListingFilters): T[] {
   const budget = budgetOptions.find((option) => option.label === filters.budget) ?? budgetOptions[0];
-  return listings.filter((listing) => (filters.area === AREA_ALL || listing.district === filters.area) && budget.test(listing.rent));
+  return listings.filter((listing) => (!filters.area || filters.area === AREA_ALL || listing.district === filters.area)
+    && budget.test(listing.rent)
+    && (!filters.university || facetValue(listing.university) === facetValue(filters.university))
+    && (!filters.developmentProject || facetValue(listing.developmentProject) === facetValue(filters.developmentProject)));
 }
 
 function first(value: string | string[] | undefined): string {
@@ -70,11 +93,20 @@ export function parseBudget(value: string | string[] | undefined): string {
   return budgetOptions.find((option) => option.param && option.param === candidate)?.label ?? BUDGET_ANY;
 }
 
-export function toResidencesHref(filters: { area?: string; budget?: string }): string {
+export function parseListingFacet(value: string | string[] | undefined): string {
+  return first(value).trim();
+}
+
+function listingSearchHref(path: string, filters: ListingFilters): string {
   const params = new URLSearchParams();
   if (filters.area && filters.area !== AREA_ALL) params.set("area", filters.area);
   const budget = budgetOptions.find((option) => option.label === filters.budget);
   if (budget?.param) params.set("budget", budget.param);
+  if (filters.university) params.set("university", filters.university);
+  if (filters.developmentProject) params.set("project", filters.developmentProject);
   const query = params.toString();
-  return query ? `/residences?${query}` : "/residences";
+  return query ? `${path}?${query}` : path;
 }
+
+export const toResidencesHref = (filters: ListingFilters) => listingSearchHref("/residences", filters);
+export const toNeighbourhoodsHref = (filters: ListingFilters) => listingSearchHref("/neighbourhoods", filters);

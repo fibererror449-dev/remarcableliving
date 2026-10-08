@@ -22,7 +22,7 @@ async function site() {
 test('admin adds a listing with photos and a YouTube link, and its page shows every one',async t=>{
   const h=await site();t.after(h.close);
   const kitchen=await h.upload(png,'image/png','kitchen.png'),living=await h.upload(Buffer.concat([png,Buffer.from('living')]),'image/png','living.png');
-  const response=await h.write('/api/listings','POST',{...facts,videoUrl:'https://youtu.be/dQw4w9WgXcQ?si=tracking',media:[{id:kitchen,caption:'Kitchen'},{id:living}]});
+  const response=await h.write('/api/listings','POST',{...facts,university:' Chulalongkorn University ',developmentProject:' RHYTHM EKKAMAI ESTATE ',videoUrl:'https://youtu.be/dQw4w9WgXcQ?si=tracking',media:[{id:kitchen,caption:'Kitchen'},{id:living}]});
   assert.equal(response.status,201,await response.clone().text());
   const {slug,url}=await response.json();
   const listing=(await h.listings()).find(entry=>entry.slug===slug);
@@ -30,6 +30,11 @@ test('admin adds a listing with photos and a YouTube link, and its page shows ev
   assert.equal(listing.videoUrl,'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
   assert.equal(listing.image,`/listing-media/${kitchen}`,'the first photo becomes the cover');
   assert.equal(listing.bedrooms,0);
+  assert.equal(listing.university,'Chulalongkorn University');
+  assert.equal(listing.developmentProject,'RHYTHM EKKAMAI ESTATE');
+  const publicListing=(await (await h.call('/api/listings')).json()).listings.find(entry=>entry.slug===slug);
+  assert.equal(publicListing.university,listing.university);
+  assert.equal(publicListing.developmentProject,listing.developmentProject);
   const html=await h.page(slug);
   assert.deepEqual(h.figures(html),[kitchen,living]);
   assert.match(html,/Kitchen · Owner-supplied/);
@@ -46,10 +51,12 @@ test('admin edits a listing: reorders photos, picks the cover and swaps the link
   const {id,slug}=await (await h.write('/api/listings','POST',{...facts,videoUrl:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',media:[{id:a},{id:b}]})).json();
   const detail=await (await h.call(`/api/listings/${id}`,{headers:admin})).json();
   assert.deepEqual(detail.media.map(item=>item.id),[a,b]);
-  const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,rent:'24000',image:`/listing-media/${b}`,videoUrl:'',media:[{id:b,caption:'Bedroom',attribution:'admin'},{id:a},{id:tour,caption:'Walkthrough',attribution:'owner'}]});
+  const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,university:'Bangkok University',developmentProject:'AP Thai The Bangkok',rent:'24000',image:`/listing-media/${b}`,videoUrl:'',media:[{id:b,caption:'Bedroom',attribution:'admin'},{id:a},{id:tour,caption:'Walkthrough',attribution:'owner'}]});
   assert.equal(saved.status,200,await saved.clone().text());
   assert.equal((await saved.json()).slug,slug,'editing keeps the address');
   const listing=(await h.listings()).find(entry=>entry.id===id);
+  assert.equal(listing.university,'Bangkok University');
+  assert.equal(listing.developmentProject,'AP Thai The Bangkok');
   assert.deepEqual(listing.media,{photos:2,cover:true,video:'upload'});
   const html=await h.page(slug);
   assert.deepEqual(h.figures(html),[b,a]);
@@ -93,6 +100,7 @@ test('the listing API refuses bad links, covers and files, and anyone but a same
   assert.match(await problems(await h.write('/api/listings','POST',{...facts,image:'/listing-media/not-attached',media:[{id:photo}]})),/cover must be one of this listing's photos/);
   assert.match(await problems(await h.write('/api/listings','POST',{...facts,media:[{id:'missing'}]})),/no longer available/);
   assert.match(await problems(await h.write('/api/listings','POST',{...facts,lastVerified:'2026-02-31'})),/real YYYY-MM-DD date/);
+  assert.match(await problems(await h.write('/api/listings','POST',{...facts,university:['Bangkok University'],developmentProject:'x'.repeat(201)})),/University must be text.*Development project must be text/);
   assert.equal((await h.write('/api/listings/999999','PUT',facts)).status,404);
   assert.equal((await h.call('/api/listings',{method:'POST',json:facts})).status,401);
   assert.equal((await h.call('/api/listings',{method:'POST',headers:{...admin,origin:'https://evil.example'},json:facts})).status,403);
@@ -107,7 +115,7 @@ test('agent imports accept a Google Drive video link and publish it to the live 
   const {token}=await (await h.write('/api/admin/imports/credentials','POST',{name:'video test',expiresInDays:1})).json();
   const agent={authorization:`Bearer ${token}`};
   const cover=await (await (await h.call('/api/v1/media',{method:'POST',headers:{...agent,'content-type':'image/png','x-file-name':'cover.png'},body:png})).json()).id;
-  const unit={reference:'drive-unit',name:'Drive residence',district:'Ari',rent:20000,bedrooms:1,bathrooms:1,sizeSqm:35,stationType:'BTS',stationName:'Ari',walkMinutes:5,latitude:13.78,longitude:100.54,lastVerified:'2026-09-01',status:'available',media:[{id:cover,attribution:'owner'}],coverId:cover};
+  const unit={reference:'drive-unit',name:'Drive residence',district:'Ari',university:'Bangkok University',developmentProject:'RHYTHM EKKAMAI ESTATE',rent:20000,bedrooms:1,bathrooms:1,sizeSqm:35,stationType:'BTS',stationName:'Ari',walkMinutes:5,latitude:13.78,longitude:100.54,lastVerified:'2026-09-01',status:'available',media:[{id:cover,attribution:'owner'}],coverId:cover};
   const submit=async (key,listing)=>(await (await h.call('/api/v1/imports',{method:'POST',headers:{...agent,'idempotency-key':key},json:{namespace:'drive',listings:[listing]}})).json()).results[0];
   const rejected=await submit('bad',{...unit,videoUrl:'https://example.com/tour.mp4'});
   assert.equal(rejected.outcome,'invalid');
@@ -118,6 +126,9 @@ test('agent imports accept a Google Drive video link and publish it to the live 
   const published=await h.write(`/api/admin/imports/drafts/${draftId}/publish`,'POST',{});
   assert.equal(published.status,200,await published.clone().text());
   const {url}=await published.json();
+  const savedListing=(await h.listings()).find(entry=>url.endsWith(entry.slug));
+  assert.equal(savedListing.university,unit.university);
+  assert.equal(savedListing.developmentProject,unit.developmentProject);
   assert.match(await (await h.call(url)).text(),/<iframe class="residence-film-embed" src="https:\/\/drive\.google\.com\/file\/d\/1AbCdEfGhIjKlMnOp\/preview"/);
   assert.deepEqual((await h.listings()).find(entry=>url.endsWith(entry.slug)).media,{photos:1,cover:true,video:'drive'});
   const schema=await (await h.call('/api/v1/listing-schema',{headers:agent})).json();

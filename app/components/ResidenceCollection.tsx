@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import ListingCard from "./ListingCard";
+import ListingFacetFilters from "./ListingFacetFilters";
 import { areaOptions, budgetOptions, filterListings, type PublicListing } from "../../lib/listings-data";
 
 type Props = {
@@ -10,14 +11,15 @@ type Props = {
   budget: string;
   onAreaChange: (area: string) => void;
   onBudgetChange: (budget: string) => void;
+  facets?: Omit<React.ComponentProps<typeof ListingFacetFilters>, "listings">;
   /** Rendered above the search strip. Omit for a plain header-less collection. */
   header?: React.ReactNode;
 };
 
 // On the homepage this section is the cinematic hero's destination: it must stay
 // a single root element with the .collection and .search-strip class names.
-export default function ResidenceCollection({ listings, area, budget, onAreaChange, onBudgetChange, header }: Props) {
-  const visible = useMemo(() => filterListings(listings, { area, budget }), [listings, area, budget]);
+export default function ResidenceCollection({ listings, area, budget, onAreaChange, onBudgetChange, facets, header }: Props) {
+  const visible = useMemo(() => filterListings(listings, { area, budget, university: facets?.university, developmentProject: facets?.developmentProject }), [listings, area, budget, facets?.university, facets?.developmentProject]);
   return (
     <section className="collection" id="residences">
       <div className="container">
@@ -27,6 +29,7 @@ export default function ResidenceCollection({ listings, area, budget, onAreaChan
           <label className="field"><span>Monthly budget</span><select value={budget} onChange={(event) => onBudgetChange(event.target.value)}>{budgetOptions.map((option) => <option key={option.label}>{option.label}</option>)}</select></label>
           <a className="btn gold" href="#residences">Show {visible.length} {visible.length === 1 ? "match" : "matches"} →</a>
         </section>
+        {facets && <ListingFacetFilters listings={listings} {...facets} />}
         {visible.length
           ? <div className="property-grid">{visible.map((listing, index) => <ListingCard key={listing.slug} listing={listing} index={index} />)}</div>
           : <div className="empty-state"><h3 className="h3">No exact match yet.</h3><p>Try another budget or ask Mark to search beyond the sample collection.</p><a className="btn" href="/contact">Start a custom search</a></div>}
