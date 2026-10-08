@@ -123,3 +123,21 @@ test('agent imports accept a Google Drive video link and publish it to the live 
   const schema=await (await h.call('/api/v1/listing-schema',{headers:agent})).json();
   assert.match(schema.fields.videoUrl,/YouTube or Google Drive/);
 });
+
+test('project features persist, render only selected amenities and can be cleared', async t => {
+  const h=await site();t.after(h.close);
+  const created=await h.write('/api/listings','POST',{...facts,projectFeatures:['Swimming Pool','Gym','EV Charger']});
+  assert.equal(created.status,201,await created.clone().text());
+  const {id,slug}=await created.json();
+  const detail=await (await h.call(`/api/listings/${id}`,{headers:admin})).json();
+  assert.deepEqual(detail.listing.projectFeatures,['Swimming Pool','Gym','EV Charger']);
+  const html=await h.page(slug);
+  assert.match(html,/Project Features/);
+  assert.match(html,/Swimming Pool/);assert.match(html,/EV Charger/);
+  assert.doesNotMatch(html,/CCTV\/IP Camera/);
+  const invalid=await h.write(`/api/listings/${id}`,'PUT',{...facts,projectFeatures:['Unknown amenity']});
+  assert.equal(invalid.status,400);
+  const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,projectFeatures:[]});
+  assert.equal(saved.status,200,await saved.clone().text());
+  assert.doesNotMatch(await h.page(slug),/Project Features/);
+});

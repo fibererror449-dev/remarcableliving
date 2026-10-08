@@ -1,0 +1,1 @@
+ALTER TABLE `listings` ADD `project_features` text DEFAULT '[]' NOT NULL;

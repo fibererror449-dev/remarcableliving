@@ -75,12 +75,14 @@ test('only an admin publishes a complete current revision and pending updates pr
   const h=await harness();t.after(h.close);const {token}=await h.issue();
   const bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64');
   const media=await (await h.request('/api/v1/media',{method:'POST',token,headers:{'content-type':'image/png','content-length':String(bytes.length)},body:bytes})).json();
-  const payload={reference:'publish-unit',name:'Reviewed home',district:'Ari',rent:20000,bedrooms:1,bathrooms:1,sizeSqm:35,stationType:'BTS',stationName:'Ari',walkMinutes:5,latitude:13.78,longitude:100.54,lastVerified:'2026-01-01',status:'available',media:[{id:media.id,caption:'Living room',attribution:'agent'}],coverId:media.id,provenance:'Private source notes'};
+  const payload={reference:'publish-unit',name:'Reviewed home',district:'Ari',rent:20000,bedrooms:1,bathrooms:1,sizeSqm:35,stationType:'BTS',stationName:'Ari',walkMinutes:5,latitude:13.78,longitude:100.54,lastVerified:'2026-01-01',status:'available',media:[{id:media.id,caption:'Living room',attribution:'agent'}],coverId:media.id,provenance:'Private source notes',projectFeatures:['Swimming Pool','Gym']};
   const submit=async (key,p)=> (await (await h.request('/api/v1/imports',{method:'POST',token,headers:{'idempotency-key':key},json:{namespace:'drive',listings:[p]}})).json()).results[0].draftId;
   const id=await submit('publish',payload);
   assert.equal((await h.request(`/api/admin/imports/drafts/${id}/publish`,{method:'POST',token,json:{}})).status,401);
   const published=await h.request(`/api/admin/imports/drafts/${id}/publish`,{method:'POST',headers:adminHeaders,json:{}});
   assert.equal(published.status,200);
+  const reviewed=await (await h.request(`/api/v1/drafts/${id}`,{token})).json();
+  assert.deepEqual(reviewed.published.projectFeatures,['Swimming Pool','Gym']);
   const live=await published.json(); assert.ok(live.slug);
   assert.equal((await h.request(`/listing-media/${media.id}`)).status,200);
   const nextId=await submit('update',{...payload,rent:25000});

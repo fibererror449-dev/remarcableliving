@@ -1,3 +1,4 @@
+import { readProjectFeatures } from "./project-features";
 import type { D1Database } from "@cloudflare/workers-types";
 import { fallbackListings, type Listing, type ListingStatus } from "./listings-data";
 
@@ -30,7 +31,7 @@ export async function ensureListings(): Promise<void> {
 }
 
 function mapRow(row: Record<string, unknown>): Listing {
-  return { id: Number(row.id), slug: String(row.slug), name: String(row.name), district: String(row.district), rent: Number(row.rent), bedrooms: Number(row.bedrooms), bathrooms: Number(row.bathrooms), sizeSqm: Number(row.size_sqm), floor: String(row.floor), stationType: String(row.station_type), stationName: String(row.station_name), walkMinutes: Number(row.walk_minutes), latitude: Number(row.latitude), longitude: Number(row.longitude), image: String(row.image), status: row.status as ListingStatus, sourceUrl: String(row.source_url), lastVerified: String(row.last_verified), description: String(row.description), videoUrl: String(row.video_url ?? "") };
+  return { id: Number(row.id), slug: String(row.slug), name: String(row.name), district: String(row.district), rent: Number(row.rent), bedrooms: Number(row.bedrooms), bathrooms: Number(row.bathrooms), sizeSqm: Number(row.size_sqm), floor: String(row.floor), stationType: String(row.station_type), stationName: String(row.station_name), walkMinutes: Number(row.walk_minutes), latitude: Number(row.latitude), longitude: Number(row.longitude), image: String(row.image), status: row.status as ListingStatus, sourceUrl: String(row.source_url), lastVerified: String(row.last_verified), description: String(row.description), videoUrl: String(row.video_url ?? ""), projectFeatures: readProjectFeatures(row.project_features) };
 }
 
 export async function listListings(includeClosed = false): Promise<Listing[]> {

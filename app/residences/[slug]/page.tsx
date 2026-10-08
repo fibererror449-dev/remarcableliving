@@ -1,3 +1,4 @@
+import ProjectFeatures from "../../components/ProjectFeatures";
 import { notFound } from "next/navigation";
 import ListingImage from "../../ListingImage";
 import SiteNav from "../../components/SiteNav";
@@ -150,6 +151,7 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         </div>
       </div>
     </section>
+    <div className="container"><ProjectFeatures value={listing.projectFeatures ?? []} /></div>
 
     {story && <section className="residence-story section on-dark">
       <div className="container">

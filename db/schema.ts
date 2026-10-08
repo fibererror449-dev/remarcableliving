@@ -22,6 +22,7 @@ export const listings = sqliteTable("listings", {
   sourceUrl: text("source_url").notNull().default(""),
   lastVerified: text("last_verified").notNull(),
   description: text("description").notNull().default(""),
+  projectFeatures: text("project_features").notNull().default("[]"),
   // YouTube or Google Drive link; uploaded video files live in listing_media instead.
   videoUrl: text("video_url").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),

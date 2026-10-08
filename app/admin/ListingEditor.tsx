@@ -1,4 +1,6 @@
 "use client";
+import { ProjectFeaturePicker } from "../components/ProjectFeatures";
+import { readProjectFeatures, type ProjectFeature } from "../../lib/project-features";
 import { FormEvent, useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 import type { AdminListingDetail, AttachedMedia, MediaAttribution } from "../../lib/listings-data";
 import { MAX_UPLOAD_BYTES, MEDIA_TYPES, type UploadedMedia } from "../../lib/uploads";
@@ -57,6 +59,7 @@ function sendFile(file: File, onProgress: (percent: number) => void, requests: S
 
 export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { listingId: number | null; onSaved: (saved: SavedListing, created: boolean) => void; onCancel: () => void; ref?: Ref<EditorHandle> }) {
   const [values, setValues] = useState<Record<string, string>>(blank);
+  const [projectFeatures, setProjectFeatures] = useState<ProjectFeature[]>([]);
   const [image, setImage] = useState("");
   const [photos, setPhotos] = useState<AttachedMedia[]>([]);
   const [video, setVideo] = useState<Video>(null);
@@ -82,6 +85,7 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
       if (!active) return;
       const { listing } = data;
       setValues(Object.fromEntries(fields.map((field) => [field.key, String(listing[field.key as keyof typeof listing] ?? "")])));
+      setProjectFeatures(readProjectFeatures(listing.projectFeatures));
       setImage(listing.image);
       setPhotos(data.media.filter((item) => item.mime.startsWith("image/")));
       const file = data.media.find((item) => item.mime.startsWith("video/"));
@@ -157,7 +161,7 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
     const media = [...photos, ...(video?.kind === "file" ? [video.item] : [])].map(({ id, caption, attribution }) => ({ id, caption, attribution }));
     setBusy(true);
     try {
-      const response = await fetch(listingId === null ? "/api/listings" : `/api/listings/${listingId}`, { method: listingId === null ? "POST" : "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, image, videoUrl: video?.kind === "link" ? video.url : "", media }) });
+      const response = await fetch(listingId === null ? "/api/listings" : `/api/listings/${listingId}`, { method: listingId === null ? "POST" : "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, projectFeatures, image, videoUrl: video?.kind === "link" ? video.url : "", media }) });
       const data = await response.json().catch(() => ({})) as Partial<SavedListing> & { error?: string; details?: unknown };
       if (!response.ok || !data.slug) { setError(data.error || "Could not save the listing. Your changes are still in the form; please retry."); if (Array.isArray(data.details)) setDetails(data.details.map(String)); return; }
       onSaved(data as SavedListing, listingId === null);
@@ -190,6 +194,8 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
       })}
     </fieldset>
 
+    <ProjectFeaturePicker value={projectFeatures} onChange={setProjectFeatures} disabled={!loaded || busy} />
+
     <fieldset className="editor-media" disabled={!loaded || busy}>
       <legend className="editor-legend">Photos <span>{photos.length + curated.photos}</span></legend>
       {curated.photos > 0 && <p className="editor-hint">{curated.photos} hand-curated photos are built into this residence’s page. Photos added here appear after them.</p>}
@@ -221,6 +227,8 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
         <label>Cover image URL<input value={image} onChange={(event) => setImage(event.target.value)} placeholder={photos.length ? "Blank uses the first photo" : "/media/… or https://…"} /><span className="editor-hint">{photos.length ? "Or tick “Use as cover photo” on one of the photos above." : "Upload photos above to choose one as the cover."}</span></label>
       </div>}
     </fieldset>
+
+    <ProjectFeaturePicker value={projectFeatures} onChange={setProjectFeatures} disabled={!loaded || busy} />
 
     <fieldset className="editor-media" disabled={!loaded || busy}>
       <legend className="editor-legend">Video</legend>

@@ -1,13 +1,15 @@
 // Client-safe listing data and filter helpers. This module must never import
 // "cloudflare:workers"; client components import from here, not lib/listings.ts.
 
+import type { ProjectFeature } from "./project-features";
+
 export type ListingStatus = "available" | "viewing" | "rented" | "verify";
 export type Listing = {
   id: number; slug: string; name: string; district: string; rent: number;
   bedrooms: number; bathrooms: number; sizeSqm: number; floor: string;
   stationType: string; stationName: string; walkMinutes: number;
   latitude: number; longitude: number; image: string; status: ListingStatus;
-  sourceUrl: string; lastVerified: string; description: string; videoUrl?: string;
+  sourceUrl: string; lastVerified: string; description: string; videoUrl?: string; projectFeatures?: ProjectFeature[];
 };
 
 export type MediaAttribution = "owner" | "agent" | "admin";

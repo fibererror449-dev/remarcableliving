@@ -1,3 +1,4 @@
+import { validProjectFeatures } from "./project-features";
 import { ApiError, audit, scopes, type Actor, type ImportEnv } from "./imports/core";
 import { listingSchema } from "./imports/validation";
 import { ensureListings, listListings } from "./listings";
@@ -56,8 +57,10 @@ export function parseListingInput(body: Record<string, unknown>): ListingInput {
     sizeSqm: number("sizeSqm", 0), floor: text("floor", "—"), stationType: text("stationType"), stationName: text("stationName"),
     walkMinutes: number("walkMinutes", 0), latitude: number("latitude", 0), longitude: number("longitude", 0), image: text("image"),
     status: (text("status", "verify") as Listing["status"]), sourceUrl: text("sourceUrl"), lastVerified: text("lastVerified"),
+    projectFeatures: validProjectFeatures(body.projectFeatures ?? []) ? (body.projectFeatures ?? []) as NonNullable<Listing["projectFeatures"]> : [],
     description: text("description"), videoUrl: text("videoUrl"), media: [],
   };
+  if (!validProjectFeatures(body.projectFeatures ?? [])) errors.push("Project features must contain unique supported amenities");
   if (input.stationType && !listingSchema.fields.stationType.includes(input.stationType)) errors.push("Station type must be BTS or MRT");
   if (!listingSchema.fields.status.includes(input.status)) errors.push("Status must be available, viewing, verify or rented");
   if (input.lastVerified && (!/^\d{4}-\d{2}-\d{2}$/.test(input.lastVerified) || !Number.isFinite(Date.parse(input.lastVerified)) || new Date(input.lastVerified).toISOString().slice(0, 10) !== input.lastVerified)) errors.push("Last verified date must be a real YYYY-MM-DD date");
@@ -112,12 +115,12 @@ export async function saveListing(env: ImportEnv, actor: Actor, id: number | nul
   const existing = id === null ? null : await env.DB.prepare("SELECT slug FROM listings WHERE id = ?").bind(id).first<{ slug: string }>();
   if (id !== null && !existing) throw new ApiError(404, "Listing not found");
   const slug = existing?.slug ?? await freeSlug(env, input.name);
-  const values = [input.name, input.district, input.rent, input.bedrooms, input.bathrooms, input.sizeSqm, input.floor, input.stationType, input.stationName, input.walkMinutes, input.latitude, input.longitude, image, input.status, input.sourceUrl, input.lastVerified, input.description, input.videoUrl];
+  const values = [input.name, input.district, input.rent, input.bedrooms, input.bathrooms, input.sizeSqm, input.floor, input.stationType, input.stationName, input.walkMinutes, input.latitude, input.longitude, image, input.status, input.sourceUrl, input.lastVerified, input.description, input.videoUrl, JSON.stringify(input.projectFeatures ?? [])];
   const listingId = "(SELECT id FROM listings WHERE slug = ?)";
   const statements = [existing
     // Bumping publication_version makes any pending import revision of this unit stale.
-    ? env.DB.prepare("UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE slug=?").bind(...values, slug)
-    : env.DB.prepare("INSERT INTO listings (name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,video_url,slug,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)").bind(...values, slug),
+    ? env.DB.prepare("UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,project_features=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE slug=?").bind(...values, slug)
+    : env.DB.prepare("INSERT INTO listings (name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,video_url,project_features,slug,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)").bind(...values, slug),
   env.DB.prepare(`DELETE FROM listing_media WHERE listing_id = ${listingId}`).bind(slug)];
   for (const [position, item] of input.media.entries()) statements.push(env.DB.prepare(`INSERT INTO listing_media (id,listing_id,media_id,position,caption,attribution,cover) VALUES (?,${listingId},?,?,?,?,?)`).bind(crypto.randomUUID(), slug, item.id, position, item.caption, item.attribution, image === `/listing-media/${item.id}` ? 1 : 0));
   statements.push(audit(env, actor, existing ? "listing.updated" : "listing.created", slug));
