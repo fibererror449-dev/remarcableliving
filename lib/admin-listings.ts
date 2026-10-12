@@ -112,21 +112,39 @@ export async function saveListing(env: ImportEnv, actor: Actor, id: number | nul
   if (unknown.length) throw new ApiError(400, "Check the listing details", [`${unknown.length} attached file${unknown.length === 1 ? " is" : "s are"} no longer available; remove and upload again`]);
   const image = coverFor(input, rows);
   await ensureListings();
-  const existing = id === null ? null : await env.DB.prepare("SELECT slug FROM listings WHERE id = ?").bind(id).first<{ slug: string }>();
+  const existing = id === null ? null : await env.DB.prepare("SELECT slug FROM listings WHERE id = ? AND deleted_at IS NULL").bind(id).first<{ slug: string }>();
   if (id !== null && !existing) throw new ApiError(404, "Listing not found");
   const slug = existing?.slug ?? await freeSlug(env, input.name);
   const values = [input.name, input.district, input.rent, input.bedrooms, input.bathrooms, input.sizeSqm, input.floor, input.stationType, input.stationName, input.walkMinutes, input.latitude, input.longitude, image, input.status, input.sourceUrl, input.lastVerified, input.description, input.videoUrl, JSON.stringify(input.projectFeatures ?? []), input.university, input.developmentProject];
   const listingId = "(SELECT id FROM listings WHERE slug = ?)";
-  const statements = [existing
+  const guard = crypto.randomUUID();
+  const statements = [];
+  if (existing) statements.push(env.DB.prepare("INSERT INTO import_guards (id,valid) SELECT ?,CASE WHEN EXISTS (SELECT 1 FROM listings WHERE id=? AND deleted_at IS NULL) THEN 1 ELSE 0 END").bind(guard, id));
+  statements.push(existing
     // Bumping publication_version makes any pending import revision of this unit stale.
-    ? env.DB.prepare("UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,project_features=?,university=?,development_project=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE slug=?").bind(...values, slug)
+    ? env.DB.prepare("UPDATE listings SET name=?,district=?,rent=?,bedrooms=?,bathrooms=?,size_sqm=?,floor=?,station_type=?,station_name=?,walk_minutes=?,latitude=?,longitude=?,image=?,status=?,source_url=?,last_verified=?,description=?,video_url=?,project_features=?,university=?,development_project=?,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE slug=? AND deleted_at IS NULL").bind(...values, slug)
     : env.DB.prepare("INSERT INTO listings (name,district,rent,bedrooms,bathrooms,size_sqm,floor,station_type,station_name,walk_minutes,latitude,longitude,image,status,source_url,last_verified,description,video_url,project_features,university,development_project,slug,publication_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)").bind(...values, slug),
-  env.DB.prepare(`DELETE FROM listing_media WHERE listing_id = ${listingId}`).bind(slug)];
+  env.DB.prepare(`DELETE FROM listing_media WHERE listing_id = ${listingId}`).bind(slug));
   for (const [position, item] of input.media.entries()) statements.push(env.DB.prepare(`INSERT INTO listing_media (id,listing_id,media_id,position,caption,attribution,cover) VALUES (?,${listingId},?,?,?,?,?)`).bind(crypto.randomUUID(), slug, item.id, position, item.caption, item.attribution, image === `/listing-media/${item.id}` ? 1 : 0));
   statements.push(audit(env, actor, existing ? "listing.updated" : "listing.created", slug));
-  await env.DB.batch(statements);
+  if (existing) statements.push(env.DB.prepare("DELETE FROM import_guards WHERE id=?").bind(guard));
+  try { await env.DB.batch(statements); }
+  catch (error) { if (String(error).includes("import_guard_valid")) throw new ApiError(404, "Listing not found"); throw error; }
   const saved = await env.DB.prepare("SELECT id FROM listings WHERE slug = ?").bind(slug).first<{ id: number }>();
   return { id: saved?.id, slug, url: `/residences/${slug}` };
+}
+
+/** Keep a tombstone so seed data and old imports cannot restore a deleted listing. */
+export async function deleteListing(env: ImportEnv, actor: Actor, id: number) {
+  await ensureListings();
+  const listing = await env.DB.prepare("SELECT slug FROM listings WHERE id=? AND deleted_at IS NULL").bind(id).first<{ slug: string }>();
+  if (!listing) throw new ApiError(404, "Listing not found");
+  await env.DB.batch([
+    env.DB.prepare("UPDATE listings SET deleted_at=CURRENT_TIMESTAMP,publication_version=publication_version+1,updated_at=CURRENT_TIMESTAMP WHERE id=? AND deleted_at IS NULL").bind(id),
+    env.DB.prepare("DELETE FROM listing_media WHERE listing_id=?").bind(id),
+    audit(env, actor, "listing.deleted", listing.slug),
+  ]);
+  return { ok: true };
 }
 
 function summarise(listing: Listing, counts?: { photos: number; videos: number }): MediaSummary {

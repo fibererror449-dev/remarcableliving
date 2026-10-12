@@ -19,13 +19,14 @@ type Props = {
 // On the homepage this section is the cinematic hero's destination: it must stay
 // a single root element with the .collection and .search-strip class names.
 export default function ResidenceCollection({ listings, area, budget, onAreaChange, onBudgetChange, facets, header }: Props) {
+  const areas = [...new Set([...areaOptions, ...listings.map((listing) => listing.district), area])];
   const visible = useMemo(() => filterListings(listings, { area, budget, university: facets?.university, developmentProject: facets?.developmentProject }), [listings, area, budget, facets?.university, facets?.developmentProject]);
   return (
     <section className="collection" id="residences">
       <div className="container">
         {header}
         <section className="search-strip on-dark" id="search" aria-label="Bangkok condominium search">
-          <label className="field"><span>Bangkok area</span><select value={area} onChange={(event) => onAreaChange(event.target.value)}>{areaOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+          <label className="field"><span>Bangkok area</span><select value={area} onChange={(event) => onAreaChange(event.target.value)}>{areas.map((option) => <option key={option}>{option}</option>)}</select></label>
           <label className="field"><span>Monthly budget</span><select value={budget} onChange={(event) => onBudgetChange(event.target.value)}>{budgetOptions.map((option) => <option key={option.label}>{option.label}</option>)}</select></label>
           <a className="btn gold" href="#residences">Show {visible.length} {visible.length === 1 ? "match" : "matches"} →</a>
         </section>

@@ -17,5 +17,5 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export default async function ResidencesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const listings = (await listListings()).map(toPublicListing);
-  return <ResidencesClient listings={listings} initialArea={parseArea(params.area)} initialBudget={parseBudget(params.budget)} initialUniversity={parseListingFacet(params.university)} initialProject={parseListingFacet(params.project)} />;
+  return <ResidencesClient listings={listings} initialArea={parseArea(params.area, listings.map((listing) => listing.district))} initialBudget={parseBudget(params.budget)} initialUniversity={parseListingFacet(params.university)} initialProject={parseListingFacet(params.project)} />;
 }

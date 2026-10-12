@@ -37,6 +37,11 @@ test('admin adds a listing with photos and a YouTube link, and its page shows ev
   assert.equal(publicListing.developmentProject,listing.developmentProject);
   const html=await h.page(slug);
   assert.deepEqual(h.figures(html),[kitchen,living]);
+  assert.match(html, /<dt>Neighbourhood<\/dt><dd><a [^>]*>Ari<\/a>/);
+  assert.match(html, /<dt>University<\/dt><dd><a [^>]*>Chulalongkorn University<\/a>/);
+  assert.match(html, /<dt>Development project<\/dt><dd><a [^>]*>RHYTHM EKKAMAI ESTATE<\/a>/);
+  assert.match(html, /Latitude:.*13.78/);
+  assert.doesNotMatch(html, /Save changes|Add photos|Cancel editing/);
   assert.match(html,/Kitchen · Owner-supplied/);
   assert.match(html,/<iframe class="residence-film-embed" src="https:\/\/www\.youtube-nocookie\.com\/embed\/dQw4w9WgXcQ\?rel=0"/);
   assert.match(html,/Open on YouTube ↗/);
@@ -133,6 +138,12 @@ test('agent imports accept a Google Drive video link and publish it to the live 
   assert.deepEqual((await h.listings()).find(entry=>url.endsWith(entry.slug)).media,{photos:1,cover:true,video:'drive'});
   const schema=await (await h.call('/api/v1/listing-schema',{headers:agent})).json();
   assert.match(schema.fields.videoUrl,/YouTube or Google Drive/);
+  const pending=await submit('before-delete',{...unit,videoUrl:'https://drive.google.com/open?id=1AbCdEfGhIjKlMnOp',rent:22000});
+  assert.equal((await h.write(`/api/listings/${savedListing.id}`,'DELETE')).status,200);
+  assert.equal((await h.write(`/api/admin/imports/drafts/${pending.draftId}/publish`,'POST',{})).status,409,'old drafts cannot republish a deleted listing');
+  const fresh=await submit('after-delete',{...unit,videoUrl:'https://drive.google.com/open?id=1AbCdEfGhIjKlMnOp',rent:23000});
+  assert.equal((await h.write(`/api/admin/imports/drafts/${fresh.draftId}/publish`,'POST',{})).status,409,'even a fresh revision cannot restore a deleted source');
+
 });
 
 test('project features persist, render only selected amenities and can be cleared', async t => {
@@ -151,4 +162,32 @@ test('project features persist, render only selected amenities and can be cleare
   const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,projectFeatures:[]});
   assert.equal(saved.status,200,await saved.clone().text());
   assert.doesNotMatch(await h.page(slug),/Project Features/);
+});
+
+test('delete requires a same-origin admin and removes seeded and uploaded listings without restoring them',async t=>{
+  const h=await site();t.after(h.close);
+  const seed=(await h.listings()).find(entry=>entry.slug==='centurion-park-ari-soi-5-1br');
+  const url=`/api/listings/${seed.id}`;
+  assert.equal((await h.call(url,{method:'DELETE'})).status,401);
+  assert.equal((await h.call(url,{method:'DELETE',headers:{...admin,origin:'https://evil.example'}})).status,403);
+  assert.equal((await h.write('/api/listings/not-a-number','DELETE')).status,404);
+  assert.equal((await h.write('/api/listings/999999','DELETE')).status,404);
+  const photo=await h.upload(png,'image/png','shared.png');
+  const created=await (await h.write('/api/listings','POST',{...facts,media:[{id:photo}]})).json();
+  assert.equal((await h.write(url,'PUT',{...seed,media:[{id:photo}]})).status,200);
+  assert.equal((await h.write(url,'DELETE')).status,200);
+  for(let retry=0;retry<2;retry++){
+    assert.equal((await h.call(`/residences/${seed.slug}`)).status,404,'seed does not reappear on another read');
+    assert.equal((await h.listings()).some(entry=>entry.id===seed.id),false);
+    assert.equal((await (await h.call('/api/listings')).json()).listings.some(entry=>entry.id===seed.id),false);
+  }
+  assert.equal((await h.call(url,{headers:admin})).status,404);
+  assert.equal((await h.write(url,'PUT',{...seed,media:[{id:photo}]})).status,404);
+  assert.equal((await h.write(url,'PATCH',{status:'available'})).status,404);
+  assert.equal((await h.call(`/listing-media/${photo}`)).status,200,'another listing still uses the shared photo');
+  assert.equal((await h.write(`/api/listings/${created.id}`,'DELETE')).status,200);
+  assert.equal((await h.call(`/residences/${created.slug}`)).status,404);
+  assert.equal((await h.call(`/listing-media/${photo}`)).status,404,'the detached upload is no longer public');
+  const db=await h.mf.getD1Database('DB');
+  assert.equal((await db.prepare("SELECT COUNT(*) AS count FROM import_audit WHERE action='listing.deleted'").first()).count,2);
 });

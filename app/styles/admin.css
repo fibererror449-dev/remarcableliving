@@ -10,7 +10,7 @@
 .admin-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:start}
 .admin-list,.admin-form,.media-library{background:#fff;border:1px solid var(--line-dark);padding:clamp(20px,2.5vw,32px);min-width:0}
 .admin-list h2,.admin-form h2,.media-library h2{font:500 clamp(24px,2vw,30px)/1.2 var(--font-display);letter-spacing:-.025em;margin:0 0 20px}
-.admin-list article{display:grid;grid-template-columns:minmax(0,1fr) 140px auto auto;gap:16px;align-items:center;padding:20px 0;border-bottom:1px solid var(--line-dark)}
+.admin-list article{display:grid;grid-template-columns:minmax(0,1fr) 140px auto auto auto;gap:16px;align-items:center;padding:20px 0;border-bottom:1px solid var(--line-dark)}
 .admin-list article:last-child{border-bottom:0}
 .admin-list article div{display:grid;gap:6px;min-width:0;overflow-wrap:anywhere}
 .admin-list article b{font-size:16px;font-weight:600;line-height:1.45}
@@ -237,3 +237,8 @@ html:has(.help-page){scroll-behavior:auto;scroll-padding-top:24px}
 @media(max-width:600px){.help-guide-body{padding-left:0}.help-job-head,.help-section-head{flex-direction:column}.help-copy{width:100%;justify-items:stretch}.help-copy [role=status]{max-width:none;text-align:left}.help-prompt{max-height:300px}}
 @media(max-width:1100px){.admin-layout{grid-template-columns:1fr}}
 @media(max-width:600px){.admin-header{padding:24px 20px;align-items:start;flex-direction:column}.admin-account{text-align:left}.admin-account nav{justify-content:flex-start}.admin-list article{grid-template-columns:minmax(0,1fr) auto auto}.editor-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.editor-photos li{grid-template-columns:1fr}.editor-photos li>div{grid-template-columns:1fr}.editor-photos img{height:180px}.editor-cover-url{flex-direction:column}.admin-list article>div{grid-column:1/-1}.admin-form>div{grid-template-columns:1fr}.media-upload{padding:16px}.media-upload>button{width:100%}}
+
+.admin-list .admin-delete{min-height:44px;padding:8px 10px;border:1px solid #9d2626;background:transparent;color:#9d2626;font:inherit;font-size:14px;cursor:pointer}
+.admin-list .admin-delete:hover:not(:disabled){background:#f3dddd}
+.admin-list .admin-delete:disabled{opacity:.5;cursor:wait}
+@media(min-width:601px) and (max-width:1400px){.admin-list article{grid-template-columns:140px repeat(3,auto)}.admin-list article>div{grid-column:1/-1}}

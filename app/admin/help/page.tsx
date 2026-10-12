@@ -69,7 +69,7 @@ function guides(site: string): Guide[] {
         <li><b>Verify</b>: shown on the website as “Confirm status” until you check it.</li>
         <li><b>Rented / close</b>: hides the listing from the home page and search lists. Anyone with its direct link can still open it, marked “Rented”.</li>
       </ul>
-      <p>There is no delete button. Use <b>Rented / close</b> to take a listing down.</p>
+      <p>Use <b>Delete</b> in Inventory and confirm the listing name to remove it from inventory and its public page. This cannot be undone in Admin. Choose <b>Rented / close</b> when you want to keep its record visible at the direct link.</p>
     </> },
     { id: "guide-library", title: "Use the media library", body: <>
       <p>“Images &amp; videos” at the top of <b>Site admin</b> holds files you can reuse.</p>

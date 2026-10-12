@@ -83,9 +83,9 @@ function first(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
-export function parseArea(value: string | string[] | undefined): string {
+export function parseArea(value: string | string[] | undefined, existingAreas: readonly string[] = []): string {
   const candidate = first(value);
-  return (areaOptions as readonly string[]).includes(candidate) ? candidate : AREA_ALL;
+  return [...areaOptions, ...existingAreas].includes(candidate) ? candidate : AREA_ALL;
 }
 
 export function parseBudget(value: string | string[] | undefined): string {

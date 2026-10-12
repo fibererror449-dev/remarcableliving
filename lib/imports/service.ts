@@ -64,7 +64,7 @@ export async function listDrafts(env:ImportEnv) {
   return (await env.DB.prepare("SELECT d.id,d.revision,d.state,d.created_at,s.namespace,s.reference,json_extract(d.payload,'$.name') AS name FROM listing_drafts d JOIN import_sources s ON s.current_draft=d.id ORDER BY d.created_at DESC LIMIT 100").all()).results;
 }
 function currentGuard(env:ImportEnv,id:string,guard:string,checkLive=false) {
-  return env.DB.prepare(`INSERT INTO import_guards (id,valid) SELECT ?,CASE WHEN EXISTS (SELECT 1 FROM listing_drafts d JOIN import_sources s ON s.current_draft=d.id LEFT JOIN listings l ON l.id=s.listing_id WHERE d.id=? AND d.state='pending' ${checkLive?'AND (s.listing_id IS NULL OR l.publication_version=d.base_version)':''}) THEN 1 ELSE 0 END`).bind(guard,id);
+  return env.DB.prepare(`INSERT INTO import_guards (id,valid) SELECT ?,CASE WHEN EXISTS (SELECT 1 FROM listing_drafts d JOIN import_sources s ON s.current_draft=d.id LEFT JOIN listings l ON l.id=s.listing_id WHERE d.id=? AND d.state='pending' ${checkLive?'AND (s.listing_id IS NULL OR (l.deleted_at IS NULL AND l.publication_version=d.base_version))':''}) THEN 1 ELSE 0 END`).bind(guard,id);
 }
 export async function publishDraft(env:ImportEnv,actor:Actor,id:string) {
   const draft=await getDraft(env,id);

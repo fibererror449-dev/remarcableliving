@@ -2,7 +2,7 @@
 import { ProjectFeaturePicker } from "../components/ProjectFeatures";
 import { readProjectFeatures, type ProjectFeature } from "../../lib/project-features";
 import { FormEvent, useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
-import type { AdminListingDetail, AttachedMedia, MediaAttribution } from "../../lib/listings-data";
+import { AREA_ALL, areaOptions, listingFacetOptions, type PublicListing, type AdminListingDetail, type AttachedMedia, type MediaAttribution } from "../../lib/listings-data";
 import { MAX_UPLOAD_BYTES, MEDIA_TYPES, type UploadedMedia } from "../../lib/uploads";
 import { parseVideoLink, VIDEO_LINK_HELP, videoKindLabel } from "../../lib/video";
 import { universityOptions } from "../../lib/site-data";
@@ -60,7 +60,7 @@ function sendFile(file: File, onProgress: (percent: number) => void, requests: S
   });
 }
 
-export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { listingId: number | null; onSaved: (saved: SavedListing, created: boolean) => void; onCancel: () => void; ref?: Ref<EditorHandle> }) {
+export default function ListingEditor({ listingId, listings, onSaved, onCancel, ref }: { listingId: number | null; listings: PublicListing[]; onSaved: (saved: SavedListing, created: boolean) => void; onCancel: () => void; ref?: Ref<EditorHandle> }) {
   const [values, setValues] = useState<Record<string, string>>(blank);
   const [projectFeatures, setProjectFeatures] = useState<ProjectFeature[]>([]);
   const [image, setImage] = useState("");
@@ -172,6 +172,11 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
     finally { setBusy(false); }
   }
 
+  const suggestions: Record<string, string[]> = {
+    district: [...new Set([...areaOptions.filter((area) => area !== AREA_ALL), ...listings.map((listing) => listing.district)])].sort((a, b) => a.localeCompare(b)),
+    university: [...new Set([...universityOptions.filter((name) => name !== "Another Bangkok university"), ...listingFacetOptions(listings, "university")])].sort((a, b) => a.localeCompare(b)),
+    developmentProject: listingFacetOptions(listings, "developmentProject"),
+  };
   const coverIndex = photos.findIndex((photo) => image === coverPath(photo));
   const linkInvalid = Boolean(linkDraft.trim()) && !parseVideoLink(linkDraft);
   const activeLink = video?.kind === "link" ? parseVideoLink(video.url) : null;
@@ -185,6 +190,7 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
     {!loaded && !error && <p role="status">Loading listing…</p>}
     <fieldset className="editor-fields" disabled={!loaded || busy}>
       <legend className="editor-legend">Listing facts</legend>
+      <p className="wide editor-hint">For District, University and Development project, choose an existing name or type a new one.</p>
       {fields.map((field) => {
         const value = values[field.key] ?? "";
         const change = (next: string) => setValues((previous) => ({ ...previous, [field.key]: next }));
@@ -192,10 +198,10 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
           ? <select value={value} onChange={(event) => change(event.target.value)}>{field.options.map(([option, label]) => <option key={option} value={option}>{label}</option>)}</select>
           : field.key === "description"
             ? <textarea value={value} onChange={(event) => change(event.target.value)} />
-            : <input type={field.type ?? "text"} step={field.step} min={field.min} required={field.required} list={field.key === "university" ? "listing-universities" : undefined} value={value} onChange={(event) => change(event.target.value)} />;
+            : <input type={field.type ?? "text"} step={field.step} min={field.min} required={field.required} list={suggestions[field.key] ? `listing-${field.key}-options` : undefined} value={value} onChange={(event) => change(event.target.value)} />;
         return <label key={field.key} className={field.wide ? "wide" : undefined}>{field.label}{control}</label>;
       })}
-      <datalist id="listing-universities">{universityOptions.map((university) => <option key={university} value={university} />)}</datalist>
+      {Object.entries(suggestions).map(([key, options]) => <datalist key={key} id={`listing-${key}-options`}>{options.map((name) => <option key={name} value={name} />)}</datalist>)}
     </fieldset>
 
     <ProjectFeaturePicker value={projectFeatures} onChange={setProjectFeatures} disabled={!loaded || busy} />
@@ -231,8 +237,6 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
         <label>Cover image URL<input value={image} onChange={(event) => setImage(event.target.value)} placeholder={photos.length ? "Blank uses the first photo" : "/media/… or https://…"} /><span className="editor-hint">{photos.length ? "Or tick “Use as cover photo” on one of the photos above." : "Upload photos above to choose one as the cover."}</span></label>
       </div>}
     </fieldset>
-
-    <ProjectFeaturePicker value={projectFeatures} onChange={setProjectFeatures} disabled={!loaded || busy} />
 
     <fieldset className="editor-media" disabled={!loaded || busy}>
       <legend className="editor-legend">Video</legend>

@@ -3,6 +3,7 @@ import { index, integer, real, sqliteTable, text, uniqueIndex, check } from "dri
 
 export const listings = sqliteTable("listings", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  deletedAt: text("deleted_at"),
   publicationVersion: integer("publication_version").notNull().default(0),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),

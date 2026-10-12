@@ -16,6 +16,7 @@ export default function AdminClient({ displayName }: { displayName: string }) {
   const [editing, setEditing] = useState<number | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [message, setMessage] = useState<{ text: string; url?: string } | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
   const editor = useRef<EditorHandle>(null);
   async function load() { const response = await fetch("/api/listings?admin=1"); const data = await response.json() as { listings?: AdminListing[] }; if (response.ok) setListings(data.listings ?? []); }
   useEffect(() => {
@@ -36,6 +37,19 @@ export default function AdminClient({ displayName }: { displayName: string }) {
     await load().catch(() => undefined);
   }
   async function setStatus(id: number, status: ListingStatus) { try { const response = await fetch(`/api/listings/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status }) }); if (!response.ok) { setMessage({ text: "Could not update listing status. Please retry." }); return; } setMessage({ text: "Listing status updated." }); await load(); } catch { setMessage({ text: "Connection lost. Please retry the status change." }); } }
+  async function removeListing(listing: AdminListing) {
+    if (!window.confirm(`Delete “${listing.name}”? It will disappear from inventory and its public page. This cannot be undone in Admin.`)) return;
+    setDeleting(listing.id);
+    try {
+      const response = await fetch(`/api/listings/${listing.id}`, { method: "DELETE" });
+      const result = await response.json();
+      if (!response.ok) { setMessage({ text: typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "Could not delete the listing. Please retry." }); return; }
+      if (editing === listing.id) { setEditing(null); setFormKey((key) => key + 1); }
+      setMessage({ text: "Listing deleted." });
+      await load();
+    } catch { setMessage({ text: "Connection lost. Please retry deleting the listing." }); }
+    finally { setDeleting(null); }
+  }
   const withoutPhotos = listings?.filter((listing) => !listing.media.photos).length ?? 0;
   const withoutVideo = listings?.filter((listing) => !listing.media.video).length ?? 0;
   return <main className="admin-page"><header className="admin-header"><div><a className="brand" href="/" aria-label="REMARCABLE LIVING home"><BrandLogo /></a><h1>Site admin</h1></div><div className="admin-account"><span>{displayName}</span><nav aria-label="Admin account"><a href="/admin/imports">Review imports</a><a href="/admin/help">How-to</a><a href="/">View website</a><a href="/signout-with-chatgpt?return_to=/">Sign out</a></nav></div></header>
@@ -55,10 +69,11 @@ export default function AdminClient({ displayName }: { displayName: string }) {
           </div>
           <select aria-label={`Status for ${listing.name}`} value={listing.status} onChange={(event) => setStatus(listing.id, event.target.value as ListingStatus)}><option value="available">Available</option><option value="viewing">Viewing</option><option value="verify">Verify</option><option value="rented">Rented / close</option></select>
           <button type="button" className="admin-edit" onClick={() => showEditor(listing.id)} aria-label={`Edit ${listing.name}`}>Edit</button>
+          <button type="button" className="admin-delete" disabled={deleting !== null} onClick={() => removeListing(listing)} aria-label={`Delete ${listing.name}`}>{deleting === listing.id ? "Deleting…" : "Delete"}</button>
           <a href={`/residences/${listing.slug}`} aria-label={`View ${listing.name}`}>View ↗</a>
         </article>)}
       </div>
-      <ListingEditor key={formKey} ref={editor} listingId={editing} onSaved={saved} onCancel={() => showEditor(null)} />
+      <ListingEditor key={formKey} ref={editor} listingId={editing} listings={listings ?? []} onSaved={saved} onCancel={() => showEditor(null)} />
     </section>
   </main>;
 }

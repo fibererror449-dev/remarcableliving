@@ -35,11 +35,19 @@ function mapRow(row: Record<string, unknown>): Listing {
 }
 
 export async function listListings(includeClosed = false): Promise<Listing[]> {
-  try { await ensureListings(); const db = await getDb(); const result = await db.prepare(`SELECT * FROM listings ${includeClosed ? "" : "WHERE status != 'rented'"} ORDER BY CASE status WHEN 'available' THEN 0 WHEN 'viewing' THEN 1 ELSE 2 END, updated_at DESC`).all(); return result.results.map((row) => mapRow(row as Record<string, unknown>)); } catch { return fallbackListings; }
+  let db: D1Database;
+  try { db = await getDb(); } catch { return fallbackListings; }
+  await ensureListings();
+  const result = await db.prepare(`SELECT * FROM listings WHERE deleted_at IS NULL ${includeClosed ? "" : "AND status != 'rented'"} ORDER BY CASE status WHEN 'available' THEN 0 WHEN 'viewing' THEN 1 ELSE 2 END, updated_at DESC`).all();
+  return result.results.map((row) => mapRow(row as Record<string, unknown>));
 }
 
 export async function getListing(slug: string): Promise<Listing | null> {
-  try { await ensureListings(); const db = await getDb(); const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>(); return row ? mapRow(row) : (fallbackListings.find((listing) => listing.slug === slug) ?? null); } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
+  let db: D1Database;
+  try { db = await getDb(); } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
+  await ensureListings();
+  const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>();
+  return row && !row.deleted_at ? mapRow(row) : null;
 }
 
 export type ListingMedia = { id: string; mime: string; caption: string; attribution: "owner" | "agent" | "admin"; cover: boolean };

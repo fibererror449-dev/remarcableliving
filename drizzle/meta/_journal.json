@@ -64,6 +64,13 @@
       "when": 1791466636191,
       "tag": "0008_windy_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1791791510322,
+      "tag": "0009_high_talisman",
+      "breakpoints": true
     }
   ]
 }
