@@ -1,11 +1,13 @@
 .discovery-index,.directory-content{display:flex;flex-direction:column;gap:48px}
 .directory-preview{padding-top:32px;scroll-margin-top:120px}
+.directory-preview>.sec-head{display:flex;flex-direction:column;align-items:flex-start;gap:18px}
 .place-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
-.place-card{min-width:0;border-bottom:1px solid var(--line-dark)}
+.place-card{min-width:0;border-bottom:1px solid var(--line-dark);display:flex;flex-direction:column}
 .place-card-image{display:block;position:relative;height:240px;overflow:hidden;background:var(--ink)}
 .place-card-image img{width:100%;height:100%;object-fit:cover}
 .place-card-image>span{position:absolute;bottom:16px;left:16px;padding:6px 10px;background:var(--ink);color:#fff;font-size:12px}
-.place-card>div{padding:24px 0;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.place-card>div{padding:24px 0;display:flex;flex-direction:column;align-items:flex-start;gap:14px;flex:1}
+.place-card>div>.text-link{margin-top:auto;padding-top:10px}
 .place-card h3{margin:0;font:400 28px/1.15 var(--font-display)}
 .place-card p{margin:0;font-size:15px;line-height:1.65;color:var(--muted)}
 .place-card .eyebrow{font-size:11px}
