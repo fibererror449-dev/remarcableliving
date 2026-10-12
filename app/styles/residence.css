@@ -11,6 +11,11 @@
 .detail-hero-copy .chip{align-self:flex-start}
 .detail-hero-copy .label{color:rgba(255,255,255,.7)}
 .detail-hero h1{margin:0;font:400 clamp(40px,3.9vw,56px)/1 var(--font-display);letter-spacing:var(--tracking-display)}
+.detail-hero-copy .project-features{padding:0;border:0}
+.detail-hero-copy .project-features h2{margin:0 0 12px;color:var(--gold);font:500 11px/1.4 var(--font-body);letter-spacing:.12em;text-transform:uppercase}
+.detail-hero-copy .project-feature-grid{display:flex;flex-wrap:wrap;gap:8px 18px}
+.detail-hero-copy .project-feature-grid li{gap:7px;color:rgba(255,255,255,.78);font-size:14px;line-height:1.5}
+.detail-hero-copy .project-feature-check{flex:0 0 14px;width:14px;height:auto;border:0;border-radius:0;color:var(--gold);font-size:12px}
 .detail-hero strong{font-size:32px;font-weight:500;color:var(--gold)}
 .detail-hero strong small{font-size:16px;font-weight:400;color:#fff}
 .hero-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -63,11 +68,6 @@
 .facts span{display:block;font-size:var(--text-meta);color:var(--muted)}
 .verified{font-size:var(--text-meta);color:var(--muted)}
 .detail-copy .whatsapp{align-self:flex-start}
-.detail-copy .project-features{width:100%;padding:24px 0 4px;border-top:1px solid var(--line-dark);border-bottom:0}
-.detail-copy .project-features h2{margin:0 0 16px;color:var(--ink);font:500 20px/1.25 var(--font-display)}
-.detail-copy .project-features .project-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.detail-copy .project-features .project-feature-grid li{padding:10px 12px;border:1px solid var(--line-dark);background:var(--paper);font-size:14px;line-height:1.4}
-.detail-copy .project-feature-check{flex-basis:1.25rem;width:1.25rem;height:1.25rem;border-color:var(--gold-deep);color:var(--gold-deep);font-size:.85rem}
 .map-card{display:flex;flex-direction:column;gap:16px;padding:24px;border:1px solid var(--line-dark);background:var(--paper)}
 .map-card header{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
 .map-card header h3{margin:0;font:500 22px/1.2 var(--font-display)}
@@ -128,7 +128,6 @@
   .facts div:nth-child(even){padding-right:0}
   .map-card{padding:16px}
   .residence-description-section p{font-size:15px}
-  .detail-copy .project-features .project-feature-grid{grid-template-columns:1fr 1fr}
   .map-card iframe{min-height:260px}
   .residence-story .container{gap:32px}
 }
