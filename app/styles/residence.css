@@ -140,3 +140,11 @@
 .residence-location-facts dt{color:var(--muted);font-size:var(--text-meta)}
 .residence-location-facts dd{margin:0;overflow-wrap:anywhere}
 .residence-location-facts a{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+
+/* Location links in the residence header */
+.detail-hero-copy .residence-location-facts{gap:12px;padding:20px 0;border-color:var(--line)}
+.detail-hero-copy .residence-location-facts div{grid-template-columns:minmax(105px,1fr) minmax(0,2fr);gap:12px}
+.detail-hero-copy .residence-location-facts dt{color:var(--muted-light);font-size:12px;line-height:1.5}
+.detail-hero-copy .residence-location-facts dd{font-size:14px;line-height:1.5}
+.detail-hero-copy .residence-location-facts a{color:rgba(255,255,255,.85);text-decoration-color:rgba(255,255,255,.3)}
+.detail-hero-copy .residence-location-facts a:hover{color:var(--gold);text-decoration-color:var(--gold)}
