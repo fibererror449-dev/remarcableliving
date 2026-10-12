@@ -52,10 +52,8 @@ test('admin sees media counts, edits a listing, uploads a photo, adds a YouTube 
   await detailPage.goto(h.url+'/residences/centurion-park-ari-soi-5-1br');
   await detailPage.locator('.residence-location-facts').screenshot({path:'/private/tmp/listing-detail-facts-390.png'});
   await detailPage.getByRole('link',{name:'New neighbourhood',exact:true}).click();
-  await detailPage.waitForURL('**/neighbourhoods?**');
-  await detailPage.locator('#neighbourhoods').getByRole('link',{name:/View all/}).click();
-  await detailPage.waitForURL('**/residences?**');
-  assert.equal(await detailPage.getByLabel('Bangkok area').inputValue(),'New neighbourhood');
+  await detailPage.waitForURL('**/areas/new-neighbourhood-*');
+  await detailPage.getByRole('heading',{name:'New neighbourhood',exact:true,level:1}).waitFor();
   assert.equal(await detailPage.locator('.collection .property-card').count(),1);
   await detailPage.close();
   await page.setViewportSize({width:390,height:844});

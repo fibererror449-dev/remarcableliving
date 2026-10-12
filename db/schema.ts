@@ -119,3 +119,17 @@ export const oauthTokens = sqliteTable("oauth_tokens", {
   id: text("id").primaryKey(), tokenHash: text("token_hash").notNull().unique(), grantId: text("grant_id").notNull().references(()=>oauthGrants.id),
   kind: text("kind").notNull(), expiresAt: integer("expires_at").notNull(), consumedAt: integer("consumed_at"), createdAt: integer("created_at").notNull(),
 },t=>[index("oauth_tokens_grant").on(t.grantId)]);
+
+// Shared discovery objects remain after a listing is removed or reassigned.
+export const discoveryPlaces = sqliteTable("discovery_places", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  kind: text("kind", { enum: ["area", "project", "university"] }).notNull(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+}, t => [uniqueIndex("discovery_place_name").on(t.kind, sql`lower(${t.name})`), uniqueIndex("discovery_place_id_kind").on(t.id, t.kind)]);
+
+export const listingPlaces = sqliteTable("listing_places", {
+  listingId: integer("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+  placeId: integer("place_id").notNull().references(() => discoveryPlaces.id),
+  kind: text("kind", { enum: ["area", "project", "university"] }).notNull(),
+}, t => [uniqueIndex("listing_place_kind").on(t.listingId, t.kind), index("listing_place_parent").on(t.placeId)]);

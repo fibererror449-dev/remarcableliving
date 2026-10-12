@@ -55,14 +55,14 @@ test("fans the homepage sections out to their own routes", async () => {
   const neighbourhoodsResponse = await render("/neighbourhoods");
   assert.equal(neighbourhoodsResponse.status, 200);
   const neighbourhoods = await neighbourhoodsResponse.text();
-  assert.match(neighbourhoods, /Find your/);
+  assert.match(neighbourhoods, /Explore/);
   assert.match(neighbourhoods, /id="projects"/);
   assert.match(neighbourhoods, /id="universities"/);
-  assert.match(neighbourhoods, /All universities/);
-  assert.match(neighbourhoods, /All development projects/);
+  assert.match(neighbourhoods, /href="\/universities"/);
+  assert.match(neighbourhoods, /href="\/projects"/);
   assert.match(neighbourhoods, /id="neighbourhoods"/);
   assert.match(neighbourhoods, /id="guide"/);
-  assert.match(neighbourhoods, /aria-pressed="false"/);
+  assert.match(neighbourhoods, /href="\/areas"/);
 
   const aboutResponse = await render("/about");
   assert.equal(aboutResponse.status, 200);
@@ -124,12 +124,9 @@ test("answers unknown routes with the branded 404 and publishes crawl metadata",
 });
 
 test("keeps boutique discovery sections evidence-safe and interactive", async () => {
-  const neighbourhoods = await readFile(new URL("../app/neighbourhoods/NeighbourhoodsClient.tsx", import.meta.url), "utf8");
-  assert.match(neighbourhoods, /id="neighbourhoods"/);
-  assert.match(neighbourhoods, /aria-pressed=\{value === choice\.name\}/);
   const journey = await readFile(new URL("../app/components/JourneySteps.tsx", import.meta.url), "utf8");
   assert.match(journey, /id="journey-title"/);
-  const sources = ["../app/HomeClient.tsx", "../app/residences/ResidencesClient.tsx", "../app/neighbourhoods/NeighbourhoodsClient.tsx", "../app/about/page.tsx", "../app/components/AboutValues.tsx", "../app/components/AboutAudience.tsx", "../app/components/AboutMark.tsx", "../app/contact/page.tsx", "../app/student-housing/page.tsx", "../app/components/Manifesto.tsx", "../app/components/ExploreStrip.tsx", "../lib/site-data.ts", "../app/CinematicHero.tsx", "../app/components/SiteNav.tsx", "../app/components/SiteFooter.tsx"];
+  const sources = ["../app/HomeClient.tsx", "../app/residences/ResidencesClient.tsx", "../app/neighbourhoods/page.tsx", "../app/about/page.tsx", "../app/components/AboutValues.tsx", "../app/components/AboutAudience.tsx", "../app/components/AboutMark.tsx", "../app/contact/page.tsx", "../app/student-housing/page.tsx", "../app/components/Manifesto.tsx", "../app/components/ExploreStrip.tsx", "../lib/site-data.ts", "../app/CinematicHero.tsx", "../app/components/SiteNav.tsx", "../app/components/SiteFooter.tsx"];
   for (const source of sources) {
     const text = await readFile(new URL(source, import.meta.url), "utf8");
     assert.doesNotMatch(text, /award-winning|five-star|clients served|off-market access/i, source);

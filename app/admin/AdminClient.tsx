@@ -52,7 +52,7 @@ export default function AdminClient({ displayName }: { displayName: string }) {
   }
   const withoutPhotos = listings?.filter((listing) => !listing.media.photos).length ?? 0;
   const withoutVideo = listings?.filter((listing) => !listing.media.video).length ?? 0;
-  return <main className="admin-page"><header className="admin-header"><div><a className="brand" href="/" aria-label="REMARCABLE LIVING home"><BrandLogo /></a><h1>Site admin</h1></div><div className="admin-account"><span>{displayName}</span><nav aria-label="Admin account"><a href="/admin/imports">Review imports</a><a href="/admin/help">How-to</a><a href="/">View website</a><a href="/signout-with-chatgpt?return_to=/">Sign out</a></nav></div></header>
+  return <main className="admin-page"><header className="admin-header"><div><a className="brand" href="/" aria-label="REMARCABLE LIVING home"><BrandLogo /></a><h1>Site admin</h1></div><div className="admin-account"><span>{displayName}</span><nav aria-label="Admin account"><a href="/admin/imports">Review imports</a><a href="/admin/places">Places &amp; collections</a><a href="/admin/help">How-to</a><a href="/">View website</a><a href="/signout-with-chatgpt?return_to=/">Sign out</a></nav></div></header>
     <MediaLibrary onUse={(item) => editor.current?.attachLibraryItem(item)} />
     {message && <div className="admin-message" role="status">{message.text}{message.url && <> <a href={message.url}>View listing ↗</a></>}</div>}
     <section className="admin-layout">

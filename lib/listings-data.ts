@@ -110,3 +110,12 @@ function listingSearchHref(path: string, filters: ListingFilters): string {
 
 export const toResidencesHref = (filters: ListingFilters) => listingSearchHref("/residences", filters);
 export const toNeighbourhoodsHref = (filters: ListingFilters) => listingSearchHref("/neighbourhoods", filters);
+
+export function parseResidencePage(value: string | string[] | undefined): number {
+  const page = Number(first(value));
+  return Number.isSafeInteger(page) && page > 0 ? page : 1;
+}
+export function parseResidencePageSize(value: string | string[] | undefined): number {
+  const size = Number(first(value));
+  return [10, 25, 50].includes(size) ? size : 10;
+}

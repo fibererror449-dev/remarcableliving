@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
-import { listListings } from "../lib/listings";
+import { loadDiscovery } from "../lib/discovery";
+import { placeHref } from "../lib/discovery-data";
 import { siteOrigin } from "../lib/site-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const listings = await listListings();
-  const staticRoutes = ["", "/residences", "/neighbourhoods", "/about", "/contact", "/student-housing", "/inventory"];
+  const { listings, places } = await loadDiscovery();
+  const staticRoutes = ["", "/residences", "/neighbourhoods", "/areas", "/projects", "/universities", "/about", "/contact", "/student-housing", "/inventory"];
   return [
     ...staticRoutes.map((route) => ({ url: `${siteOrigin}${route}` })),
-    ...listings.map((listing) => ({ url: `${siteOrigin}/residences/${listing.slug}`, lastModified: listing.lastVerified })),
+    ...places.map(place => ({ url: `${siteOrigin}${placeHref(place)}` })),
+    ...listings.map((listing) => ({ url: `${siteOrigin}/residences/${listing.slug}` })),
   ];
 }

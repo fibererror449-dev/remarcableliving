@@ -71,6 +71,13 @@
       "when": 1791791510322,
       "tag": "0009_high_talisman",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1791812786923,
+      "tag": "0010_fair_mathemanic",
+      "breakpoints": true
     }
   ]
 }
