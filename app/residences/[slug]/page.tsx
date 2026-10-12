@@ -85,6 +85,7 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         <span className={`chip ${listing.status}`}>{statusLabel}</span>
         <p className="label">{listing.district}, Bangkok</p>
         <h1>{listing.name}</h1>
+        <ProjectFeatures value={listing.projectFeatures ?? []} />
         <strong>฿{listing.rent.toLocaleString()} <small>/ month</small></strong>
         <div className="hero-facts" aria-label="Key property facts"><span><b>{listing.sizeSqm}</b> sq m</span><span><b>{listing.bedrooms}</b> {listing.bedrooms === 1 ? "bedroom" : "bedrooms"}</span><span><b>{listing.floor}</b> floor</span></div>
         <a className="btn gold hero-contact" href={whatsapp} target="_blank" rel="noreferrer">Check availability <span>↗</span></a>
@@ -149,7 +150,6 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
             <h2 className="h3">{listing.stationType} {listing.stationName}</h2>
             <p>{slug === ashtonSlug ? "Approximately 20 metres from MRT Sukhumvit and 230 metres from BTS Asok. Distances are owner supplied and should be confirmed during the viewing." : `Approximately ${listing.walkMinutes} minutes on foot. Walking time is an estimate and should be checked during the viewing.`}</p>
           </div>
-          <ProjectFeatures value={listing.projectFeatures ?? []} />
           <p className="verified">Last listing check: {listing.lastVerified}{listing.sourceUrl ? <> · <a href={listing.sourceUrl} target="_blank" rel="noreferrer">View original source ↗</a></> : " · Owner-supplied media"}</p>
           <a className="btn wa whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Ask about this residence →</a>
         </div>

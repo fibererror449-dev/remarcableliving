@@ -4,7 +4,7 @@ type DescriptionSection = {
 };
 
 const sectionRules: Array<{ title: string; matches: RegExp }> = [
-  { title: "Nearby universities", matches: /\b(universit|campus|students)\b/i },
+  { title: "Nearby universities", matches: /\b(university|universities|campus|students)\b/i },
   { title: "Getting around", matches: /\b(MRT|BTS|station|road|walk|metres|meters|kilometres|kilometers|km|transit)\b/i },
   { title: "Building amenities", matches: /\b(amenit|facilit|pool|Jacuzzi|gym|co-working|lounge|garden|CCTV|security)\b/i },
   { title: "Availability", matches: /\b(availability|available|rented|viewing|confirm)\b/i },
