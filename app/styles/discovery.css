@@ -28,7 +28,10 @@
 .collection .collection-search input::placeholder{color:rgba(255,255,255,.55)}
 .collection>.container>.collection-search{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 .collection-results{scroll-margin-top:calc(var(--nav-height) + 24px);margin:0;color:var(--muted);font-size:14px}
-.collection-pagination{display:flex;align-items:center;justify-content:center;gap:24px}
+.collection-pagination{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap}
+.pagination-page-size{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink)}
+.pagination-page-size select{min-height:48px;min-width:160px;padding:10px 14px;border:1px solid var(--line-dark);border-radius:0;background:var(--paper);color:var(--ink);font:inherit;appearance:auto}
+@media(max-width:620px){.pagination-page-size{width:100%;justify-content:center}}
 .collection-pagination .btn{border:1px solid var(--line-dark);padding:12px 20px;min-height:48px}
 .collection-pagination button:disabled{opacity:.35;cursor:default}
 @media(max-width:1000px){.place-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.collection>.container>.collection-search{grid-template-columns:repeat(2,minmax(0,1fr))}}

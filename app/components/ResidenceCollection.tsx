@@ -48,6 +48,7 @@ export default function ResidenceCollection({ listings, area, budget, onAreaChan
           ? <div className="property-grid">{shown.map((listing, index) => <ListingCard key={listing.slug} listing={listing} index={offset + index} />)}</div>
           : <div className="empty-state"><h3 className="h3">No exact match yet.</h3><p>Try another budget or ask Mark to search beyond the sample collection.</p><a className="btn" href="/contact">Start a custom search</a></div>}
         {pagination && matches.length > 0 && <nav className="collection-pagination" aria-label="Residence pagination">
+          <label className="pagination-page-size"><span>Show per page</span><select value={pageSize} onChange={event => pagination.onPageSizeChange(Number(event.target.value))}>{[10,25,50].map(size => <option key={size} value={size}>{size} residences</option>)}</select></label>
           <button type="button" className="btn" disabled={page === 1} onClick={() => pagination.onPageChange(page - 1)}>← Previous</button>
           <span>Page {page} of {pages}</span>
           <button type="button" className="btn" disabled={page === pages} onClick={() => pagination.onPageChange(page + 1)}>Next →</button>
