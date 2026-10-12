@@ -45,8 +45,12 @@
 /* Details + map */
 .detail-grid{background:var(--paper-2)}
 .detail-grid-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:80px;align-items:start}
-.detail-copy{display:flex;flex-direction:column;gap:32px}
-.detail-copy .lede{color:var(--ink);font-size:clamp(19px,1.5vw,24px);line-height:1.45}
+.detail-copy{display:flex;flex-direction:column;gap:28px}
+.residence-description{display:grid;gap:20px;color:#403d37}
+.residence-description-section{display:grid;gap:8px}
+.residence-description-section h2,.detail-subheading{margin:0;color:var(--ink);font:500 20px/1.25 var(--font-display)}
+.residence-description-section p{max-width:68ch;color:#5d5a55;font-size:16px;line-height:1.65}
+.detail-copy .detail-subheading{margin-top:2px}
 .detail-copy h2{margin:0}
 .detail-copy p{margin:0}
 .detail-copy .station{display:flex;flex-direction:column;gap:12px}
@@ -59,6 +63,11 @@
 .facts span{display:block;font-size:var(--text-meta);color:var(--muted)}
 .verified{font-size:var(--text-meta);color:var(--muted)}
 .detail-copy .whatsapp{align-self:flex-start}
+.detail-copy .project-features{width:100%;padding:24px 0 4px;border-top:1px solid var(--line-dark);border-bottom:0}
+.detail-copy .project-features h2{margin:0 0 16px;color:var(--ink);font:500 20px/1.25 var(--font-display)}
+.detail-copy .project-features .project-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.detail-copy .project-features .project-feature-grid li{padding:10px 12px;border:1px solid var(--line-dark);background:var(--paper);font-size:14px;line-height:1.4}
+.detail-copy .project-feature-check{flex-basis:1.25rem;width:1.25rem;height:1.25rem;border-color:var(--gold-deep);color:var(--gold-deep);font-size:.85rem}
 .map-card{display:flex;flex-direction:column;gap:16px;padding:24px;border:1px solid var(--line-dark);background:var(--paper)}
 .map-card header{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
 .map-card header h3{margin:0;font:500 22px/1.2 var(--font-display)}
@@ -118,6 +127,8 @@
   .facts div:nth-child(odd){padding-left:0;border-right:1px solid var(--line-dark)}
   .facts div:nth-child(even){padding-right:0}
   .map-card{padding:16px}
+  .residence-description-section p{font-size:15px}
+  .detail-copy .project-features .project-feature-grid{grid-template-columns:1fr 1fr}
   .map-card iframe{min-height:260px}
   .residence-story .container{gap:32px}
 }

@@ -22,7 +22,7 @@ const fields: { key: string; label: string; type?: "number" | "date" | "url"; st
   { key: "status", label: "Availability", options: [["verify", "Verify first"], ["available", "Available"], ["viewing", "Viewing"], ["rented", "Rented / close"]] },
   { key: "bedrooms", label: "Bedrooms", type: "number", step: "1", min: "0" },
   { key: "bathrooms", label: "Bathrooms", type: "number", step: "1", min: "1" },
-  { key: "sizeSqm", label: "Size (sq m)", type: "number", step: "0.1", min: "0.1", required: true },
+  { key: "sizeSqm", label: "Size (sq m)", type: "number", step: "any", min: "0.1", required: true },
   { key: "floor", label: "Floor" },
   { key: "stationType", label: "Station type", options: [["BTS", "BTS"], ["MRT", "MRT"]] },
   { key: "stationName", label: "Station", required: true },
