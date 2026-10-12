@@ -1,4 +1,5 @@
 import ProjectFeatures from "../../components/ProjectFeatures";
+import ResidenceDescription from "../../components/ResidenceDescription";
 import { notFound } from "next/navigation";
 import ListingImage from "../../ListingImage";
 import SiteNav from "../../components/SiteNav";
@@ -131,22 +132,24 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
       <div className="container detail-grid-inner">
         <div className="detail-copy">
           <p className="eyebrow dark"><span /> Residence details</p>
-          <p className="lede">{listing.description}</p>
-          <dl className="residence-location-facts">
-            <div><dt>Neighbourhood</dt><dd><a href={toNeighbourhoodsHref({ area: listing.district }) + "#neighbourhoods"}>{listing.district}</a></dd></div>
-            {listing.developmentProject && <div><dt>Development project</dt><dd><a href={toNeighbourhoodsHref({ developmentProject: listing.developmentProject }) + "#projects"}>{listing.developmentProject}</a></dd></div>}
-            {listing.university && <div><dt>University</dt><dd><a href={toNeighbourhoodsHref({ university: listing.university }) + "#universities"}>{listing.university}</a></dd></div>}
-          </dl>
-          <div className="facts">
+          <ResidenceDescription description={listing.description} />
+          <h2 className="detail-subheading">At a glance</h2>
+          <div className="facts" aria-label="Residence facts">
             <div><b>{listing.bedrooms}</b><span>Bedroom{listing.bedrooms === 1 ? "" : "s"}</span></div>
             <div><b>{listing.bathrooms}</b><span>Bathroom{listing.bathrooms === 1 ? "" : "s"}</span></div>
             <div><b>{listing.sizeSqm}</b><span>Sq m</span></div>
             <div><b>{listing.floor}</b><span>Floor</span></div>
           </div>
+          <dl className="residence-location-facts">
+            <div><dt>Neighbourhood</dt><dd><a href={toNeighbourhoodsHref({ area: listing.district }) + "#neighbourhoods"}>{listing.district}</a></dd></div>
+            {listing.developmentProject && <div><dt>Development project</dt><dd><a href={toNeighbourhoodsHref({ developmentProject: listing.developmentProject }) + "#projects"}>{listing.developmentProject}</a></dd></div>}
+            {listing.university && <div><dt>University</dt><dd><a href={toNeighbourhoodsHref({ university: listing.university }) + "#universities"}>{listing.university}</a></dd></div>}
+          </dl>
           <div className="station">
             <h2 className="h3">{listing.stationType} {listing.stationName}</h2>
             <p>{slug === ashtonSlug ? "Approximately 20 metres from MRT Sukhumvit and 230 metres from BTS Asok. Distances are owner supplied and should be confirmed during the viewing." : `Approximately ${listing.walkMinutes} minutes on foot. Walking time is an estimate and should be checked during the viewing.`}</p>
           </div>
+          <ProjectFeatures value={listing.projectFeatures ?? []} />
           <p className="verified">Last listing check: {listing.lastVerified}{listing.sourceUrl ? <> · <a href={listing.sourceUrl} target="_blank" rel="noreferrer">View original source ↗</a></> : " · Owner-supplied media"}</p>
           <a className="btn wa whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Ask about this residence →</a>
         </div>
@@ -158,8 +161,6 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         </div>
       </div>
     </section>
-    <div className="container"><ProjectFeatures value={listing.projectFeatures ?? []} /></div>
-
     {story && <section className="residence-story section on-dark">
       <div className="container">
         <header><div><p className="eyebrow"><span /> The life inside</p><h2>{story.title}</h2></div><p>{story.opening}</p></header>
