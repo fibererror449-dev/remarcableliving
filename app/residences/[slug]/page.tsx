@@ -9,7 +9,8 @@ import { getListingStory } from "../../../lib/listing-stories";
 import { getListing, listListingMedia } from "../../../lib/listings";
 import { hasMedia } from "../../../lib/media";
 import { ashtonSlug, baanKlangSlug, centricAriSlug, curatedResidence } from "../../../lib/residence-galleries";
-import { toNeighbourhoodsHref } from "../../../lib/listings-data";
+import { loadDiscovery } from "../../../lib/discovery";
+import { placeDirectories, placeHref, placeKinds } from "../../../lib/discovery-data";
 import { parseVideoLink } from "../../../lib/video";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,8 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
   const { slug } = await params;
   const listing = await getListing(slug);
   if (!listing) notFound();
+  const { places } = await loadDiscovery();
+  const parents = places.filter(place => place.listingIds.includes(listing.id)).sort((a,b) => placeKinds.indexOf(a.kind) - placeKinds.indexOf(b.kind));
   const story = getListingStory(slug);
   // Curated files render only when committed (see lib/residence-galleries.ts); every photo attached
   // through an approved import or the admin editor follows them, in the order it was arranged.
@@ -87,9 +90,7 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         <h1>{listing.name}</h1>
         <ProjectFeatures value={listing.projectFeatures ?? []} />
         <dl className="residence-location-facts">
-          <div><dt>Neighbourhood</dt><dd><a href={toNeighbourhoodsHref({ area: listing.district }) + "#neighbourhoods"}>{listing.district}</a></dd></div>
-          {listing.developmentProject && <div><dt>Development project</dt><dd><a href={toNeighbourhoodsHref({ developmentProject: listing.developmentProject }) + "#projects"}>{listing.developmentProject}</a></dd></div>}
-          {listing.university && <div><dt>University</dt><dd><a href={toNeighbourhoodsHref({ university: listing.university }) + "#universities"}>{listing.university}</a></dd></div>}
+          {parents.map(place => <div key={place.id}><dt>{placeDirectories[place.kind].singular}</dt><dd><a href={placeHref(place)}>{place.name}</a></dd></div>)}
         </dl>
         <strong>฿{listing.rent.toLocaleString()} <small>/ month</small></strong>
         <div className="hero-facts" aria-label="Key property facts"><span><b>{listing.sizeSqm}</b> sq m</span><span><b>{listing.bedrooms}</b> {listing.bedrooms === 1 ? "bedroom" : "bedrooms"}</span><span><b>{listing.floor}</b> floor</span></div>

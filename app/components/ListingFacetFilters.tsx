@@ -21,11 +21,11 @@ export default function ListingFacetFilters({ listings, university, developmentP
   if (developmentProject && !projects.includes(developmentProject)) projects.push(developmentProject);
 
   return <div className="listing-facet-filters" role="group" aria-label="University and development project filters">
-    <label><span>University</span><select aria-label="University" value={university} onChange={(event) => onUniversityChange(event.target.value)}>
+    <label className="field"><span>University</span><select aria-label="University" value={university} onChange={(event) => onUniversityChange(event.target.value)}>
       <option value="">All universities</option>
       {universities.map((name) => <option key={name} value={name}>{name}</option>)}
     </select></label>
-    <label><span>Development project</span><select aria-label="Development project" value={developmentProject} onChange={(event) => onProjectChange(event.target.value)}>
+    <label className="field"><span>Development project</span><select aria-label="Development project" value={developmentProject} onChange={(event) => onProjectChange(event.target.value)}>
       <option value="">All development projects</option>
       {projects.map((name) => <option key={name} value={name}>{name}</option>)}
     </select></label>

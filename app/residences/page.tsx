@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ResidencesClient from "./ResidencesClient";
 import { listListings } from "../../lib/listings";
-import { parseArea, parseBudget, parseListingFacet, toPublicListing } from "../../lib/listings-data";
+import { parseArea, parseBudget, parseListingFacet, parseResidencePage, parseResidencePageSize, toPublicListing } from "../../lib/listings-data";
 import { siteOrigin } from "../../lib/site-data";
 
 export const dynamic = "force-dynamic";
@@ -17,5 +17,5 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export default async function ResidencesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const listings = (await listListings()).map(toPublicListing);
-  return <ResidencesClient listings={listings} initialArea={parseArea(params.area, listings.map((listing) => listing.district))} initialBudget={parseBudget(params.budget)} initialUniversity={parseListingFacet(params.university)} initialProject={parseListingFacet(params.project)} />;
+  return <ResidencesClient listings={listings} initialArea={parseArea(params.area, listings.map((listing) => listing.district))} initialBudget={parseBudget(params.budget)} initialUniversity={parseListingFacet(params.university)} initialProject={parseListingFacet(params.project)} initialName={parseListingFacet(params.q)} initialPage={parseResidencePage(params.page)} initialPageSize={parseResidencePageSize(params.pageSize)} />;
 }

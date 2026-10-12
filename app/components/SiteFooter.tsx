@@ -14,7 +14,7 @@ export default function SiteFooter() {
             <h4>Site</h4>
             <a href={studentHousingHref}>Your University</a>
             <a href="/residences">Condo/Apartment</a>
-            <a href="/neighbourhoods">University &amp; project search</a>
+            <a href="/neighbourhoods">Explore Bangkok</a>
             <a href="/neighbourhoods#guide">Bangkok guide</a>
             <a href="/about">About Us</a>
             <a href="/inventory">Complete inventory</a>

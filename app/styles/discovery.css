@@ -1,0 +1,41 @@
+.discovery-index,.directory-content{display:flex;flex-direction:column;gap:48px}
+.directory-preview{padding-top:32px;scroll-margin-top:120px}
+.place-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
+.place-card{min-width:0;border-bottom:1px solid var(--line-dark)}
+.place-card-image{display:block;position:relative;height:240px;overflow:hidden;background:var(--ink)}
+.place-card-image img{width:100%;height:100%;object-fit:cover}
+.place-card-image>span{position:absolute;bottom:16px;left:16px;padding:6px 10px;background:var(--ink);color:#fff;font-size:12px}
+.place-card>div{padding:24px 0;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.place-card h3{margin:0;font:400 28px/1.15 var(--font-display)}
+.place-card p{margin:0;font-size:15px;line-height:1.65;color:var(--muted)}
+.place-card .eyebrow{font-size:11px}
+.directory-toolbar{display:flex;gap:24px;align-items:end;justify-content:space-between}
+.directory-toolbar .field{width:min(100%,520px)}
+.directory-toolbar input{background:var(--paper);color:var(--ink);border-color:var(--line-dark)}
+.place-breadcrumbs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px;color:var(--muted-light);font-size:13px}
+.place-breadcrumbs a:hover{color:var(--gold)}
+.place-count{color:var(--gold);margin-top:24px}
+.place-connections{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.place-connections a{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);padding:12px 16px;font-size:14px}
+.place-connections small{color:var(--gold);font-size:11px}
+.collection .collection-search:has(.listing-facet-filters){grid-template-columns:repeat(2,minmax(0,1fr))}
+.collection .collection-search .listing-facet-filters{display:contents}
+.collection .collection-search .listing-facet-filters label{gap:10px}
+.collection .collection-search :is(input,select){box-sizing:border-box;width:100%;height:52px;min-height:52px;padding:12px 40px 12px 16px;border:1px solid rgba(255,255,255,.28);background-color:#22221f;color:#fff;font:inherit}
+.collection .collection-search label{min-width:0;display:flex;flex-direction:column;gap:10px}
+.collection .collection-search label>span{font-size:var(--text-label);font-weight:600;letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--muted-light)}
+.collection .collection-search input{padding-right:16px}
+.collection .collection-search input::placeholder{color:rgba(255,255,255,.55)}
+.collection>.container>.collection-search{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.collection-results{scroll-margin-top:calc(var(--nav-height) + 24px);margin:0;color:var(--muted);font-size:14px}
+.collection-pagination{display:flex;align-items:center;justify-content:center;gap:24px}
+.collection-pagination .btn{border:1px solid var(--line-dark);padding:12px 20px;min-height:48px}
+.collection-pagination button:disabled{opacity:.35;cursor:default}
+@media(max-width:1000px){.place-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.collection>.container>.collection-search{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.place-grid{grid-template-columns:1fr}.directory-toolbar{align-items:stretch;flex-direction:column}.collection .collection-search:has(.listing-facet-filters),.collection>.container>.collection-search{grid-template-columns:1fr}.collection-pagination{gap:12px;flex-wrap:wrap}.place-connections a{width:100%}.place-card-image{height:220px}}
+.place-editor{display:flex;flex-direction:column;gap:24px;max-width:760px;margin-top:32px}
+.place-editor label{display:flex;flex-direction:column;gap:10px}
+.place-editor :is(select,textarea){width:100%;padding:12px;border:1px solid var(--line-dark);font:inherit;background:var(--paper)}
+.place-editor .btn{align-self:flex-start}
+.collection .collection-search select{appearance:none;-webkit-appearance:none;background-repeat:no-repeat;background-position:right 16px center;background-size:14px 14px}
+@media(forced-colors:active){.collection .collection-search select{appearance:auto;background-image:none}}
