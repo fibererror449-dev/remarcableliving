@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getAdminUser, isSameOrigin } from "../../../../lib/admin";
-import { adminActorFor, apiErrorResponse, getAdminListing, saveListing } from "../../../../lib/admin-listings";
+import { adminActorFor, apiErrorResponse, deleteListing, getAdminListing, saveListing } from "../../../../lib/admin-listings";
 import type { ImportEnv } from "../../../../lib/imports/core";
 import { ensureListings } from "../../../../lib/listings";
 
@@ -32,11 +32,23 @@ export async function PUT(request: Request, context: Context) {
 
 export async function PATCH(request: Request, context: Context) {
   if (!(await getAdminUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
-  const { id } = await context.params;
+  const id = await listingId(context);
+  if (!id) return Response.json({ error: "Listing not found" }, { status: 404 });
   if (!isSameOrigin(request)) return Response.json({ error: "Invalid request origin" }, { status: 403 });
   const body = await request.json() as { status?: string };
   if (!body.status || !["available", "viewing", "rented", "verify"].includes(body.status)) return Response.json({ error: "Invalid status" }, { status: 400 });
   await ensureListings();
-  await env.DB.prepare("UPDATE listings SET status = ?, publication_version = publication_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(body.status, Number(id)).run();
+  const result = await env.DB.prepare("UPDATE listings SET status = ?, publication_version = publication_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(body.status, id).run();
+  if (!result.meta.changes) return Response.json({ error: "Listing not found" }, { status: 404 });
   return Response.json({ ok: true });
+}
+
+export async function DELETE(request: Request, context: Context) {
+  const user = await getAdminUser();
+  if (!user) return Response.json({ error: "Sign in required" }, { status: 401 });
+  if (!isSameOrigin(request)) return Response.json({ error: "Invalid request origin" }, { status: 403 });
+  const id = await listingId(context);
+  if (!id) return Response.json({ error: "Listing not found" }, { status: 404 });
+  try { return Response.json(await deleteListing(env as unknown as ImportEnv, adminActorFor(user), id)); }
+  catch (error) { return apiErrorResponse(error, "Could not delete the listing. Please retry."); }
 }

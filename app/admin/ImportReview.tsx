@@ -1,10 +1,13 @@
 "use client";
+import { ProjectFeaturePicker } from "../components/ProjectFeatures";
+import { readProjectFeatures, type ProjectFeature } from "../../lib/project-features";
 import { FormEvent, useEffect, useState } from "react";
 import BrandLogo from "../components/BrandLogo";
+import { universityOptions } from "../../lib/site-data";
 
 type Attribution = "owner" | "agent" | "admin";
 type Attachment = { id: string; caption?: string; attribution: Attribution };
-type Payload = Record<string, unknown> & { reference: string; name: string; media?: Attachment[]; coverId?: string; provenance?: string };
+type Payload = Record<string, unknown> & { reference: string; name: string; projectFeatures?: ProjectFeature[]; media?: Attachment[]; coverId?: string; provenance?: string };
 type Draft = {
   id: string; revision: number; state: string; actor: string; created_at: number; namespace: string; reference: string;
   current: boolean; current_draft: string; payload: Payload; blockers: string[];
@@ -19,6 +22,8 @@ type ConnectionList = { mcpUrl: string; clients: Connection[] };
 const fields: { key: string; label: string; type?: "number" | "date" | "url"; step?: string; options?: [string, string][] }[] = [
   { key: "name", label: "Name" },
   { key: "district", label: "District" },
+  { key: "university", label: "University" },
+  { key: "developmentProject", label: "Development project" },
   { key: "rent", label: "Monthly rent (THB)", type: "number", step: "1" },
   { key: "bedrooms", label: "Bedrooms", type: "number", step: "1" },
   { key: "bathrooms", label: "Bathrooms", type: "number", step: "1" },
@@ -189,6 +194,7 @@ export function DraftReview({ id, displayName }: { id: string; displayName: stri
   const [draft, setDraft] = useState<Draft | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [media, setMedia] = useState<Attachment[]>([]);
+  const [projectFeatures, setProjectFeatures] = useState<ProjectFeature[]>([]);
   const [coverId, setCoverId] = useState("");
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -196,13 +202,13 @@ export function DraftReview({ id, displayName }: { id: string; displayName: stri
   const [liveUrl, setLiveUrl] = useState("");
   const [error, setError] = useState("");
   function show(next: Draft) {
-    setDraft(next); setValues(formValues(next.payload)); setMedia(next.payload.media ?? []); setCoverId(next.payload.coverId ?? ""); setDirty(false);
+    setProjectFeatures(readProjectFeatures(next.payload.projectFeatures)); setDraft(next); setValues(formValues(next.payload)); setMedia(next.payload.media ?? []); setCoverId(next.payload.coverId ?? ""); setDirty(false);
     if (next.id !== window.location.pathname.split("/").at(-1)) window.history.replaceState(null, "", `/admin/imports/${next.id}`);
   }
   useEffect(() => {
     let active = true;
     api<Draft>(`/api/admin/imports/drafts/${encodeURIComponent(id)}`)
-      .then((data) => { if (active) { setDraft(data); setValues(formValues(data.payload)); setMedia(data.payload.media ?? []); setCoverId(data.payload.coverId ?? ""); } })
+      .then((data) => { if (active) { setProjectFeatures(readProjectFeatures(data.payload.projectFeatures)); setDraft(data); setValues(formValues(data.payload)); setMedia(data.payload.media ?? []); setCoverId(data.payload.coverId ?? ""); } })
       .catch((failure) => { if (active) setError(failure instanceof RequestError && failure.status === 404 ? "This draft does not exist." : problem(failure)); });
     return () => { active = false; };
   }, [id]);
@@ -210,7 +216,7 @@ export function DraftReview({ id, displayName }: { id: string; displayName: stri
   function editMedia(next: Attachment[]) { setMedia(next); setDirty(true); if (!next.some((item) => item.id === coverId)) setCoverId(""); }
   function move(index: number, offset: number) { const next = [...media]; [next[index], next[index + offset]] = [next[index + offset], next[index]]; editMedia(next); }
   function payload(current: Draft): Payload {
-    const next: Payload = { reference: current.payload.reference, name: values.name.trim() };
+    const next: Payload = { reference: current.payload.reference, name: values.name.trim(), projectFeatures };
     for (const field of fields) {
       const value = values[field.key]?.trim();
       if (field.key !== "name" && value) next[field.key] = field.type === "number" ? Number(value) : value;
@@ -248,10 +254,12 @@ export function DraftReview({ id, displayName }: { id: string; displayName: stri
               ? <select value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined}><option value="">Not confirmed</option>{field.options.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
               : field.key === "description"
                 ? <textarea value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} />
-                : <input type={field.type ?? "text"} step={field.step} required={field.key === "name"} value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined} />;
+                : <input type={field.type ?? "text"} step={field.step} required={field.key === "name"} list={field.key === "university" ? "draft-universities" : undefined} value={values[field.key] ?? ""} onChange={(event) => edit(field.key, event.target.value)} aria-invalid={missing || undefined} />;
             return <label key={field.key} className={["description", "sourceUrl", "videoUrl"].includes(field.key) ? "wide" : undefined}>{field.label}{control}</label>;
           })}
+          <datalist id="draft-universities">{universityOptions.map((university) => <option key={university} value={university} />)}</datalist>
         </fieldset>
+        <ProjectFeaturePicker value={projectFeatures} onChange={next => { setProjectFeatures(next); setDirty(true); }} disabled={!open || busy} />
         <fieldset className="import-panel draft-media" disabled={!open || busy}>
           <legend>Photos &amp; videos</legend>
           {media.length === 0 && <p>No media attached. A real photo of this unit is required as the cover before publishing.</p>}

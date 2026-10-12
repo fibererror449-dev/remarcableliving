@@ -29,6 +29,11 @@ The two 409s differ only in message text; clients retry when it contains `busy`.
 Optional facts and limits: GET /api/v1/listing-schema. Unknown fields are errors; missing facts are
 not, they become publication `blockers`. `media`: ≤60 `{id, caption? (≤500), attribution:
 owner|agent|admin}`, no repeated id. A reference repeated within one request is invalid.
+`university` and `developmentProject` are optional text fields of at most 200 characters each,
+trimmed on save. They persist through draft review and publication and are returned with public
+listings. The university is an admin-assigned university or campus; it is never inferred from
+coordinates. Development project names refer to the building or development, such as
+`RHYTHM EKKAMAI ESTATE`, rather than a unit's bedroom count or reference.
 `videoUrl` (optional, ≤2000): a YouTube (`watch?v=`, `youtu.be/`, `shorts/`, `embed/`, `live/`) or
 Google Drive (`/file/d/<id>/…`, `open?id=`, `uc?id=`) link, stored in its canonical form; anything
 else is invalid. The public page plays it instead of any uploaded video.

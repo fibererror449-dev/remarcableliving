@@ -22,7 +22,7 @@ async function site() {
 test('admin adds a listing with photos and a YouTube link, and its page shows every one',async t=>{
   const h=await site();t.after(h.close);
   const kitchen=await h.upload(png,'image/png','kitchen.png'),living=await h.upload(Buffer.concat([png,Buffer.from('living')]),'image/png','living.png');
-  const response=await h.write('/api/listings','POST',{...facts,videoUrl:'https://youtu.be/dQw4w9WgXcQ?si=tracking',media:[{id:kitchen,caption:'Kitchen'},{id:living}]});
+  const response=await h.write('/api/listings','POST',{...facts,university:' Chulalongkorn University ',developmentProject:' RHYTHM EKKAMAI ESTATE ',videoUrl:'https://youtu.be/dQw4w9WgXcQ?si=tracking',media:[{id:kitchen,caption:'Kitchen'},{id:living}]});
   assert.equal(response.status,201,await response.clone().text());
   const {slug,url}=await response.json();
   const listing=(await h.listings()).find(entry=>entry.slug===slug);
@@ -30,8 +30,18 @@ test('admin adds a listing with photos and a YouTube link, and its page shows ev
   assert.equal(listing.videoUrl,'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
   assert.equal(listing.image,`/listing-media/${kitchen}`,'the first photo becomes the cover');
   assert.equal(listing.bedrooms,0);
+  assert.equal(listing.university,'Chulalongkorn University');
+  assert.equal(listing.developmentProject,'RHYTHM EKKAMAI ESTATE');
+  const publicListing=(await (await h.call('/api/listings')).json()).listings.find(entry=>entry.slug===slug);
+  assert.equal(publicListing.university,listing.university);
+  assert.equal(publicListing.developmentProject,listing.developmentProject);
   const html=await h.page(slug);
   assert.deepEqual(h.figures(html),[kitchen,living]);
+  assert.match(html, /<dt>Neighbourhood<\/dt><dd><a [^>]*>Ari<\/a>/);
+  assert.match(html, /<dt>University<\/dt><dd><a [^>]*>Chulalongkorn University<\/a>/);
+  assert.match(html, /<dt>Development project<\/dt><dd><a [^>]*>RHYTHM EKKAMAI ESTATE<\/a>/);
+  assert.match(html, /Latitude:.*13.78/);
+  assert.doesNotMatch(html, /Save changes|Add photos|Cancel editing/);
   assert.match(html,/Kitchen · Owner-supplied/);
   assert.match(html,/<iframe class="residence-film-embed" src="https:\/\/www\.youtube-nocookie\.com\/embed\/dQw4w9WgXcQ\?rel=0"/);
   assert.match(html,/Open on YouTube ↗/);
@@ -46,10 +56,12 @@ test('admin edits a listing: reorders photos, picks the cover and swaps the link
   const {id,slug}=await (await h.write('/api/listings','POST',{...facts,videoUrl:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',media:[{id:a},{id:b}]})).json();
   const detail=await (await h.call(`/api/listings/${id}`,{headers:admin})).json();
   assert.deepEqual(detail.media.map(item=>item.id),[a,b]);
-  const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,rent:'24000',image:`/listing-media/${b}`,videoUrl:'',media:[{id:b,caption:'Bedroom',attribution:'admin'},{id:a},{id:tour,caption:'Walkthrough',attribution:'owner'}]});
+  const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,university:'Bangkok University',developmentProject:'AP Thai The Bangkok',rent:'24000',image:`/listing-media/${b}`,videoUrl:'',media:[{id:b,caption:'Bedroom',attribution:'admin'},{id:a},{id:tour,caption:'Walkthrough',attribution:'owner'}]});
   assert.equal(saved.status,200,await saved.clone().text());
   assert.equal((await saved.json()).slug,slug,'editing keeps the address');
   const listing=(await h.listings()).find(entry=>entry.id===id);
+  assert.equal(listing.university,'Bangkok University');
+  assert.equal(listing.developmentProject,'AP Thai The Bangkok');
   assert.deepEqual(listing.media,{photos:2,cover:true,video:'upload'});
   const html=await h.page(slug);
   assert.deepEqual(h.figures(html),[b,a]);
@@ -93,6 +105,7 @@ test('the listing API refuses bad links, covers and files, and anyone but a same
   assert.match(await problems(await h.write('/api/listings','POST',{...facts,image:'/listing-media/not-attached',media:[{id:photo}]})),/cover must be one of this listing's photos/);
   assert.match(await problems(await h.write('/api/listings','POST',{...facts,media:[{id:'missing'}]})),/no longer available/);
   assert.match(await problems(await h.write('/api/listings','POST',{...facts,lastVerified:'2026-02-31'})),/real YYYY-MM-DD date/);
+  assert.match(await problems(await h.write('/api/listings','POST',{...facts,university:['Bangkok University'],developmentProject:'x'.repeat(201)})),/University must be text.*Development project must be text/);
   assert.equal((await h.write('/api/listings/999999','PUT',facts)).status,404);
   assert.equal((await h.call('/api/listings',{method:'POST',json:facts})).status,401);
   assert.equal((await h.call('/api/listings',{method:'POST',headers:{...admin,origin:'https://evil.example'},json:facts})).status,403);
@@ -107,7 +120,7 @@ test('agent imports accept a Google Drive video link and publish it to the live 
   const {token}=await (await h.write('/api/admin/imports/credentials','POST',{name:'video test',expiresInDays:1})).json();
   const agent={authorization:`Bearer ${token}`};
   const cover=await (await (await h.call('/api/v1/media',{method:'POST',headers:{...agent,'content-type':'image/png','x-file-name':'cover.png'},body:png})).json()).id;
-  const unit={reference:'drive-unit',name:'Drive residence',district:'Ari',rent:20000,bedrooms:1,bathrooms:1,sizeSqm:35,stationType:'BTS',stationName:'Ari',walkMinutes:5,latitude:13.78,longitude:100.54,lastVerified:'2026-09-01',status:'available',media:[{id:cover,attribution:'owner'}],coverId:cover};
+  const unit={reference:'drive-unit',name:'Drive residence',district:'Ari',university:'Bangkok University',developmentProject:'RHYTHM EKKAMAI ESTATE',rent:20000,bedrooms:1,bathrooms:1,sizeSqm:35,stationType:'BTS',stationName:'Ari',walkMinutes:5,latitude:13.78,longitude:100.54,lastVerified:'2026-09-01',status:'available',media:[{id:cover,attribution:'owner'}],coverId:cover};
   const submit=async (key,listing)=>(await (await h.call('/api/v1/imports',{method:'POST',headers:{...agent,'idempotency-key':key},json:{namespace:'drive',listings:[listing]}})).json()).results[0];
   const rejected=await submit('bad',{...unit,videoUrl:'https://example.com/tour.mp4'});
   assert.equal(rejected.outcome,'invalid');
@@ -118,8 +131,63 @@ test('agent imports accept a Google Drive video link and publish it to the live 
   const published=await h.write(`/api/admin/imports/drafts/${draftId}/publish`,'POST',{});
   assert.equal(published.status,200,await published.clone().text());
   const {url}=await published.json();
+  const savedListing=(await h.listings()).find(entry=>url.endsWith(entry.slug));
+  assert.equal(savedListing.university,unit.university);
+  assert.equal(savedListing.developmentProject,unit.developmentProject);
   assert.match(await (await h.call(url)).text(),/<iframe class="residence-film-embed" src="https:\/\/drive\.google\.com\/file\/d\/1AbCdEfGhIjKlMnOp\/preview"/);
   assert.deepEqual((await h.listings()).find(entry=>url.endsWith(entry.slug)).media,{photos:1,cover:true,video:'drive'});
   const schema=await (await h.call('/api/v1/listing-schema',{headers:agent})).json();
   assert.match(schema.fields.videoUrl,/YouTube or Google Drive/);
+  const pending=await submit('before-delete',{...unit,videoUrl:'https://drive.google.com/open?id=1AbCdEfGhIjKlMnOp',rent:22000});
+  assert.equal((await h.write(`/api/listings/${savedListing.id}`,'DELETE')).status,200);
+  assert.equal((await h.write(`/api/admin/imports/drafts/${pending.draftId}/publish`,'POST',{})).status,409,'old drafts cannot republish a deleted listing');
+  const fresh=await submit('after-delete',{...unit,videoUrl:'https://drive.google.com/open?id=1AbCdEfGhIjKlMnOp',rent:23000});
+  assert.equal((await h.write(`/api/admin/imports/drafts/${fresh.draftId}/publish`,'POST',{})).status,409,'even a fresh revision cannot restore a deleted source');
+
+});
+
+test('project features persist, render only selected amenities and can be cleared', async t => {
+  const h=await site();t.after(h.close);
+  const created=await h.write('/api/listings','POST',{...facts,projectFeatures:['Swimming Pool','Gym','EV Charger']});
+  assert.equal(created.status,201,await created.clone().text());
+  const {id,slug}=await created.json();
+  const detail=await (await h.call(`/api/listings/${id}`,{headers:admin})).json();
+  assert.deepEqual(detail.listing.projectFeatures,['Swimming Pool','Gym','EV Charger']);
+  const html=await h.page(slug);
+  assert.match(html,/Project Features/);
+  assert.match(html,/Swimming Pool/);assert.match(html,/EV Charger/);
+  assert.doesNotMatch(html,/CCTV\/IP Camera/);
+  const invalid=await h.write(`/api/listings/${id}`,'PUT',{...facts,projectFeatures:['Unknown amenity']});
+  assert.equal(invalid.status,400);
+  const saved=await h.write(`/api/listings/${id}`,'PUT',{...facts,projectFeatures:[]});
+  assert.equal(saved.status,200,await saved.clone().text());
+  assert.doesNotMatch(await h.page(slug),/Project Features/);
+});
+
+test('delete requires a same-origin admin and removes seeded and uploaded listings without restoring them',async t=>{
+  const h=await site();t.after(h.close);
+  const seed=(await h.listings()).find(entry=>entry.slug==='centurion-park-ari-soi-5-1br');
+  const url=`/api/listings/${seed.id}`;
+  assert.equal((await h.call(url,{method:'DELETE'})).status,401);
+  assert.equal((await h.call(url,{method:'DELETE',headers:{...admin,origin:'https://evil.example'}})).status,403);
+  assert.equal((await h.write('/api/listings/not-a-number','DELETE')).status,404);
+  assert.equal((await h.write('/api/listings/999999','DELETE')).status,404);
+  const photo=await h.upload(png,'image/png','shared.png');
+  const created=await (await h.write('/api/listings','POST',{...facts,media:[{id:photo}]})).json();
+  assert.equal((await h.write(url,'PUT',{...seed,media:[{id:photo}]})).status,200);
+  assert.equal((await h.write(url,'DELETE')).status,200);
+  for(let retry=0;retry<2;retry++){
+    assert.equal((await h.call(`/residences/${seed.slug}`)).status,404,'seed does not reappear on another read');
+    assert.equal((await h.listings()).some(entry=>entry.id===seed.id),false);
+    assert.equal((await (await h.call('/api/listings')).json()).listings.some(entry=>entry.id===seed.id),false);
+  }
+  assert.equal((await h.call(url,{headers:admin})).status,404);
+  assert.equal((await h.write(url,'PUT',{...seed,media:[{id:photo}]})).status,404);
+  assert.equal((await h.write(url,'PATCH',{status:'available'})).status,404);
+  assert.equal((await h.call(`/listing-media/${photo}`)).status,200,'another listing still uses the shared photo');
+  assert.equal((await h.write(`/api/listings/${created.id}`,'DELETE')).status,200);
+  assert.equal((await h.call(`/residences/${created.slug}`)).status,404);
+  assert.equal((await h.call(`/listing-media/${photo}`)).status,404,'the detached upload is no longer public');
+  const db=await h.mf.getD1Database('DB');
+  assert.equal((await db.prepare("SELECT COUNT(*) AS count FROM import_audit WHERE action='listing.deleted'").first()).count,2);
 });

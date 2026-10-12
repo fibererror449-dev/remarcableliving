@@ -1,5 +1,6 @@
+import { readProjectFeatures } from "./project-features";
 import type { D1Database } from "@cloudflare/workers-types";
-import { fallbackListings, type Listing, type ListingStatus } from "./listings-data";
+import { developmentProjectName, fallbackListings, type Listing, type ListingStatus } from "./listings-data";
 
 export { fallbackListings };
 export type { Listing, ListingStatus };
@@ -30,15 +31,23 @@ export async function ensureListings(): Promise<void> {
 }
 
 function mapRow(row: Record<string, unknown>): Listing {
-  return { id: Number(row.id), slug: String(row.slug), name: String(row.name), district: String(row.district), rent: Number(row.rent), bedrooms: Number(row.bedrooms), bathrooms: Number(row.bathrooms), sizeSqm: Number(row.size_sqm), floor: String(row.floor), stationType: String(row.station_type), stationName: String(row.station_name), walkMinutes: Number(row.walk_minutes), latitude: Number(row.latitude), longitude: Number(row.longitude), image: String(row.image), status: row.status as ListingStatus, sourceUrl: String(row.source_url), lastVerified: String(row.last_verified), description: String(row.description), videoUrl: String(row.video_url ?? "") };
+  return { id: Number(row.id), slug: String(row.slug), name: String(row.name), district: String(row.district), university: String(row.university ?? ""), developmentProject: developmentProjectName({ name: String(row.name), developmentProject: String(row.development_project ?? "") }), rent: Number(row.rent), bedrooms: Number(row.bedrooms), bathrooms: Number(row.bathrooms), sizeSqm: Number(row.size_sqm), floor: String(row.floor), stationType: String(row.station_type), stationName: String(row.station_name), walkMinutes: Number(row.walk_minutes), latitude: Number(row.latitude), longitude: Number(row.longitude), image: String(row.image), status: row.status as ListingStatus, sourceUrl: String(row.source_url), lastVerified: String(row.last_verified), description: String(row.description), videoUrl: String(row.video_url ?? ""), projectFeatures: readProjectFeatures(row.project_features) };
 }
 
 export async function listListings(includeClosed = false): Promise<Listing[]> {
-  try { await ensureListings(); const db = await getDb(); const result = await db.prepare(`SELECT * FROM listings ${includeClosed ? "" : "WHERE status != 'rented'"} ORDER BY CASE status WHEN 'available' THEN 0 WHEN 'viewing' THEN 1 ELSE 2 END, updated_at DESC`).all(); return result.results.map((row) => mapRow(row as Record<string, unknown>)); } catch { return fallbackListings; }
+  let db: D1Database;
+  try { db = await getDb(); } catch { return fallbackListings; }
+  await ensureListings();
+  const result = await db.prepare(`SELECT * FROM listings WHERE deleted_at IS NULL ${includeClosed ? "" : "AND status != 'rented'"} ORDER BY CASE status WHEN 'available' THEN 0 WHEN 'viewing' THEN 1 ELSE 2 END, updated_at DESC`).all();
+  return result.results.map((row) => mapRow(row as Record<string, unknown>));
 }
 
 export async function getListing(slug: string): Promise<Listing | null> {
-  try { await ensureListings(); const db = await getDb(); const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>(); return row ? mapRow(row) : (fallbackListings.find((listing) => listing.slug === slug) ?? null); } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
+  let db: D1Database;
+  try { db = await getDb(); } catch { return fallbackListings.find((listing) => listing.slug === slug) ?? null; }
+  await ensureListings();
+  const row = await db.prepare("SELECT * FROM listings WHERE slug = ?").bind(slug).first<Record<string, unknown>>();
+  return row && !row.deleted_at ? mapRow(row) : null;
 }
 
 export type ListingMedia = { id: string; mime: string; caption: string; attribution: "owner" | "agent" | "admin"; cover: boolean };

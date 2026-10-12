@@ -3,10 +3,13 @@ import { index, integer, real, sqliteTable, text, uniqueIndex, check } from "dri
 
 export const listings = sqliteTable("listings", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  deletedAt: text("deleted_at"),
   publicationVersion: integer("publication_version").notNull().default(0),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   district: text("district").notNull(),
+  university: text("university").notNull().default(""),
+  developmentProject: text("development_project").notNull().default(""),
   rent: integer("rent").notNull(),
   bedrooms: integer("bedrooms").notNull().default(1),
   bathrooms: integer("bathrooms").notNull().default(1),
@@ -22,6 +25,7 @@ export const listings = sqliteTable("listings", {
   sourceUrl: text("source_url").notNull().default(""),
   lastVerified: text("last_verified").notNull(),
   description: text("description").notNull().default(""),
+  projectFeatures: text("project_features").notNull().default("[]"),
   // YouTube or Google Drive link; uploaded video files live in listing_media instead.
   videoUrl: text("video_url").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),

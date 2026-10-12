@@ -19,3 +19,19 @@
 .concierge input:focus-visible{outline:0}
 .primary-button,.nav-whatsapp,.hero-contact,.whatsapp,.story-cta,.journey-cta,.inventory-link,.inventory-actions a,.inventory-more,.concierge button,.empty-state button{transition:transform 180ms cubic-bezier(.2,.8,.2,1),background-color 180ms ease,color 180ms ease,border-color 180ms ease,opacity 180ms ease}
 @media(hover:hover){.primary-button:hover,.nav-whatsapp:hover,.hero-contact:hover,.whatsapp:hover,.inventory-actions a:hover,.concierge button:hover,.empty-state button:hover{transform:translateY(-2px)}.neighbourhood-card:hover .neighbourhood-image{transform:scale(1.045)}.inventory-card:hover{border-color:#9e927f}.inventory-link:hover,.story-cta:hover,.journey-cta:hover{color:#8d6f3d}.inventory-actions a:first-child:hover{background:#3a382f}.inventory-actions a:last-child:hover,.inventory-more:hover{background:#e2dccf}}
+
+/* Shared amenity controls and public project checklist. */
+.project-feature-picker { min-width:0; margin:1.5rem 0; padding:1.5rem; border:1px solid #d6dce4; border-radius:8px; }
+.project-feature-picker legend { font-size:1.25rem; font-weight:600; }
+.project-feature-picker > p { margin:0 0 1.5rem; font-size:0.875rem; }
+.project-feature-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.5rem 2rem; margin:0; padding:0; list-style:none; }
+.project-feature-grid label,.project-feature-grid li { display:flex; align-items:center; gap:0.75rem; min-width:0; font-size:1rem; line-height:1.5; }
+.project-feature-grid label { cursor:pointer; }
+.project-feature-picker .project-feature-grid input[type="checkbox"] { width:1.25rem; height:1.25rem; min-width:1.25rem; margin:0; accent-color:#182e6d; }
+.project-features { padding:2.5rem 0; border-bottom:1px solid #d6dce4; }
+.project-features h2 { margin:0 0 2rem; color:#182e6d; font-size:clamp(1.75rem,3vw,2.5rem); font-weight:500; }
+.project-features .project-feature-grid { grid-template-columns:repeat(6,minmax(0,1fr)); gap:2rem 1.5rem; }
+.project-feature-check { display:inline-flex; align-items:center; justify-content:center; flex:0 0 1.4rem; height:1.4rem; border:1px solid currentColor; border-radius:3px; font-size:1rem; }
+@media(max-width:1100px) { .project-features .project-feature-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:650px) { .project-feature-grid,.project-features .project-feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem 1rem; } .project-feature-picker { padding:1rem; } }
+@media(max-width:380px) { .project-feature-grid,.project-features .project-feature-grid { grid-template-columns:1fr; } }

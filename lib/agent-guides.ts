@@ -6,7 +6,7 @@
 export type AgentJob = { id: string; title: string; when: string; text: string };
 
 /** Listing form labels the admin-screen route names; the browser test checks each exists on /admin. */
-const editorLabels = ["Condominium and unit name", "District", "Rent (THB / month)", "Availability", "Bedrooms", "Bathrooms", "Size (sq m)", "Floor", "Station type", "Station", "Walk to station (min)", "Latitude", "Longitude", "Last verified", "Original listing URL", "Short factual description"];
+const editorLabels = ["Condominium and unit name", "District", "University", "Development project", "Rent (THB / month)", "Availability", "Bedrooms", "Bathrooms", "Size (sq m)", "Floor", "Station type", "Station", "Walk to station (min)", "Latitude", "Longitude", "Last verified", "Original listing URL", "Short factual description"];
 
 const preamble = (site: string, heading: string) => `You are helping the admin of REMARCABLE LIVING (${site}), a Bangkok rental website.
 ${heading}
@@ -96,7 +96,8 @@ Route A: a draft through the import tools
 1. Read the schema: get_listing_schema, or GET ${site}/api/v1/listing-schema.
 2. Choose a namespace for the source (for example drive) and a reference for the unit: the source's own unit code, or the Drive ID of the unit's folder. Never build it from the building name and never change it later. The same namespace and reference always mean the same unit.
 3. Write one listing with only the facts the source states. Numbers are JSON numbers, not strings.
-   Fields: reference, name, district, rent (THB per month, whole number), bedrooms (0 for a studio), bathrooms, sizeSqm, floor (text), stationType (BTS or MRT), stationName (without the BTS or MRT prefix), walkMinutes, latitude, longitude, lastVerified (YYYY-MM-DD, not in the future), status (available, viewing, rented or verify; use verify unless the source confirms the unit is free now), description (short and factual), sourceUrl (a public listing page only), videoUrl (a YouTube or Google Drive link), provenance (private notes on where each fact came from), media, coverId.
+   Fields: reference, name, district, university (the admin's assigned university or campus), developmentProject (the development's name, for example RHYTHM EKKAMAI ESTATE), rent (THB per month, whole number), bedrooms (0 for a studio), bathrooms, sizeSqm, floor (text), stationType (BTS or MRT), stationName (without the BTS or MRT prefix), walkMinutes, latitude, longitude, lastVerified (YYYY-MM-DD, not in the future), status (available, viewing, rented or verify; use verify unless the source confirms the unit is free now), description (short and factual), sourceUrl (a public listing page only), videoUrl (a YouTube or Google Drive link), provenance (private notes on where each fact came from), media, coverId.
+   University and developmentProject are optional text fields of at most 200 characters each. They power the University & project search page. Leave the university blank when the admin has not assigned one; do not infer it from the district.
    Name style: building plus bedrooms, for example "Example Tower 2BR" or "Example Tower Studio".
 4. Upload the photos (upload_media, or POST ${site}/api/v1/media) and list them in media as {"id","caption","attribution"}. attribution is who supplied the photo: owner, agent or admin. Set coverId to one real interior photo that is also in media.
 5. Validate (validate_listings, or POST ${site}/api/v1/imports/validate) and fix every error. Blockers are facts still missing for publication. That is fine; never invent values to clear them.

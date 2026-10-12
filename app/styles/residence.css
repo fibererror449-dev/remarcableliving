@@ -124,3 +124,9 @@
 
 .detail-page .listing-photo-fallback p{font-size:18px;font-weight:500}
 .detail-page .listing-photo-fallback small{font-size:var(--text-meta);font-weight:400}
+
+.residence-location-facts{display:grid;gap:16px;margin:0;padding:24px 0;border-top:1px solid var(--line-dark);border-bottom:1px solid var(--line-dark)}
+.residence-location-facts div{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,2fr);gap:16px}
+.residence-location-facts dt{color:var(--muted);font-size:var(--text-meta)}
+.residence-location-facts dd{margin:0;overflow-wrap:anywhere}
+.residence-location-facts a{color:var(--ink);text-decoration:underline;text-underline-offset:4px}

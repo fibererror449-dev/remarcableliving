@@ -1,8 +1,11 @@
 "use client";
+import { ProjectFeaturePicker } from "../components/ProjectFeatures";
+import { readProjectFeatures, type ProjectFeature } from "../../lib/project-features";
 import { FormEvent, useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
-import type { AdminListingDetail, AttachedMedia, MediaAttribution } from "../../lib/listings-data";
+import { AREA_ALL, areaOptions, listingFacetOptions, type PublicListing, type AdminListingDetail, type AttachedMedia, type MediaAttribution } from "../../lib/listings-data";
 import { MAX_UPLOAD_BYTES, MEDIA_TYPES, type UploadedMedia } from "../../lib/uploads";
 import { parseVideoLink, VIDEO_LINK_HELP, videoKindLabel } from "../../lib/video";
+import { universityOptions } from "../../lib/site-data";
 
 export type EditorHandle = { attachLibraryItem: (item: UploadedMedia) => void };
 export type SavedListing = { id: number; slug: string; url: string };
@@ -13,6 +16,8 @@ type Upload = { key: string; name: string; progress: number };
 const fields: { key: string; label: string; type?: "number" | "date" | "url"; step?: string; min?: string; required?: boolean; wide?: boolean; options?: [string, string][] }[] = [
   { key: "name", label: "Condominium and unit name", required: true, wide: true },
   { key: "district", label: "District", required: true },
+  { key: "university", label: "University" },
+  { key: "developmentProject", label: "Development project" },
   { key: "rent", label: "Rent (THB / month)", type: "number", step: "1", min: "1", required: true },
   { key: "status", label: "Availability", options: [["verify", "Verify first"], ["available", "Available"], ["viewing", "Viewing"], ["rented", "Rented / close"]] },
   { key: "bedrooms", label: "Bedrooms", type: "number", step: "1", min: "0" },
@@ -55,8 +60,9 @@ function sendFile(file: File, onProgress: (percent: number) => void, requests: S
   });
 }
 
-export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { listingId: number | null; onSaved: (saved: SavedListing, created: boolean) => void; onCancel: () => void; ref?: Ref<EditorHandle> }) {
+export default function ListingEditor({ listingId, listings, onSaved, onCancel, ref }: { listingId: number | null; listings: PublicListing[]; onSaved: (saved: SavedListing, created: boolean) => void; onCancel: () => void; ref?: Ref<EditorHandle> }) {
   const [values, setValues] = useState<Record<string, string>>(blank);
+  const [projectFeatures, setProjectFeatures] = useState<ProjectFeature[]>([]);
   const [image, setImage] = useState("");
   const [photos, setPhotos] = useState<AttachedMedia[]>([]);
   const [video, setVideo] = useState<Video>(null);
@@ -82,6 +88,7 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
       if (!active) return;
       const { listing } = data;
       setValues(Object.fromEntries(fields.map((field) => [field.key, String(listing[field.key as keyof typeof listing] ?? "")])));
+      setProjectFeatures(readProjectFeatures(listing.projectFeatures));
       setImage(listing.image);
       setPhotos(data.media.filter((item) => item.mime.startsWith("image/")));
       const file = data.media.find((item) => item.mime.startsWith("video/"));
@@ -157,7 +164,7 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
     const media = [...photos, ...(video?.kind === "file" ? [video.item] : [])].map(({ id, caption, attribution }) => ({ id, caption, attribution }));
     setBusy(true);
     try {
-      const response = await fetch(listingId === null ? "/api/listings" : `/api/listings/${listingId}`, { method: listingId === null ? "POST" : "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, image, videoUrl: video?.kind === "link" ? video.url : "", media }) });
+      const response = await fetch(listingId === null ? "/api/listings" : `/api/listings/${listingId}`, { method: listingId === null ? "POST" : "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, projectFeatures, image, videoUrl: video?.kind === "link" ? video.url : "", media }) });
       const data = await response.json().catch(() => ({})) as Partial<SavedListing> & { error?: string; details?: unknown };
       if (!response.ok || !data.slug) { setError(data.error || "Could not save the listing. Your changes are still in the form; please retry."); if (Array.isArray(data.details)) setDetails(data.details.map(String)); return; }
       onSaved(data as SavedListing, listingId === null);
@@ -165,6 +172,11 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
     finally { setBusy(false); }
   }
 
+  const suggestions: Record<string, string[]> = {
+    district: [...new Set([...areaOptions.filter((area) => area !== AREA_ALL), ...listings.map((listing) => listing.district)])].sort((a, b) => a.localeCompare(b)),
+    university: [...new Set([...universityOptions.filter((name) => name !== "Another Bangkok university"), ...listingFacetOptions(listings, "university")])].sort((a, b) => a.localeCompare(b)),
+    developmentProject: listingFacetOptions(listings, "developmentProject"),
+  };
   const coverIndex = photos.findIndex((photo) => image === coverPath(photo));
   const linkInvalid = Boolean(linkDraft.trim()) && !parseVideoLink(linkDraft);
   const activeLink = video?.kind === "link" ? parseVideoLink(video.url) : null;
@@ -178,6 +190,7 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
     {!loaded && !error && <p role="status">Loading listing…</p>}
     <fieldset className="editor-fields" disabled={!loaded || busy}>
       <legend className="editor-legend">Listing facts</legend>
+      <p className="wide editor-hint">For District, University and Development project, choose an existing name or type a new one.</p>
       {fields.map((field) => {
         const value = values[field.key] ?? "";
         const change = (next: string) => setValues((previous) => ({ ...previous, [field.key]: next }));
@@ -185,10 +198,13 @@ export default function ListingEditor({ listingId, onSaved, onCancel, ref }: { l
           ? <select value={value} onChange={(event) => change(event.target.value)}>{field.options.map(([option, label]) => <option key={option} value={option}>{label}</option>)}</select>
           : field.key === "description"
             ? <textarea value={value} onChange={(event) => change(event.target.value)} />
-            : <input type={field.type ?? "text"} step={field.step} min={field.min} required={field.required} value={value} onChange={(event) => change(event.target.value)} />;
+            : <input type={field.type ?? "text"} step={field.step} min={field.min} required={field.required} list={suggestions[field.key] ? `listing-${field.key}-options` : undefined} value={value} onChange={(event) => change(event.target.value)} />;
         return <label key={field.key} className={field.wide ? "wide" : undefined}>{field.label}{control}</label>;
       })}
+      {Object.entries(suggestions).map(([key, options]) => <datalist key={key} id={`listing-${key}-options`}>{options.map((name) => <option key={name} value={name} />)}</datalist>)}
     </fieldset>
+
+    <ProjectFeaturePicker value={projectFeatures} onChange={setProjectFeatures} disabled={!loaded || busy} />
 
     <fieldset className="editor-media" disabled={!loaded || busy}>
       <legend className="editor-legend">Photos <span>{photos.length + curated.photos}</span></legend>

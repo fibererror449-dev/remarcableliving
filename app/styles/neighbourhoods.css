@@ -1,6 +1,14 @@
 /* /neighbourhoods: residences on the left, a pinned rail of neighbourhood cards on the right.
    Picking an area filters the residences; on narrow screens the areas sit above the list. */
 .neighbourhoods{background:var(--paper-2)}
+.neighbourhood-search{display:flex;align-items:end;gap:24px;margin-bottom:40px;flex-wrap:wrap}
+.listing-facet-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;width:100%}
+.neighbourhood-search .listing-facet-filters{flex:1;min-width:min(100%,420px)}
+.listing-facet-filters label{display:flex;flex-direction:column;gap:10px;min-width:0}
+.listing-facet-filters label>span{font-size:var(--text-label);font-weight:600;letter-spacing:var(--tracking-label);text-transform:uppercase}
+.listing-facet-filters select{width:100%;min-height:48px;padding:12px 36px 12px 14px;border:1px solid var(--line-dark);background:var(--paper);color:var(--ink);font:inherit;text-overflow:ellipsis}
+.listing-facet-filters select:focus-visible{outline:2px solid var(--gold-deep);outline-offset:3px}
+.neighbourhood-search>button{min-height:48px;border:0;background:none;font:inherit;cursor:pointer}
 .neighbourhood-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:clamp(32px,4vw,56px);align-items:start}
 
 /* Neighbourhood rail. Four cards share the viewport height so the pinned rail never runs off screen. */
@@ -55,6 +63,8 @@
   .area-listings .property-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:620px){
+  .listing-facet-filters{grid-template-columns:1fr;gap:20px}
+  .neighbourhood-search{gap:16px;margin-bottom:32px}
   .neighbourhood-layout{gap:32px}
   .neighbourhood-rail{gap:10px}
   .neighbourhood-card{height:104px}
@@ -77,3 +87,34 @@
 @media(max-width:359px){
   .area-listings .property-grid{grid-template-columns:1fr}
 }
+
+/* Each discovery section has an independent filter and a compact shortlist. */
+.discovery-jumps{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:40px}
+.discovery-jumps a{min-height:48px;display:flex;align-items:center;color:var(--gold-deep);font-weight:600}
+.discovery-section{padding:40px 0 56px;border-top:1px solid var(--line-dark);scroll-margin-top:calc(var(--nav-height) + 24px)}
+.discovery-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px;flex-wrap:wrap}
+.discovery-head .h3{font-size:clamp(32px,3vw,48px);font-weight:400}
+.discovery-filter{display:flex;align-items:end;gap:16px;max-width:100%;width:440px}
+.discovery-filter label{display:grid;gap:10px;min-width:0;flex:1}
+.discovery-filter label>span{font-size:var(--text-label);font-weight:600;letter-spacing:var(--tracking-label);text-transform:uppercase}
+.discovery-filter select{width:100%;min-height:48px;padding:12px 36px 12px 14px;border:1px solid var(--line-dark);background:var(--paper);color:var(--ink);font:inherit;text-overflow:ellipsis}
+.discovery-filter select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%2311110f' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;background-size:12px 8px}
+@media(forced-colors:active){.discovery-filter select{appearance:auto;background-image:none}}
+.discovery-filter button{min-height:48px;border:0;background:none;font:inherit;cursor:pointer}
+.discovery-section .neighbourhood-rail{position:static}
+.discovery-section .neighbourhood-card{height:150px}
+.discovery-section .neighbourhood-copy strong{font-size:24px;line-height:1.15}
+.discovery-section .empty-state{padding:40px 24px}
+.discovery-section .empty-state .h3{font-size:28px}
+@media(max-width:620px){
+  .discovery-jumps{gap:8px 20px;margin-bottom:20px}
+  .discovery-section{padding:32px 0}
+  .discovery-head{align-items:start;gap:20px}
+  .discovery-filter{width:100%;flex-wrap:wrap}
+  .discovery-filter label{flex-basis:100%}
+  .discovery-section .neighbourhood-rail{grid-template-columns:1fr}
+  .discovery-section .neighbourhood-card{height:120px}
+  .discovery-section .neighbourhood-copy strong{font-size:24px}
+}
+
+.discovery-section .neighbourhood-layout:not(:has(.neighbourhood-rail)){grid-template-columns:1fr}

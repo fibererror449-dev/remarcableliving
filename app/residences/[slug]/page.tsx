@@ -1,3 +1,4 @@
+import ProjectFeatures from "../../components/ProjectFeatures";
 import { notFound } from "next/navigation";
 import ListingImage from "../../ListingImage";
 import SiteNav from "../../components/SiteNav";
@@ -7,6 +8,7 @@ import { getListingStory } from "../../../lib/listing-stories";
 import { getListing, listListingMedia } from "../../../lib/listings";
 import { hasMedia } from "../../../lib/media";
 import { ashtonSlug, baanKlangSlug, centricAriSlug, curatedResidence } from "../../../lib/residence-galleries";
+import { toNeighbourhoodsHref } from "../../../lib/listings-data";
 import { parseVideoLink } from "../../../lib/video";
 
 export const dynamic = "force-dynamic";
@@ -130,6 +132,11 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         <div className="detail-copy">
           <p className="eyebrow dark"><span /> Residence details</p>
           <p className="lede">{listing.description}</p>
+          <dl className="residence-location-facts">
+            <div><dt>Neighbourhood</dt><dd><a href={toNeighbourhoodsHref({ area: listing.district }) + "#neighbourhoods"}>{listing.district}</a></dd></div>
+            {listing.developmentProject && <div><dt>Development project</dt><dd><a href={toNeighbourhoodsHref({ developmentProject: listing.developmentProject }) + "#projects"}>{listing.developmentProject}</a></dd></div>}
+            {listing.university && <div><dt>University</dt><dd><a href={toNeighbourhoodsHref({ university: listing.university }) + "#universities"}>{listing.university}</a></dd></div>}
+          </dl>
           <div className="facts">
             <div><b>{listing.bedrooms}</b><span>Bedroom{listing.bedrooms === 1 ? "" : "s"}</span></div>
             <div><b>{listing.bathrooms}</b><span>Bathroom{listing.bathrooms === 1 ? "" : "s"}</span></div>
@@ -146,10 +153,12 @@ export default async function ResidencePage({ params }: { params: Promise<{ slug
         <div className="map-card">
           <header><h3>Near {listing.stationType} {listing.stationName}</h3><span className="meta">OpenStreetMap</span></header>
           <iframe title={`Map near ${listing.stationName}`} src={map} loading="lazy" />
+          <p className="meta">Latitude: {listing.latitude} · Longitude: {listing.longitude}</p>
           <a className="text-link" href={`https://www.openstreetmap.org/?mlat=${listing.latitude}&mlon=${listing.longitude}#map=16/${listing.latitude}/${listing.longitude}`} target="_blank" rel="noreferrer">Open full map ↗</a>
         </div>
       </div>
     </section>
+    <div className="container"><ProjectFeatures value={listing.projectFeatures ?? []} /></div>
 
     {story && <section className="residence-story section on-dark">
       <div className="container">
